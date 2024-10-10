@@ -3,25 +3,30 @@
 import { useState } from 'react';
 import { supabase } from '../../../supabase'
 
-emailList = [
-    "busines1244@gmail.com",
-    "marcsnvv@gmail.com"
-]
+
 
 export default function Login() {
     const [email, setEmail] = useState('');
     const [error, setError] = useState('');
 
+    const emailList = [
+        "busines1244@gmail.com",
+        "marcsnvv@gmail.com"
+    ]
+
     const handleLogin = async () => {
-        const { error } = await supabase.auth.signInWithOtp({ email });
-        if (error) {
-            setError(error.message);
-        } else {
+        if (emailList.includes(email)) {
             if (emailList.includes(email)) {
-                alert('Check your email for the login link!');
+                const { error } = await supabase.auth.signInWithOtp({ email });
+                if (error) {
+                    setError(error.message);
+                } else {
+                    alert('Check your email for the login link!');
+                }
             } else {
                 alert("Access denied")
             }
+
         }
     };
 
