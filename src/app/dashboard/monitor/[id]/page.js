@@ -48,6 +48,8 @@ export default function ProductsTable({ params }) {
     const [loading, setLoading] = useState(false) // Estado para el spinner de carga
     const [monitorName, setMonitorName] = useState("") // Estado para el nombre del monitor
 
+    const [newEventMaxPrice, setNewEventMaxPrice] = useState("") // Nuevo estado para el Max Price
+
     // Cargar productos asociados a un monitor específico
     useEffect(() => {
 
@@ -104,7 +106,7 @@ export default function ProductsTable({ params }) {
         if (editProduct) {
             const { error } = await supabase
                 .from('products')
-                .update({ name: newName, url: newUrl }) // Actualizar con webhook_url
+                .update({ name: newName, url: newUrl, max_price: newEventMaxPrice }) // Actualizar con webhook_url
                 .eq('id', editProduct.id)
 
             const { error: webhookError } = await supabase
@@ -119,7 +121,7 @@ export default function ProductsTable({ params }) {
                 console.error('Error updating product:', error)
             } else {
                 setProducts(products.map(product =>
-                    product.id === editProduct.id ? { ...product, name: newName, url: newUrl, webhook_url: newWebhookUrl } : product
+                    product.id === editProduct.id ? { ...product, name: newName, url: newUrl, max_price: newEventMaxPrice, webhook_url: newWebhookUrl } : product
                 ))
             }
         }
@@ -132,7 +134,7 @@ export default function ProductsTable({ params }) {
 
         const { data: productData, error: productError } = await supabase
             .from('products')
-            .insert([{ name: newEventName, url: newEventUrl, monitor_id: id }])
+            .insert([{ name: newEventName, url: newEventUrl, monitor_id: id, max_price: newEventMaxPrice }])
             .select('id'); // Insertar el producto y obtener su id
 
         if (!productError && productData.length > 0) {
@@ -150,7 +152,7 @@ export default function ProductsTable({ params }) {
             console.error('Error adding new event:', error)
         } else {
             // Añadir el nuevo producto a la lista
-            setProducts([...products, { name: newEventName, url: newEventUrl, webhooks: [{ webhook_url: newEventWebhookUrl }], monitor_id: id }])
+            setProducts([...products, { name: newEventName, url: newEventUrl, max_price: newEventMaxPrice, webhooks: [{ webhook_url: newEventWebhookUrl }], monitor_id: id }])
             setNewEventDialogOpen(false) // Cerrar el diálogo
             setNewEventName('') // Resetear el nombre
             setNewEventUrl('') // Resetear la URL
@@ -200,6 +202,24 @@ export default function ProductsTable({ params }) {
                             </div>
                             <div className="grid gap-4">
                                 <Label htmlFor="event-webhook-url">
+                                    Max price (for price errors)
+                                </Label>
+                                <div className='flex items-center gap-2'>
+                                    <Input
+                                        id="max-price"
+                                        type="number"
+                                        maxLength={4}
+                                        value={newEventMaxPrice}
+                                        onChange={(e) => setNewEventMaxPrice(e.target.value)}
+                                        className="col-span-3"
+                                    />
+                                    <div className='flex items-center justify-center p-2 h-10 w-10 border border-gray rounded-lg'>
+                                        $
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="grid gap-4">
+                                <Label htmlFor="event-webhook-url">
                                     Webhook URL
                                 </Label>
                                 <Input
@@ -223,7 +243,8 @@ export default function ProductsTable({ params }) {
                         <TableRow>
                             <TableHead>Event</TableHead>
                             <TableHead>URL</TableHead>
-                            <TableHead>Webhook URL</TableHead> {/* Nueva columna para Webhook URL */}
+                            <TableHead>Webhook URL</TableHead>
+                            <TableHead>Max Price</TableHead>
                             <TableHead>Actions</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -239,7 +260,7 @@ export default function ProductsTable({ params }) {
                                             target="_blank"
                                             rel="noopener noreferrer"
                                         >
-                                            {product.url?.slice(0, 45)}...
+                                            {product.url?.slice(0, 40)}...
                                         </a>
                                     </TableCell>
                                     <TableCell>
@@ -249,8 +270,11 @@ export default function ProductsTable({ params }) {
                                             target="_blank"
                                             rel="noopener noreferrer"
                                         >
-                                            {product.webhooks?.[0]?.webhook_url?.slice(0, 45)}...
+                                            {product.webhooks?.[0]?.webhook_url?.slice(0, 40)}...
                                         </a>
+                                    </TableCell>
+                                    <TableCell>
+                                        {product.max_price ? product.max_price + " $" : "-- $"}
                                     </TableCell>
                                     <TableCell>
                                         <DropdownMenu>
@@ -308,6 +332,24 @@ export default function ProductsTable({ params }) {
                                     onChange={(e) => setNewUrl(e.target.value)}
                                     className="col-span-3"
                                 />
+                            </div>
+                            <div className="grid gap-4">
+                                <Label htmlFor="event-webhook-url">
+                                    Max price (for price errors)
+                                </Label>
+                                <div className='flex items-center gap-2'>
+                                    <Input
+                                        id="max-price"
+                                        type="number"
+                                        maxLength={4}
+                                        value={newEventMaxPrice}
+                                        onChange={(e) => setNewEventMaxPrice(e.target.value)}
+                                        className="col-span-3"
+                                    />
+                                    <div className='flex items-center justify-center p-2 h-10 w-10 border border-gray rounded-lg'>
+                                        $
+                                    </div>
+                                </div>
                             </div>
                             <div className="grid gap-4">
                                 <Label htmlFor="product-webhook-url">

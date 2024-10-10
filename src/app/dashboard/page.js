@@ -63,7 +63,7 @@ export default function MonitorsTable() {
         async function fetchMonitors() {
             const { data: { session } } = await supabase.auth.getSession()
             if (!session) {
-                router("/login")
+                router.push("/login")
             }
             const { data, error } = await supabase
                 .from('monitors')
