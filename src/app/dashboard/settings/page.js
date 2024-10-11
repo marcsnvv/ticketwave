@@ -18,11 +18,12 @@ export default function Settings() {
     const saveSettings = async () => {
         const { error } = await supabase
             .from('notification_settings')
-            .upsert([{
+            .update([{
                 company_title: companyTitle,
                 image_url: imageUrl,
                 color: color
-            }]);
+            }])
+            .eq("company_id", "33b414df-7509-462e-9f8f-3709ec77eabf")
 
         if (error) {
             console.error('Error saving settings:', error);
@@ -37,6 +38,20 @@ export default function Settings() {
             if (!session) {
                 router("/login")
             }
+
+            const { data, error } = await supabase
+                .from("notification_settings")
+                .select("company_title,image_url,color")
+                .eq("company_id", "33b414df-7509-462e-9f8f-3709ec77eabf")
+
+            if (error) {
+                console.error(error)
+            }
+            console.log(data)
+
+            setColor(data[0].color)
+            setCompanyTitle(data[0].company_title)
+            setImageUrl(data[0].image_url)
         }
 
         getData()
