@@ -28,7 +28,8 @@ import { cn } from "@/lib/utils"
 import { useRouter } from 'next/navigation'
 
 const websites = [
-    { value: "viagogo.com", label: "Viagogo.com" },
+    { "value": "viagogo.com", "label": "Viagogo.com" },
+    { "value": "ticketmaster.es", "label": "Ticketmaster.es" }
 ]
 
 export default function MonitorsTable() {
