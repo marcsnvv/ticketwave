@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { DotsHorizontalIcon, ChevronDownIcon, ChevronRightIcon } from '@radix-ui/react-icons'
+import { DotsHorizontalIcon } from '@radix-ui/react-icons'
 import Loader from '@/components/ui/loader' // Asegúrate de tener un componente de loader
 
 export default function ProductsTable({ params }) {
@@ -49,8 +49,6 @@ export default function ProductsTable({ params }) {
     const [monitorName, setMonitorName] = useState("") // Estado para el nombre del monitor
 
     const [newEventMaxPrice, setNewEventMaxPrice] = useState("") // Nuevo estado para el Max Price
-
-    const [expanded, setExpanded] = useState(null) // Estado para controlar qué fila está expandida
 
     // Cargar productos asociados a un monitor específico
     useEffect(() => {
@@ -79,27 +77,6 @@ export default function ProductsTable({ params }) {
             fetchProducts()
         }
     }, [id])
-
-    // Agrupar productos por nombre
-    const groupedProducts = products.reduce((acc, product) => {
-        const existingProduct = acc.find(p => p.name === product.name);
-        if (existingProduct) {
-            // Si ya existe, añade las URLs adicionales y otros detalles
-            existingProduct.items.push(product);
-        } else {
-            // Si no existe, lo añadimos con la estructura adecuada
-            acc.push({
-                name: product.name,
-                items: [product],
-            });
-        }
-        return acc;
-    }, []);
-
-    // Función para expandir/colapsar filas
-    const handleToggleExpand = (productName) => {
-        setExpanded(expanded === productName ? null : productName)
-    }
 
     // Función para eliminar un producto
     const handleDelete = async (productId) => {
@@ -272,82 +249,55 @@ export default function ProductsTable({ params }) {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {groupedProducts.length ? (
-                            groupedProducts.map((group) => (
-                                <>
-                                    <TableRow key={group.name} className="cursor-pointer" onClick={() => handleToggleExpand(group.name)}>
-                                        <TableCell>
-                                            <div className="flex items-center">
-                                                {expanded === group.name ? (
-                                                    <ChevronDownIcon className="mr-2" />
-                                                ) : (
-                                                    <ChevronRightIcon className="mr-2" />
-                                                )}
-                                                {group.name}
-                                            </div>
-                                        </TableCell>
-
-                                    </TableRow>
-                                    {/* Filas desplegadas con los productos individuales */}
-                                    {expanded === group.name && (
-                                        group.items.map((product) => (
-                                            <TableRow key={product.id}>
-                                                <TableCell></TableCell>
-
-                                                <TableCell>
-                                                    <a
-                                                        href={product.url}
-                                                        className="text-blue-500 underline"
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                    >
-                                                        {product.url.slice(0, 40)}...
-                                                    </a>
-                                                </TableCell>
-                                                <TableCell>
-                                                    {product.webhooks.map((webhook, index) => (
-                                                        <div key={index}>
-                                                            <a
-                                                                href={webhook.webhook_url}
-                                                                className="text-blue-500 underline"
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                            >
-                                                                {webhook.webhook_url.slice(0, 40)}...
-                                                            </a>
-                                                        </div>
-                                                    ))}
-                                                </TableCell>
-                                                <TableCell>
-                                                    {product.max_price ? product.max_price + " $" : "-- $"}
-                                                </TableCell>
-                                                <TableCell>
-                                                    <DropdownMenu>
-                                                        <DropdownMenuTrigger asChild>
-                                                            <Button variant="ghost">
-                                                                <DotsHorizontalIcon className="w-4 h-4" />
-                                                            </Button>
-                                                        </DropdownMenuTrigger>
-                                                        <DropdownMenuContent align="end">
-                                                            <DropdownMenuItem onClick={() => handleEdit(product)}>
-                                                                Edit
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuItem onClick={() => handleDelete(product.id)}>
-                                                                Delete
-                                                            </DropdownMenuItem>
-                                                        </DropdownMenuContent>
-                                                    </DropdownMenu>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))
-                                    )}
-                                </>
+                        {products.length ? (
+                            products.map((product) => (
+                                <TableRow key={product.id}>
+                                    <TableCell>{product.name}</TableCell>
+                                    <TableCell>
+                                        <a
+                                            href={product.url}
+                                            className="text-blue-500 underline"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            {product.url?.slice(0, 40)}...
+                                        </a>
+                                    </TableCell>
+                                    <TableCell>
+                                        <a
+                                            href={product.webhooks[0].webhook_url} // Mostrar la URL del webhook
+                                            className="text-blue-500 underline"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            {product.webhooks?.[0]?.webhook_url?.slice(0, 40)}...
+                                        </a>
+                                    </TableCell>
+                                    <TableCell>
+                                        {product.max_price ? product.max_price + " $" : "-- $"}
+                                    </TableCell>
+                                    <TableCell>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost">
+                                                    <DotsHorizontalIcon className="w-4 h-4" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuItem onClick={() => handleEdit(product)}>
+                                                    Edit
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => handleDelete(product.id)}>
+                                                    Delete
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </TableCell>
+                                </TableRow>
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan="3" className="text-center">
-                                    No products found.
-                                </TableCell>
+                                <TableCell colSpan={4} className="text-center">No products found</TableCell>
                             </TableRow>
                         )}
                     </TableBody>
