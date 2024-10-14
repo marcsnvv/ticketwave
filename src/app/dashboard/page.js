@@ -29,7 +29,21 @@ import { useRouter } from 'next/navigation'
 
 const websites = [
     { "value": "viagogo.com", "label": "Viagogo.com" },
-    { "value": "ticketmaster.es", "label": "Ticketmaster.es" }
+    { "value": "ticketmaster.be", "label": "Ticketmaster.be" },
+    { "value": "ticketmaster.dk", "label": "Ticketmaster.dk" },
+    { "value": "ticketmaster.de", "label": "Ticketmaster.de" },
+    { "value": "ticketmaster.nl", "label": "Ticketmaster.nl" },
+    { "value": "ticketmaster.fi", "label": "Ticketmaster.fi" },
+    { "value": "ticketmaster.no", "label": "Ticketmaster.no" },
+    { "value": "ticketmaster.se", "label": "Ticketmaster.se" },
+    { "value": "ticketmaster.at", "label": "Ticketmaster.at" },
+    { "value": "ticketmaster.ae", "label": "Ticketmaster.ae" },
+    { "value": "ticketmaster.pl", "label": "Ticketmaster.pl" },
+    { "value": "ticketmaster.es", "label": "Ticketmaster.es" },
+    { "value": "ticketmaster.ch", "label": "Ticketmaster.ch" },
+    { "value": "ticketmaster.it", "label": "Ticketmaster.it" },
+    { "value": "ticketmaster.cz", "label": "Ticketmaster.cz" },
+    { "value": "ticketmaster.co.za", "label": "Ticketmaster.co.za" },
 ]
 
 export default function MonitorsTable() {
