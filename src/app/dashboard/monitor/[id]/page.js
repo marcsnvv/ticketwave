@@ -187,10 +187,10 @@ export default function ProductsTable({ params }) {
         setError(""); // Reiniciar el error
 
         // Validación de URL
-        if (!newEventUrl.startsWith(`https://${monitorName}`) || !newEventUrl.startsWith(`https://www.${monitorName}`)) {
-            setError(`The URL must start with 'https://${monitorName}' .`);
-            return;
-        }
+        // if (!newEventUrl.startsWith(`https://${monitorName}`) || !newEventUrl.startsWith(`https://www.${monitorName}`)) {
+        //     setError(`The URL must start with 'https://${monitorName}' .`);
+        //     return;
+        // }
 
         // Validación de Webhook URL
         if (!newEventWebhookUrl.startsWith("https://discord.com/api")) {
