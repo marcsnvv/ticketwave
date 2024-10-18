@@ -63,6 +63,8 @@ export default function ProductsTable({ params }) {
 
     const [expanded, setExpanded] = useState(null) // Estado para controlar qué fila está expandida
 
+    const [error, setError] = useState(""); // Estado para manejar errores
+
     // Cargar productos asociados a un monitor específico
     useEffect(() => {
 
@@ -137,27 +139,42 @@ export default function ProductsTable({ params }) {
     }
 
     // Función para guardar los cambios
-    const handleSave = async () => {
-        setLoading(true) // Activar el spinner de carga
+    const handleSave = async () => { // Cambiado para no recibir parámetro
+        setLoading(true); // Activar el spinner de carga
+        setError(""); // Reiniciar el error
+
+        // Validación de URL
+        // if (newUrl && !newUrl.startsWith(`https://${monitorName}`)) {
+        //     setError("The URL must start with 'https://' and contain the monitor name.");
+        //     setLoading(false);
+        //     return;
+        // }
+
+        // Validación de Webhook URL
+        if (newWebhookUrl && !newWebhookUrl.startsWith("https://discord.com/api")) {
+            setError("The Webhook URL must start with 'https://discord.com/api'.");
+            setLoading(false);
+            return;
+        }
+
+        const updates = {};
+        if (newName) updates.name = newName;
+        if (newUrl) updates.url = newUrl;
+        if (newEventMaxPrice) updates.max_price = newEventMaxPrice;
+        if (rolePing) updates.role_ping = rolePing;
+        if (resell !== null) updates.resell = resell; // Asegúrate de que resell se actualice correctamente
+
         if (editProduct) {
             const { error } = await supabase
                 .from('products')
-                .update({ name: newName, url: newUrl, max_price: newEventMaxPrice, role_ping: rolePing, resell: resell }) // Actualizar con webhook_url
+                .update(updates) // Actualizar solo los campos que han cambiado
                 .eq('id', editProduct.id)
-
-            const { error: webhookError } = await supabase
-                .from('webhooks')
-                .insert([{ webhook_url: newWebhookUrl, monitor_id: editProduct.monitor_id, product_id: editProduct.id }]); // Insertar el webhook_url relacionado con el producto y el monitor
-
-            if (webhookError) {
-                console.error('Error adding webhook:', webhookError);
-            }
 
             if (error) {
                 console.error('Error updating product:', error)
             } else {
                 setProducts(products.map(product =>
-                    product.id === editProduct.id ? { ...product, name: newName, url: newUrl, max_price: newEventMaxPrice, role_ping: rolePing, resell: resell, webhook_url: newWebhookUrl } : product
+                    product.id === editProduct.id ? { ...product, ...updates } : product
                 ))
             }
         }
@@ -167,6 +184,19 @@ export default function ProductsTable({ params }) {
 
     // Función para añadir un nuevo evento
     const handleAddEvent = async () => {
+        setError(""); // Reiniciar el error
+
+        // Validación de URL
+        if (!newEventUrl.startsWith(`https://${monitorName}`) || !newEventUrl.startsWith(`https://www.${monitorName}`)) {
+            setError(`The URL must start with 'https://${monitorName}' .`);
+            return;
+        }
+
+        // Validación de Webhook URL
+        if (!newEventWebhookUrl.startsWith("https://discord.com/api")) {
+            setError("The Webhook URL must start with 'https://discord.com/api'.");
+            return;
+        }
 
         const { data: productData, error: productError } = await supabase
             .from('products')
@@ -298,6 +328,7 @@ export default function ProductsTable({ params }) {
                             </div>
                         </div>
                         <DialogFooter>
+                            {error && <span className="text-red-500 text-sm">{error}</span>}
                             <Button type="button" onClick={handleAddEvent}>Save</Button>
                         </DialogFooter>
                     </DialogContent>
@@ -405,74 +436,96 @@ export default function ProductsTable({ params }) {
                             <DialogTitle>Edit Product</DialogTitle>
                         </DialogHeader>
                         <div className="grid gap-4 py-4">
-                            <div className="grid gap-4">
-                                <Label htmlFor="product-name">
-                                    Name
-                                </Label>
-                                <Input
-                                    id="product-name"
-                                    value={newName}
-                                    onChange={(e) => setNewName(e.target.value)}
-                                    className="col-span-3"
-                                />
-                            </div>
-                            <div className="grid gap-4">
-                                <Label htmlFor="product-url">
-                                    URL
-                                </Label>
-                                <Input
-                                    id="product-url"
-                                    value={newUrl}
-                                    onChange={(e) => setNewUrl(e.target.value)}
-                                    className="col-span-3"
-                                />
-                            </div>
-                            <div className="grid gap-4">
-                                <Label htmlFor="event-webhook-url">
-                                    Max price (for price errors)
-                                </Label>
-                                <div className='flex items-center gap-2'>
+                            <div className="flex justify-between gap-2">
+                                <div className="grid gap-4">
+                                    <Label htmlFor="event-name">
+                                        Name
+                                    </Label>
                                     <Input
-                                        id="max-price"
-                                        type="number"
-                                        maxLength={4}
-                                        value={newEventMaxPrice}
-                                        onChange={(e) => setNewEventMaxPrice(e.target.value)}
+                                        id="event-name"
+                                        value={newEventName}
+                                        onChange={(e) => setNewEventName(e.target.value)}
                                         className="col-span-3"
+                                        placeholder={editProduct.name}
                                     />
-                                    <div className='flex items-center justify-center p-2 h-10 w-10 border border-gray rounded-lg'>
-                                        $
+                                </div>
+
+                                <div className="grid gap-4">
+                                    <Label htmlFor="event-webhook-url">
+                                        Max price
+                                    </Label>
+                                    <div className='flex items-center gap-2'>
+                                        <Input
+                                            id="max-price"
+                                            type="number"
+                                            maxLength={4}
+                                            value={newEventMaxPrice}
+                                            onChange={(e) => setNewEventMaxPrice(e.target.value)}
+                                            className="col-span-3"
+                                            placeholder={editProduct.max_price}
+                                        />
+                                        <div className='flex items-center justify-center p-2 h-10 w-10 border border-gray rounded-lg'>
+                                            $
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                             <div className="grid gap-4">
-                                <Label htmlFor="product-webhook-url">
+                                <Label htmlFor="event-url">
+                                    URL *
+                                </Label>
+                                <Input
+                                    id="event-url"
+                                    value={newEventUrl}
+                                    onChange={(e) => setNewEventUrl(e.target.value)}
+                                    className="col-span-3"
+                                    placeholder={editProduct.url}
+                                />
+                            </div>
+
+                            <div className="grid gap-4">
+                                <Label htmlFor="event-webhook-url">
                                     Webhook URL
                                 </Label>
                                 <Input
-                                    id="product-webhook-url"
-                                    value={newWebhookUrl}
-                                    onChange={(e) => setNewWebhookUrl(e.target.value)}
+                                    id="event-webhook-url"
+                                    value={newEventWebhookUrl}
+                                    onChange={(e) => setNewEventWebhookUrl(e.target.value)}
                                     className="col-span-3"
+                                    placeholder={editProduct.webhooks[0].webhook_url}
                                 />
                             </div>
-                            <div className="grid gap-4">
-                                <Label htmlFor="product-webhook-url">
-                                    Resell
-                                </Label>
-                                <Select>
-                                    <SelectTrigger className="">
-                                        <SelectValue placeholder="Resell" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="true">True</SelectItem>
-                                        <SelectItem value="false">False</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                            <div className="flex justify-between gap-2 items-center">
+                                <div className="grid gap-4 w-1/2">
+                                    <Label htmlFor="product-webhook-url">
+                                        Resell
+                                    </Label>
+                                    <Select onValueChange={(value) => setResell(value === "true")}>
+                                        <SelectTrigger className="">
+                                            <SelectValue placeholder="Resell" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="true">True</SelectItem>
+                                            <SelectItem value="false">False</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="grid gap-4">
+                                    <Label htmlFor="event-webhook-url">
+                                        Role ping
+                                    </Label>
+                                    <Input
+                                        id="role-ping"
+                                        value={rolePing}
+                                        onChange={(e) => setNewRolePing(e.target.value)}
+                                        className="col-span-3"
+                                    />
+                                </div>
                             </div>
                         </div>
                         <DialogFooter>
-                            <Button type="button" onClick={handleSave}>Save</Button>
+                            {error && <span className="text-red-500 text-sm">{error}</span>}
+                            <Button type="button" onClick={handleSave}>Save Changes</Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
