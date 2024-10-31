@@ -46,7 +46,6 @@ const websites = [
     { "value": "ticketmaster.cz", "label": "Ticketmaster.cz" },
     { "value": "ticketmaster.co.za", "label": "Ticketmaster.co.za" },
     { "value": "axs.com", "label": "Axs.com" },
-    { "value": "axs.co.uk", "label": "Axs.co.uk" },
 ]
 
 export default function MonitorsTable() {
