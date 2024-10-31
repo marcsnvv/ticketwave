@@ -109,6 +109,24 @@ export default function MonitorsTable() {
     const handleAddMonitor = async () => {
         setLoading(true)
         try {
+            // Verificar si ya existe un monitor con el mismo nombre
+            const { data: existingMonitors, error: fetchError } = await supabase
+                .from('monitors')
+                .select('*')
+                .eq('name', selectedWebsite)
+
+            if (fetchError) {
+                console.error('Error fetching monitors:', fetchError)
+                setLoading(false)
+                return
+            }
+
+            if (existingMonitors.length > 0) {
+                console.error('Monitor with the same name already exists.')
+                setLoading(false)
+                return
+            }
+
             const { data, error } = await supabase
                 .from('monitors')
                 .insert([{ name: selectedWebsite }])
