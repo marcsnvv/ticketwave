@@ -65,6 +65,9 @@ export default function ProductsTable({ params }) {
 
     const [error, setError] = useState(""); // Estado para manejar errores
 
+    const [autoDeleteDate, setAutoDeleteDate] = useState("")
+    const [newEventAutoDeleteDate, setNewEventAutoDeleteDate] = useState("")
+
     // Cargar productos asociados a un monitor específico
     useEffect(() => {
 
@@ -133,15 +136,16 @@ export default function ProductsTable({ params }) {
         setEditProduct(product)
         setNewName(product.name)
         setNewUrl(product.url)
-        setNewWebhookUrl(product.webhook_url) // Cargar la URL del webhook para edición
+        setNewWebhookUrl(product.webhook_url)
         setNewRolePing(product.role_ping)
         setResell(product.resell)
+        setAutoDeleteDate(product.autodelete_event || '') // Add this line
     }
 
     // Función para guardar los cambios
-    const handleSave = async () => { // Cambiado para no recibir parámetro
-        setLoading(true); // Activar el spinner de carga
-        setError(""); // Reiniciar el error
+    const handleSave = async () => {
+        setLoading(true)
+        setError("")
 
         // Validación de URL
         // if (newUrl && !newUrl.startsWith(`https://${monitorName}`)) {
@@ -162,7 +166,8 @@ export default function ProductsTable({ params }) {
         if (newUrl) updates.url = newUrl;
         if (newEventMaxPrice) updates.max_price = newEventMaxPrice;
         if (rolePing) updates.role_ping = rolePing;
-        if (resell !== null) updates.resell = resell; // Asegúrate de que resell se actualice correctamente
+        if (resell !== null) updates.resell = resell;
+        if (autoDeleteDate) updates.autodelete_event = autoDeleteDate; // Add this line
 
         if (editProduct) {
             const { error } = await supabase
@@ -184,7 +189,7 @@ export default function ProductsTable({ params }) {
 
     // Función para añadir un nuevo evento
     const handleAddEvent = async () => {
-        setError(""); // Reiniciar el error
+        setError("")
 
         // Validación de URL
         // if (!newEventUrl.startsWith(`https://${monitorName}`) || !newEventUrl.startsWith(`https://www.${monitorName}`)) {
@@ -200,8 +205,16 @@ export default function ProductsTable({ params }) {
 
         const { data: productData, error: productError } = await supabase
             .from('products')
-            .insert([{ name: newEventName, url: newEventUrl, monitor_id: id, max_price: newEventMaxPrice, role_ping: rolePing, resell: resell }])
-            .select('id'); // Insertar el producto y obtener su id
+            .insert([{
+                name: newEventName,
+                url: newEventUrl,
+                monitor_id: id,
+                max_price: newEventMaxPrice,
+                role_ping: rolePing,
+                resell: resell,
+                autodelete_event: newEventAutoDeleteDate || null // Add this line
+            }])
+            .select('id')
 
         if (!productError && productData.length > 0) {
             const product_id = productData[0].id; // Obtener el id del producto recién creado
@@ -326,6 +339,18 @@ export default function ProductsTable({ params }) {
                                     />
                                 </div>
                             </div>
+                            <div className="grid gap-4">
+                                <Label htmlFor="auto-delete-date">
+                                    Date to autoremove
+                                </Label>
+                                <Input
+                                    id="auto-delete-date"
+                                    type="datetime-local"
+                                    value={newEventAutoDeleteDate}
+                                    onChange={(e) => setNewEventAutoDeleteDate(e.target.value)}
+                                    className="col-span-3"
+                                />
+                            </div>
                         </div>
                         <DialogFooter>
                             {error && <span className="text-red-500 text-sm">{error}</span>}
@@ -343,6 +368,7 @@ export default function ProductsTable({ params }) {
                             <TableHead>URL</TableHead>
                             <TableHead>Webhook URL</TableHead>
                             <TableHead>Max Price</TableHead>
+                            <TableHead>Auto Delete</TableHead>  {/* New column */}
                             <TableHead>Actions</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -395,6 +421,13 @@ export default function ProductsTable({ params }) {
                                                 </TableCell>
                                                 <TableCell>
                                                     {product.max_price ? product.max_price + " $" : "-- $"}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {product.autodelete_event ? (
+                                                        new Date(product.autodelete_event).toLocaleString()
+                                                    ) : (
+                                                        "Not set"
+                                                    )}
                                                 </TableCell>
                                                 <TableCell>
                                                     <DropdownMenu>
@@ -521,6 +554,19 @@ export default function ProductsTable({ params }) {
                                         className="col-span-3"
                                     />
                                 </div>
+                            </div>
+                            <div className="grid gap-4">
+                                <Label htmlFor="auto-delete-date">
+                                    Date to autoremove
+                                </Label>
+                                <Input
+                                    id="auto-delete-date"
+                                    type="datetime-local"
+                                    value={autoDeleteDate}
+                                    onChange={(e) => setAutoDeleteDate(e.target.value)}
+                                    className="col-span-3"
+                                    placeholder={editProduct.autodelete_event}
+                                />
                             </div>
                         </div>
                         <DialogFooter>

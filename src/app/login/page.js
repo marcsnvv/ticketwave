@@ -16,7 +16,9 @@ export default function Login() {
     const emailList = [
         "busines1244@gmail.com",
         "marcsnvv@gmail.com",
-        "vaskotomas6@gmail.com"
+        "vaskotomas6@gmail.com",
+        "jozi71mut@seznam.cz",
+        "timotej.liskay@gmail.com",
     ];
 
     const handleLogin = async () => {
