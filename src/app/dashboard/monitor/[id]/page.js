@@ -402,7 +402,7 @@ export default function ProductsTable({ params }) {
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                     >
-                                                        {product.url.slice(0, 40)}...
+                                                        {product.url.slice(0, 25)}...
                                                     </a>
                                                 </TableCell>
                                                 <TableCell>
@@ -414,7 +414,7 @@ export default function ProductsTable({ params }) {
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
                                                             >
-                                                                {webhook.webhook_url.slice(0, 40)}...
+                                                                {webhook.webhook_url.slice(0, 25)}...
                                                             </a>
                                                         </div>
                                                     ))}
