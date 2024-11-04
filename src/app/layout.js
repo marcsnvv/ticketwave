@@ -1,3 +1,4 @@
+
 import localFont from "next/font/local";
 import "./globals.css";
 
@@ -19,12 +20,8 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className="w-full flex items-center justify-center">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased
-           min-w-[960px] max-w-[960px]
-          `}
-      >
+    <html lang="en">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {children}
       </body>
     </html>
