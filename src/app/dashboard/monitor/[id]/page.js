@@ -36,8 +36,9 @@ import {
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { DotsHorizontalIcon, ChevronDownIcon, ChevronRightIcon } from '@radix-ui/react-icons'
+import { DotsHorizontalIcon, ChevronDownIcon, ChevronRightIcon, MagnifyingGlassIcon } from '@radix-ui/react-icons'
 import Loader from '@/components/ui/loader' // Asegúrate de tener un componente de loader
+import Footer from '@/components/ui/footer' // Asegúrate de tener un componente de footer
 
 export default function ProductsTable({ params }) {
     const router = useRouter()
@@ -67,6 +68,10 @@ export default function ProductsTable({ params }) {
 
     const [autoDeleteDate, setAutoDeleteDate] = useState("")
     const [newEventAutoDeleteDate, setNewEventAutoDeleteDate] = useState("")
+    const [searchTerm, setSearchTerm] = useState("")
+
+    const [roles, setRoles] = useState([])
+    const [channels, setChannels] = useState([])
 
     // Cargar productos asociados a un monitor específico
     useEffect(() => {
@@ -95,6 +100,17 @@ export default function ProductsTable({ params }) {
             fetchProducts()
         }
     }, [id])
+
+    // Add this to your existing useEffect or create a new one
+    useEffect(() => {
+        const fetchData = async () => {
+            const { data: rolesData } = await supabase.from('roles').select('*')
+            const { data: channelsData } = await supabase.from('channels').select('*')
+            setRoles(rolesData || [])
+            setChannels(channelsData || [])
+        }
+        fetchData()
+    }, [])
 
     // Agrupar productos por nombre
     const groupedProducts = products.reduce((acc, product) => {
@@ -239,345 +255,378 @@ export default function ProductsTable({ params }) {
         }
     }
 
+    const filteredProducts = groupedProducts.filter(product =>
+        product.name.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+
     return (
-        <div className="w-full">
-
-            {/* Sección para añadir nuevos eventos */}
-            <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-white mb-4">{monitorName}</h2>
-                <Dialog open={newEventDialogOpen} onOpenChange={setNewEventDialogOpen}>
-                    <DialogTrigger asChild>
-                        <Button variant="outline">Add New Event</Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
-                        <DialogHeader>
-                            <DialogTitle>Add New Event</DialogTitle>
-                            <DialogDescription>
-                                Enter the details of the new event below.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                            <div className="flex justify-between gap-2">
-                                <div className="grid gap-4">
-                                    <Label htmlFor="event-name">
-                                        Name *
-                                    </Label>
-                                    <Input
-                                        id="event-name"
-                                        value={newEventName}
-                                        onChange={(e) => setNewEventName(e.target.value)}
-                                        className="col-span-3"
-                                    />
-                                </div>
-
-                                <div className="grid gap-4">
-                                    <Label htmlFor="event-webhook-url">
-                                        Max price
-                                    </Label>
-                                    <div className='flex items-center gap-2'>
+        <main className='flex items-center justify-center mx-48 p-5'>
+            <div className="w-full">
+                {/* Sección para añadir nuevos eventos */}
+                <div className="flex justify-between mb-4">
+                    <div className="relative">
+                        <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5" />
+                        <Input
+                            type="search"
+                            placeholder={`Search events on ${monitorName}...`}
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="lg:w-96 w-52 pl-9" // Added padding for the icon
+                        />
+                    </div>
+                    <Dialog open={newEventDialogOpen} onOpenChange={setNewEventDialogOpen}>
+                        <DialogTrigger asChild>
+                            <Button variant="outline">Add New Event</Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px]">
+                            <DialogHeader>
+                                <DialogTitle>Add New Event</DialogTitle>
+                                <DialogDescription>
+                                    Enter the details of the new event below.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="grid gap-4 py-4">
+                                <div className="flex justify-between gap-2">
+                                    <div className="grid gap-4">
+                                        <Label htmlFor="event-name">
+                                            Name *
+                                        </Label>
                                         <Input
-                                            id="max-price"
-                                            type="number"
-                                            maxLength={4}
-                                            value={newEventMaxPrice}
-                                            onChange={(e) => setNewEventMaxPrice(e.target.value)}
+                                            id="event-name"
+                                            value={newEventName}
+                                            onChange={(e) => setNewEventName(e.target.value)}
                                             className="col-span-3"
                                         />
-                                        <div className='flex items-center justify-center p-2 h-10 w-10 border border-gray rounded-lg'>
-                                            $
-                                        </div>
                                     </div>
-                                </div>
-                            </div>
-                            <div className="grid gap-4">
-                                <Label htmlFor="event-url">
-                                    URL *
-                                </Label>
-                                <Input
-                                    id="event-url"
-                                    value={newEventUrl}
-                                    onChange={(e) => setNewEventUrl(e.target.value)}
-                                    className="col-span-3"
-                                />
-                            </div>
 
-                            <div className="grid gap-4">
-                                <Label htmlFor="event-webhook-url">
-                                    Webhook URL
-                                </Label>
-                                <Input
-                                    id="event-webhook-url"
-                                    value={newEventWebhookUrl}
-                                    onChange={(e) => setNewEventWebhookUrl(e.target.value)}
-                                    className="col-span-3"
-                                />
-                            </div>
-                            <div className="flex justify-between gap-2 items-center">
-                                <div className="grid gap-4 w-1/2">
-                                    <Label htmlFor="product-webhook-url">
-                                        Resell
-                                    </Label>
-                                    <Select onValueChange={(value) => setResell(value === "true")}>
-                                        <SelectTrigger className="">
-                                            <SelectValue placeholder="Resell" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="true">True</SelectItem>
-                                            <SelectItem value="false">False</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="grid gap-4">
-                                    <Label htmlFor="event-webhook-url">
-                                        Role ping
-                                    </Label>
-                                    <Input
-                                        id="role-ping"
-                                        value={rolePing}
-                                        onChange={(e) => setNewRolePing(e.target.value)}
-                                        className="col-span-3"
-                                    />
-                                </div>
-                            </div>
-                            <div className="grid gap-4">
-                                <Label htmlFor="auto-delete-date">
-                                    Date to autoremove
-                                </Label>
-                                <Input
-                                    id="auto-delete-date"
-                                    type="datetime-local"
-                                    value={newEventAutoDeleteDate}
-                                    onChange={(e) => setNewEventAutoDeleteDate(e.target.value)}
-                                    className="col-span-3"
-                                />
-                            </div>
-                        </div>
-                        <DialogFooter>
-                            {error && <span className="text-red-500 text-sm">{error}</span>}
-                            <Button type="button" onClick={handleAddEvent}>Save</Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
-            </div>
-
-            <div className="rounded-md border">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Event</TableHead>
-                            <TableHead>URL</TableHead>
-                            <TableHead>Webhook URL</TableHead>
-                            <TableHead>Max Price</TableHead>
-                            <TableHead>Auto Delete</TableHead>  {/* New column */}
-                            <TableHead>Actions</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {groupedProducts.length ? (
-                            groupedProducts.map((group) => (
-                                <>
-                                    <TableRow key={group.name} className="cursor-pointer" onClick={() => handleToggleExpand(group.name)}>
-                                        <TableCell>
-                                            <div className="flex items-center">
-                                                {expanded === group.name ? (
-                                                    <ChevronDownIcon className="mr-2" />
-                                                ) : (
-                                                    <ChevronRightIcon className="mr-2" />
-                                                )}
-                                                {group.name}
+                                    <div className="grid gap-4">
+                                        <Label htmlFor="event-webhook-url">
+                                            Max price
+                                        </Label>
+                                        <div className='flex items-center gap-2'>
+                                            <Input
+                                                id="max-price"
+                                                type="number"
+                                                maxLength={4}
+                                                value={newEventMaxPrice}
+                                                onChange={(e) => setNewEventMaxPrice(e.target.value)}
+                                                className="col-span-3"
+                                            />
+                                            <div className='flex items-center justify-center p-2 h-10 w-10 border border-gray rounded-lg'>
+                                                $
                                             </div>
-                                        </TableCell>
-
-                                    </TableRow>
-                                    {/* Filas desplegadas con los productos individuales */}
-                                    {expanded === group.name && (
-                                        group.items.map((product) => (
-                                            <TableRow key={product.id}>
-                                                <TableCell></TableCell>
-
-                                                <TableCell>
-                                                    <a
-                                                        href={product.url}
-                                                        className="text-blue-500 underline"
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                    >
-                                                        {product.url.slice(0, 25)}...
-                                                    </a>
-                                                </TableCell>
-                                                <TableCell>
-                                                    {product.webhooks.map((webhook, index) => (
-                                                        <div key={index}>
-                                                            <a
-                                                                href={webhook.webhook_url}
-                                                                className="text-blue-500 underline"
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                            >
-                                                                {webhook.webhook_url.slice(0, 25)}...
-                                                            </a>
-                                                        </div>
-                                                    ))}
-                                                </TableCell>
-                                                <TableCell>
-                                                    {product.max_price ? product.max_price + " $" : "-- $"}
-                                                </TableCell>
-                                                <TableCell>
-                                                    {product.autodelete_event ? (
-                                                        new Date(product.autodelete_event).toLocaleString()
-                                                    ) : (
-                                                        "Not set"
-                                                    )}
-                                                </TableCell>
-                                                <TableCell>
-                                                    <DropdownMenu>
-                                                        <DropdownMenuTrigger asChild>
-                                                            <Button variant="ghost">
-                                                                <DotsHorizontalIcon className="w-4 h-4" />
-                                                            </Button>
-                                                        </DropdownMenuTrigger>
-                                                        <DropdownMenuContent align="end">
-                                                            <DropdownMenuItem onClick={() => handleEdit(product)}>
-                                                                Edit
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuItem onClick={() => handleDelete(product.id)}>
-                                                                Delete
-                                                            </DropdownMenuItem>
-                                                        </DropdownMenuContent>
-                                                    </DropdownMenu>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))
-                                    )}
-                                </>
-                            ))
-                        ) : (
-                            <TableRow>
-                                <TableCell colSpan="3" className="text-center">
-                                    No products found.
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
-            </div>
-
-            {editProduct && (
-                <Dialog open={Boolean(editProduct)} onOpenChange={() => setEditProduct(null)}>
-                    <DialogContent className="sm:max-w-[425px]">
-                        <DialogHeader>
-                            <DialogTitle>Edit Product</DialogTitle>
-                        </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                            <div className="flex justify-between gap-2">
-                                <div className="grid gap-4">
-                                    <Label htmlFor="event-name">
-                                        Name
-                                    </Label>
-                                    <Input
-                                        id="event-name"
-                                        value={newEventName}
-                                        onChange={(e) => setNewEventName(e.target.value)}
-                                        className="col-span-3"
-                                        placeholder={editProduct.name}
-                                    />
-                                </div>
-
-                                <div className="grid gap-4">
-                                    <Label htmlFor="event-webhook-url">
-                                        Max price
-                                    </Label>
-                                    <div className='flex items-center gap-2'>
-                                        <Input
-                                            id="max-price"
-                                            type="number"
-                                            maxLength={4}
-                                            value={newEventMaxPrice}
-                                            onChange={(e) => setNewEventMaxPrice(e.target.value)}
-                                            className="col-span-3"
-                                            placeholder={editProduct.max_price}
-                                        />
-                                        <div className='flex items-center justify-center p-2 h-10 w-10 border border-gray rounded-lg'>
-                                            $
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div className="grid gap-4">
-                                <Label htmlFor="event-url">
-                                    URL *
-                                </Label>
-                                <Input
-                                    id="event-url"
-                                    value={newEventUrl}
-                                    onChange={(e) => setNewEventUrl(e.target.value)}
-                                    className="col-span-3"
-                                    placeholder={editProduct.url}
-                                />
-                            </div>
-
-                            <div className="grid gap-4">
-                                <Label htmlFor="event-webhook-url">
-                                    Webhook URL
-                                </Label>
-                                <Input
-                                    id="event-webhook-url"
-                                    value={newEventWebhookUrl}
-                                    onChange={(e) => setNewEventWebhookUrl(e.target.value)}
-                                    className="col-span-3"
-                                    placeholder={editProduct.webhooks[0].webhook_url}
-                                />
-                            </div>
-                            <div className="flex justify-between gap-2 items-center">
-                                <div className="grid gap-4 w-1/2">
-                                    <Label htmlFor="product-webhook-url">
-                                        Resell
+                                <div className="grid gap-4">
+                                    <Label htmlFor="event-url">
+                                        URL *
                                     </Label>
-                                    <Select onValueChange={(value) => setResell(value === "true")}>
-                                        <SelectTrigger className="">
-                                            <SelectValue placeholder="Resell" />
+                                    <Input
+                                        id="event-url"
+                                        value={newEventUrl}
+                                        onChange={(e) => setNewEventUrl(e.target.value)}
+                                        className="col-span-3"
+                                    />
+                                </div>
+
+                                <div className="grid gap-4">
+                                    <Label htmlFor="event-webhook-url">
+                                        Webhook URL *
+                                    </Label>
+                                    <Select
+                                        value={newEventWebhookUrl}
+                                        onValueChange={(value) => setNewEventWebhookUrl(value)}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select webhook" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="true">True</SelectItem>
-                                            <SelectItem value="false">False</SelectItem>
+                                            {channels.map(channel => (
+                                                <SelectItem key={channel.id} value={channel.webhook_url}>
+                                                    {channel.title}
+                                                </SelectItem>
+                                            ))}
                                         </SelectContent>
                                     </Select>
                                 </div>
+                                <div className="flex justify-between gap-2 items-center">
+                                    <div className="grid gap-4 w-1/2">
+                                        <Label htmlFor="product-webhook-url">
+                                            Resell
+                                        </Label>
+                                        <Select onValueChange={(value) => setResell(value === "true")}>
+                                            <SelectTrigger className="">
+                                                <SelectValue placeholder="Resell" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="true">True</SelectItem>
+                                                <SelectItem value="false">False</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="grid gap-4 w-1/2">
+                                        <Label htmlFor="role-ping">
+                                            Role ping
+                                        </Label>
+                                        <Select
+                                            value={rolePing}
+                                            onValueChange={(value) => setNewRolePing(value)}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select role" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {roles.map(role => (
+                                                    <SelectItem key={role.id} value={role.role_id}>
+                                                        {role.title}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
                                 <div className="grid gap-4">
-                                    <Label htmlFor="event-webhook-url">
-                                        Role ping
+                                    <Label htmlFor="auto-delete-date">
+                                        Date to autoremove
                                     </Label>
                                     <Input
-                                        id="role-ping"
-                                        value={rolePing}
-                                        onChange={(e) => setNewRolePing(e.target.value)}
+                                        id="auto-delete-date"
+                                        type="datetime-local"
+                                        value={newEventAutoDeleteDate}
+                                        onChange={(e) => setNewEventAutoDeleteDate(e.target.value)}
                                         className="col-span-3"
                                     />
                                 </div>
                             </div>
-                            <div className="grid gap-4">
-                                <Label htmlFor="auto-delete-date">
-                                    Date to autoremove
-                                </Label>
-                                <Input
-                                    id="auto-delete-date"
-                                    type="datetime-local"
-                                    value={autoDeleteDate}
-                                    onChange={(e) => setAutoDeleteDate(e.target.value)}
-                                    className="col-span-3"
-                                    placeholder={editProduct.autodelete_event}
-                                />
-                            </div>
-                        </div>
-                        <DialogFooter>
-                            {error && <span className="text-red-500 text-sm">{error}</span>}
-                            <Button type="button" onClick={handleSave}>Save Changes</Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
-            )}
+                            <DialogFooter>
+                                {error && <span className="text-red-500 text-sm">{error}</span>}
+                                <Button type="button" onClick={handleAddEvent}>Save</Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+                </div>
 
-            {loading && <Loader />} {/* Muestra un spinner de carga si loading es true */}
-        </div>
+                <div className="rounded-md border">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Event</TableHead>
+                                <TableHead>URL</TableHead>
+                                <TableHead>Webhook URL</TableHead>
+                                <TableHead>Max Price</TableHead>
+                                <TableHead>Auto Delete</TableHead>  {/* New column */}
+                                <TableHead>Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {filteredProducts.length ? (
+                                filteredProducts.map((group) => (
+                                    <>
+                                        <TableRow key={group.name} className="cursor-pointer" onClick={() => handleToggleExpand(group.name)}>
+                                            <TableCell>
+                                                <div className="flex items-center">
+                                                    {expanded === group.name ? (
+                                                        <ChevronDownIcon className="mr-2" />
+                                                    ) : (
+                                                        <ChevronRightIcon className="mr-2" />
+                                                    )}
+                                                    {group.name}
+                                                </div>
+                                            </TableCell>
+
+                                        </TableRow>
+                                        {/* Filas desplegadas con los productos individuales */}
+                                        {expanded === group.name && (
+                                            group.items.map((product) => (
+                                                <TableRow key={product.id}>
+                                                    <TableCell></TableCell>
+
+                                                    <TableCell>
+                                                        <a
+                                                            href={product.url}
+                                                            className="text-blue-500 underline"
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                        >
+                                                            {product.url.slice(0, 25)}...
+                                                        </a>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {product.webhooks.map((webhook, index) => (
+                                                            <div key={index}>
+                                                                <a
+                                                                    href={webhook.webhook_url}
+                                                                    className="text-blue-500 underline"
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                >
+                                                                    {webhook.webhook_url.slice(0, 25)}...
+                                                                </a>
+                                                            </div>
+                                                        ))}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {product.max_price ? product.max_price + " $" : "-- $"}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {product.autodelete_event ? (
+                                                            <time className='text-sm text-gray-300' dateTime={new Date(product.autodelete_event).toLocaleString()}>{new Date(product.autodelete_event).toLocaleString()}</time>
+                                                        ) : (
+                                                            "Not set"
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <DropdownMenu>
+                                                            <DropdownMenuTrigger asChild>
+                                                                <Button variant="ghost">
+                                                                    <DotsHorizontalIcon className="w-4 h-4" />
+                                                                </Button>
+                                                            </DropdownMenuTrigger>
+                                                            <DropdownMenuContent align="end">
+                                                                <DropdownMenuItem onClick={() => handleEdit(product)}>
+                                                                    Edit
+                                                                </DropdownMenuItem>
+                                                                <DropdownMenuItem onClick={() => handleDelete(product.id)}>
+                                                                    Delete
+                                                                </DropdownMenuItem>
+                                                            </DropdownMenuContent>
+                                                        </DropdownMenu>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))
+                                        )}
+                                    </>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan="3" className="text-center">
+                                        No products found.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
+
+                {editProduct && (
+                    <Dialog open={Boolean(editProduct)} onOpenChange={() => setEditProduct(null)}>
+                        <DialogContent className="sm:max-w-[425px]">
+                            <DialogHeader>
+                                <DialogTitle>Edit Product</DialogTitle>
+                            </DialogHeader>
+                            <div className="grid gap-4 py-4">
+                                <div className="flex justify-between gap-2">
+                                    <div className="grid gap-4">
+                                        <Label htmlFor="event-name">
+                                            Name
+                                        </Label>
+                                        <Input
+                                            id="event-name"
+                                            value={newEventName}
+                                            onChange={(e) => setNewEventName(e.target.value)}
+                                            className="col-span-3"
+                                            placeholder={editProduct.name}
+                                        />
+                                    </div>
+
+                                    <div className="grid gap-4">
+                                        <Label htmlFor="event-webhook-url">
+                                            Max price
+                                        </Label>
+                                        <div className='flex items-center gap-2'>
+                                            <Input
+                                                id="max-price"
+                                                type="number"
+                                                maxLength={4}
+                                                value={newEventMaxPrice}
+                                                onChange={(e) => setNewEventMaxPrice(e.target.value)}
+                                                className="col-span-3"
+                                                placeholder={editProduct.max_price}
+                                            />
+                                            <div className='flex items-center justify-center p-2 h-10 w-10 border border-gray rounded-lg'>
+                                                $
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="grid gap-4">
+                                    <Label htmlFor="event-url">
+                                        URL *
+                                    </Label>
+                                    <Input
+                                        id="event-url"
+                                        value={newEventUrl}
+                                        onChange={(e) => setNewEventUrl(e.target.value)}
+                                        className="col-span-3"
+                                        placeholder={editProduct.url}
+                                    />
+                                </div>
+
+                                <div className="grid gap-4">
+                                    <Label htmlFor="event-webhook-url">
+                                        Webhook URL
+                                    </Label>
+                                    <Input
+                                        id="event-webhook-url"
+                                        value={newEventWebhookUrl}
+                                        onChange={(e) => setNewEventWebhookUrl(e.target.value)}
+                                        className="col-span-3"
+                                        placeholder={editProduct.webhooks[0].webhook_url}
+                                    />
+                                </div>
+                                <div className="flex justify-between gap-2 items-center">
+                                    <div className="grid gap-4 w-1/2">
+                                        <Label htmlFor="product-webhook-url">
+                                            Resell
+                                        </Label>
+                                        <Select defaultValue={resell && resell === "true" ? "true" : "false"} onValueChange={(value) => setResell(value === "true")}>
+                                            <SelectTrigger className="">
+                                                <SelectValue placeholder="Resell" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="true">True</SelectItem>
+                                                <SelectItem value="false">False</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="grid gap-4">
+                                        <Label htmlFor="event-webhook-url">
+                                            Role ping
+                                        </Label>
+                                        <Input
+                                            id="role-ping"
+                                            value={rolePing}
+                                            onChange={(e) => setNewRolePing(e.target.value)}
+                                            className="col-span-3"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="grid gap-4">
+                                    <Label htmlFor="auto-delete-date">
+                                        Date to autoremove
+                                    </Label>
+                                    <Input
+                                        id="auto-delete-date"
+                                        type="datetime-local"
+                                        value={new Date(autoDeleteDate).toISOString().slice(0, 16)} // Add this line
+                                        onChange={(e) => setAutoDeleteDate(e.target.value)}
+                                        className="col-span-3"
+                                        placeholder={editProduct.autodelete_event}
+                                    />
+                                </div>
+                            </div>
+                            <DialogFooter>
+                                {error && <span className="text-red-500 text-sm">{error}</span>}
+                                <Button type="button" onClick={handleSave}>Save Changes</Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+                )}
+
+                {loading && <Loader />} {/* Muestra un spinner de carga si loading es true */}
+            </div>
+
+        </main>
     )
 }

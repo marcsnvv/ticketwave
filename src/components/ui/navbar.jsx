@@ -11,7 +11,7 @@ export default function Navbar() {
     const router = useRouter()
 
     return (
-        <div className="flex items-center justify-between px-4 py-2 text-white mb-4">
+        <div className="flex items-center justify-between p-5 text-white mx-48">
             <div className="flex items-center">
                 <Link href={"/"}>
                     <Image src="/logo.png" alt="Logo" width={35} height={35} />
@@ -20,7 +20,7 @@ export default function Navbar() {
             <div className="flex items-center">
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Avatar className="h-8 w-8">
+                        <Avatar className="h-8 w-8 cursor-pointer">
                             <AvatarImage alt="User Avatar" />
                             <AvatarFallback>TW</AvatarFallback>
                         </Avatar>

@@ -62,7 +62,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground min-w-[960px] max-w-[960px] w-full mx-auto mb-10;
+    @apply bg-background text-foreground;
   }
 }
 
