@@ -19,7 +19,7 @@ export default function Login() {
         "vaskotomas6@gmail.com",
         "jozi71mut@seznam.cz",
         "timotej.liskay@gmail.com",
-    ];
+    ]
 
     const handleLogin = async () => {
         if (emailList.includes(email)) {
