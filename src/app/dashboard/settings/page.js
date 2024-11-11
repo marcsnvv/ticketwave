@@ -27,6 +27,10 @@ export default function Settings() {
     const [channelError, setChannelError] = useState("")
     const [editDialogOpen, setEditDialogOpen] = useState(false)
     const [editError, setEditError] = useState("")
+    const [roleSearch, setRoleSearch] = useState("")
+    const [channelSearch, setChannelSearch] = useState("")
+    const [visibleRoles, setVisibleRoles] = useState(9)
+    const [visibleChannels, setVisibleChannels] = useState(9)
 
     const saveSettings = async () => {
         const { error } = await supabase
@@ -267,6 +271,9 @@ export default function Settings() {
         }
     }
 
+    const filteredRoles = roles.filter(role => role.title.toLowerCase().includes(roleSearch.toLowerCase()))
+    const filteredChannels = channels.filter(channel => channel.title.toLowerCase().includes(channelSearch.toLowerCase()))
+
     return (
         <main className='flex items-center justify-center mx-48 p-5'>
             <div className="container mx-auto">
@@ -274,6 +281,11 @@ export default function Settings() {
                     {/* Roles Section */}
                     <div className="space-y-4">
                         <h3 className="text-lg font-medium">Roles</h3>
+                        <Input
+                            placeholder="Search Roles"
+                            value={roleSearch}
+                            onChange={(e) => setRoleSearch(e.target.value)}
+                        />
                         <div className="flex justify-between gap-4">
                             <div className='w-full'>
                                 <Input
@@ -297,7 +309,7 @@ export default function Settings() {
                             </Button>
                         </div>
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
-                            {roles.map((role) => (
+                            {filteredRoles.slice(0, visibleRoles).map((role) => (
                                 <div key={role.id} className="flex items-center justify-between p-2 border rounded hover:shadow-sm">
                                     <Badge style={{ backgroundColor: role.color }}>
                                         {role.title}
@@ -313,11 +325,21 @@ export default function Settings() {
                                 </div>
                             ))}
                         </div>
+                        {filteredRoles.length > visibleRoles && (
+                            <Button className="" variant="ghost" onClick={() => setVisibleRoles(visibleRoles + 9)}>
+                                Show more
+                            </Button>
+                        )}
                     </div>
 
                     {/* Channels Section */}
                     <div className="space-y-4">
                         <h3 className="text-lg font-medium">Channels</h3>
+                        <Input
+                            placeholder="Search Channels"
+                            value={channelSearch}
+                            onChange={(e) => setChannelSearch(e.target.value)}
+                        />
                         <div className="flex justify-between gap-4">
                             <div className='w-full'>
                                 <Input
@@ -341,7 +363,7 @@ export default function Settings() {
                             </Button>
                         </div>
                         <div className="grid grid-cols-2 lg:grid-cols-3 gap-5">
-                            {channels.map((channel) => (
+                            {filteredChannels.slice(0, visibleChannels).map((channel) => (
                                 <div key={channel.id} className="flex items-center justify-between p-2 border rounded">
                                     <div className='flex gap-2 items-center justify-center'>
                                         <WebhookIcon className='h-5 w-5' />
@@ -358,6 +380,11 @@ export default function Settings() {
                                 </div>
                             ))}
                         </div>
+                        {filteredChannels.length > visibleChannels && (
+                            <Button variant="ghost" onClick={() => setVisibleChannels(visibleChannels + 9)}>
+                                Show more
+                            </Button>
+                        )}
                     </div>
                 </div>
 
