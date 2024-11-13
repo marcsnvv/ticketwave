@@ -27,18 +27,14 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { DotsHorizontalIcon, ChevronDownIcon, ChevronRightIcon, MagnifyingGlassIcon } from '@radix-ui/react-icons'
+import { DotsHorizontalIcon, ChevronDownIcon, ChevronRightIcon, MagnifyingGlassIcon, CheckIcon } from '@radix-ui/react-icons'
 import Loader from '@/components/ui/loader' // Asegúrate de tener un componente de loader
 import Footer from '@/components/ui/footer' // Asegúrate de tener un componente de footer
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
+import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from '@/components/ui/command'
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 
 export default function ProductsTable({ params }) {
     const router = useRouter()
@@ -55,30 +51,23 @@ export default function ProductsTable({ params }) {
     const [newEventWebhookUrl, setNewEventWebhookUrl] = useState("") // Nuevo estado para el webhook del evento
     const [resell, setResell] = useState(false)
     const [rolePing, setNewRolePing] = useState("")
-
-
     const [loading, setLoading] = useState(false) // Estado para el spinner de carga
     const [monitorName, setMonitorName] = useState("") // Estado para el nombre del monitor
-
     const [newEventMaxPrice, setNewEventMaxPrice] = useState("") // Nuevo estado para el Max Price
-
     const [expanded, setExpanded] = useState(null) // Estado para controlar qué fila está expandida
-
     const [error, setError] = useState(""); // Estado para manejar errores
-
     const [autoDeleteDate, setAutoDeleteDate] = useState("")
     const [newEventAutoDeleteDate, setNewEventAutoDeleteDate] = useState("")
     const [searchTerm, setSearchTerm] = useState("")
-
     const [roles, setRoles] = useState([])
     const [channels, setChannels] = useState([])
+    const [openWebhook, setOpenWebhook] = useState(false)
+    const [openRole, setOpenRole] = useState(false)
 
     // Cargar productos asociados a un monitor específico
     useEffect(() => {
-
         if (id) {
             async function fetchProducts() {
-
                 const { data: { session } } = await supabase.auth.getSession()
                 if (!session) {
                     router("/login")
@@ -164,11 +153,11 @@ export default function ProductsTable({ params }) {
         setError("")
 
         // Validación de URL
-        // if (newUrl && !newUrl.startsWith(`https://${monitorName}`)) {
-        //     setError("The URL must start with 'https://' and contain the monitor name.");
-        //     setLoading(false);
-        //     return;
-        // }
+        if (newUrl && !newUrl.startsWith(`https://${monitorName}`)) {
+            setError("The URL must start with 'https://' and contain the monitor name.");
+            setLoading(false);
+            return;
+        }
 
         // Validación de Webhook URL
         if (newWebhookUrl && !newWebhookUrl.startsWith("https://discord.com/api")) {
@@ -208,10 +197,10 @@ export default function ProductsTable({ params }) {
         setError("")
 
         // Validación de URL
-        // if (!newEventUrl.startsWith(`https://${monitorName}`) || !newEventUrl.startsWith(`https://www.${monitorName}`)) {
-        //     setError(`The URL must start with 'https://${monitorName}' .`);
-        //     return;
-        // }
+        if (!newEventUrl.startsWith(`https://${monitorName}`) && !newEventUrl.startsWith(`https://www.${monitorName}`)) {
+            setError(`The URL must start with 'https://${monitorName}' or 'https://www.${monitorName}'.`);
+            return;
+        }
 
         // Validación de Webhook URL
         if (!newEventWebhookUrl.startsWith("https://discord.com/api")) {
@@ -334,21 +323,39 @@ export default function ProductsTable({ params }) {
                                     <Label htmlFor="event-webhook-url">
                                         Webhook URL *
                                     </Label>
-                                    <Select
-                                        value={newEventWebhookUrl}
-                                        onValueChange={(value) => setNewEventWebhookUrl(value)}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select webhook" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {channels.map(channel => (
-                                                <SelectItem key={channel.id} value={channel.webhook_url}>
-                                                    {channel.title}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                    <Popover open={openWebhook} onOpenChange={setOpenWebhook}>
+                                        <PopoverTrigger asChild>
+                                            <Button variant="outline" className="w-full justify-between">
+                                                {newEventWebhookUrl || "Select webhook"}
+                                                <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-full p-0 h-48">
+                                            <Command>
+                                                <CommandInput placeholder="Search webhook..." className="h-9" />
+                                                <CommandList>
+                                                    <CommandEmpty>No webhook found.</CommandEmpty>
+                                                    <CommandGroup>
+                                                        {channels.sort((a, b) => a.title.localeCompare(b.title)).map((channel) => (
+                                                            <CommandItem
+                                                                key={channel.id}
+                                                                value={channel.webhook_url}
+                                                                onSelect={(currentValue) => {
+                                                                    setNewEventWebhookUrl(currentValue === newEventWebhookUrl ? "" : currentValue)
+                                                                    setOpenWebhook(false)
+                                                                }}
+                                                            >
+                                                                {channel.title}
+                                                                <CheckIcon
+                                                                    className={`ml-auto h-4 w-4 ${newEventWebhookUrl === channel.webhook_url ? "opacity-100" : "opacity-0"}`}
+                                                                />
+                                                            </CommandItem>
+                                                        ))}
+                                                    </CommandGroup>
+                                                </CommandList>
+                                            </Command>
+                                        </PopoverContent>
+                                    </Popover>
                                 </div>
                                 <div className="flex justify-between gap-2 items-center">
                                     <div className="grid gap-4 w-1/2">
@@ -369,21 +376,39 @@ export default function ProductsTable({ params }) {
                                         <Label htmlFor="role-ping">
                                             Role ping
                                         </Label>
-                                        <Select
-                                            value={rolePing}
-                                            onValueChange={(value) => setNewRolePing(value)}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select role" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {roles.map(role => (
-                                                    <SelectItem key={role.id} value={role.role_id}>
-                                                        {role.title}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
+                                        <Popover open={openRole} onOpenChange={setOpenRole}>
+                                            <PopoverTrigger asChild>
+                                                <Button variant="outline" className="w-full justify-between">
+                                                    {rolePing || "Select role"}
+                                                    <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-full p-0 h-48">
+                                                <Command>
+                                                    <CommandInput placeholder="Search role..." className="h-9" />
+                                                    <CommandList>
+                                                        <CommandEmpty>No role found.</CommandEmpty>
+                                                        <CommandGroup>
+                                                            {roles.sort((a, b) => a.title.localeCompare(b.title)).map((role) => (
+                                                                <CommandItem
+                                                                    key={role.id}
+                                                                    value={role.role_id}
+                                                                    onSelect={(currentValue) => {
+                                                                        setNewRolePing(currentValue === rolePing ? "" : currentValue)
+                                                                        setOpenRole(false)
+                                                                    }}
+                                                                >
+                                                                    {role.title}
+                                                                    <CheckIcon
+                                                                        className={`ml-auto h-4 w-4 ${rolePing === role.role_id ? "opacity-100" : "opacity-0"}`}
+                                                                    />
+                                                                </CommandItem>
+                                                            ))}
+                                                        </CommandGroup>
+                                                    </CommandList>
+                                                </Command>
+                                            </PopoverContent>
+                                        </Popover>
                                     </div>
                                 </div>
                                 <div className="grid gap-4">
@@ -393,8 +418,8 @@ export default function ProductsTable({ params }) {
                                     <Input
                                         id="auto-delete-date"
                                         type="datetime-local"
-                                        value={newEventAutoDeleteDate}
-                                        onChange={(e) => setNewEventAutoDeleteDate(e.target.value)}
+                                        value={autoDeleteDate ? new Date(autoDeleteDate).toISOString().slice(0, 16) : ''}
+                                        onChange={(e) => setAutoDeleteDate(new Date(e.target.value).toISOString())}
                                         className="col-span-3"
                                     />
                                 </div>
@@ -565,15 +590,41 @@ export default function ProductsTable({ params }) {
 
                                 <div className="grid gap-4">
                                     <Label htmlFor="event-webhook-url">
-                                        Webhook URL
+                                        Webhook URL *
                                     </Label>
-                                    <Input
-                                        id="event-webhook-url"
-                                        value={newEventWebhookUrl}
-                                        onChange={(e) => setNewEventWebhookUrl(e.target.value)}
-                                        className="col-span-3"
-                                        placeholder={editProduct.webhooks[0].webhook_url}
-                                    />
+                                    <Popover open={openWebhook} onOpenChange={setOpenWebhook}>
+                                        <PopoverTrigger asChild>
+                                            <Button variant="outline" className="w-full justify-between">
+                                                {newEventWebhookUrl || "Select webhook"}
+                                                <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-full p-0 h-48">
+                                            <Command>
+                                                <CommandInput placeholder="Search webhook..." className="h-9" />
+                                                <CommandList>
+                                                    <CommandEmpty>No webhook found.</CommandEmpty>
+                                                    <CommandGroup>
+                                                        {channels.sort((a, b) => a.title.localeCompare(b.title)).map((channel) => (
+                                                            <CommandItem
+                                                                key={channel.id}
+                                                                value={channel.webhook_url}
+                                                                onSelect={(currentValue) => {
+                                                                    setNewEventWebhookUrl(currentValue === newEventWebhookUrl ? "" : currentValue)
+                                                                    setOpenWebhook(false)
+                                                                }}
+                                                            >
+                                                                {channel.title}
+                                                                <CheckIcon
+                                                                    className={`ml-auto h-4 w-4 ${newEventWebhookUrl === channel.webhook_url ? "opacity-100" : "opacity-0"}`}
+                                                                />
+                                                            </CommandItem>
+                                                        ))}
+                                                    </CommandGroup>
+                                                </CommandList>
+                                            </Command>
+                                        </PopoverContent>
+                                    </Popover>
                                 </div>
                                 <div className="flex justify-between gap-2 items-center">
                                     <div className="grid gap-4 w-1/2">
@@ -591,15 +642,42 @@ export default function ProductsTable({ params }) {
                                         </Select>
                                     </div>
                                     <div className="grid gap-4">
-                                        <Label htmlFor="event-webhook-url">
-                                            Role ping
+                                        <Label htmlFor="product-webhook-url">
+                                            Role Ping
                                         </Label>
-                                        <Input
-                                            id="role-ping"
-                                            value={rolePing}
-                                            onChange={(e) => setNewRolePing(e.target.value)}
-                                            className="col-span-3"
-                                        />
+                                        <Popover open={openRole} onOpenChange={setOpenRole}>
+                                            <PopoverTrigger asChild>
+                                                <Button variant="outline" className="w-full justify-between">
+                                                    {rolePing || "Select role"}
+                                                    <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-full p-0 h-48">
+                                                <Command>
+                                                    <CommandInput placeholder="Search role..." className="h-9" />
+                                                    <CommandList>
+                                                        <CommandEmpty>No role found.</CommandEmpty>
+                                                        <CommandGroup>
+                                                            {roles.sort((a, b) => a.title.localeCompare(b.title)).map((role) => (
+                                                                <CommandItem
+                                                                    key={role.id}
+                                                                    value={role.role_id}
+                                                                    onSelect={(currentValue) => {
+                                                                        setNewRolePing(currentValue === rolePing ? "" : currentValue)
+                                                                        setOpenRole(false)
+                                                                    }}
+                                                                >
+                                                                    {role.title}
+                                                                    <CheckIcon
+                                                                        className={`ml-auto h-4 w-4 ${rolePing === role.role_id ? "opacity-100" : "opacity-0"}`}
+                                                                    />
+                                                                </CommandItem>
+                                                            ))}
+                                                        </CommandGroup>
+                                                    </CommandList>
+                                                </Command>
+                                            </PopoverContent>
+                                        </Popover>
                                     </div>
                                 </div>
                                 <div className="grid gap-4">
@@ -609,8 +687,8 @@ export default function ProductsTable({ params }) {
                                     <Input
                                         id="auto-delete-date"
                                         type="datetime-local"
-                                        value={new Date(autoDeleteDate).toISOString().slice(0, 16)} // Add this line
-                                        onChange={(e) => setAutoDeleteDate(e.target.value)}
+                                        value={autoDeleteDate ? new Date(autoDeleteDate).toISOString().slice(0, 16) : ''}
+                                        onChange={(e) => setAutoDeleteDate(new Date(e.target.value).toISOString())}
                                         className="col-span-3"
                                         placeholder={editProduct.autodelete_event}
                                     />
