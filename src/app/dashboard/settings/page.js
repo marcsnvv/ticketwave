@@ -271,8 +271,13 @@ export default function Settings() {
         }
     }
 
-    const filteredRoles = roles.filter(role => role.title.toLowerCase().includes(roleSearch.toLowerCase()))
-    const filteredChannels = channels.filter(channel => channel.title.toLowerCase().includes(channelSearch.toLowerCase()))
+    const filteredRoles = roles
+        .filter(role => role.title.toLowerCase().includes(roleSearch.toLowerCase()))
+        .sort((a, b) => a.title.localeCompare(b.title))
+
+    const filteredChannels = channels
+        .filter(channel => channel.title.toLowerCase().includes(channelSearch.toLowerCase()))
+        .sort((a, b) => a.title.localeCompare(b.title))
 
     return (
         <main className='flex items-center justify-center mx-48 p-5'>
