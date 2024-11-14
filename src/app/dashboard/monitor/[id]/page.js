@@ -153,11 +153,11 @@ export default function ProductsTable({ params }) {
         setError("")
 
         // Validación de URL
-        if (newUrl && !newUrl.startsWith(`https://${monitorName}`)) {
-            setError("The URL must start with 'https://' and contain the monitor name.");
-            setLoading(false);
-            return;
-        }
+        // if (newUrl && !newUrl.startsWith(`https://${monitorName}`)) {
+        //     setError("The URL must start with 'https://' and contain the monitor name.");
+        //     setLoading(false)
+        //     return
+        // }
 
         // Validación de Webhook URL
         if (newWebhookUrl && !newWebhookUrl.startsWith("https://discord.com/api")) {
