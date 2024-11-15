@@ -1,11 +1,12 @@
 "use client"
 
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../../supabase'
 import Image from 'next/image'
 import Link from 'next/link'
+import { ListBulletIcon, MixerHorizontalIcon, ExitIcon } from "@radix-ui/react-icons"
 
 export default function Navbar() {
     const router = useRouter()
@@ -26,9 +27,22 @@ export default function Navbar() {
                         </Avatar>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem onSelect={() => router.push("/dashboard")} >Monitors</DropdownMenuItem>
-                        <DropdownMenuItem onSelect={() => router.push("/dashboard/settings")}>Settings</DropdownMenuItem>
-                        <DropdownMenuItem onSelect={() => supabase.auth.signOut()}>Logout</DropdownMenuItem>
+                        <DropdownMenuLabel
+                        >
+                            TicketWave
+                        </DropdownMenuLabel>
+                        <DropdownMenuItem onSelect={() => router.push("/dashboard")} >
+                            <ListBulletIcon className="w-4 h-4 mr-2" />
+                            Monitors
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => router.push("/dashboard/settings")}>
+                            <MixerHorizontalIcon className="w-4 h-4 mr-2" />
+                            Settings
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => supabase.auth.signOut()}>
+                            <ExitIcon className="w-4 h-4 mr-2" />
+                            Logout
+                        </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>

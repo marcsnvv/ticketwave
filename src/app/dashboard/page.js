@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/table'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import { DotsHorizontalIcon, CaretSortIcon, CheckIcon, MagnifyingGlassIcon } from '@radix-ui/react-icons'
+import { DotsHorizontalIcon, CaretSortIcon, CheckIcon, MagnifyingGlassIcon, TargetIcon, MixerHorizontalIcon, TrashIcon } from '@radix-ui/react-icons'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
@@ -26,6 +26,7 @@ import {
 import { supabase } from '../../../supabase'
 import { cn } from "@/lib/utils"
 import { useRouter } from 'next/navigation'
+import { Badge } from "@/components/ui/badge"
 
 const websites = [
     { "value": "viagogo.com", "label": "Viagogo.com" },
@@ -55,7 +56,6 @@ export default function MonitorsTable() {
     const router = useRouter()
 
     const [monitors, setMonitors] = useState([])
-    const [dialogOpen, setDialogOpen] = useState(false)
     const [editDialogOpen, setEditDialogOpen] = useState(false)
     const [selectedMonitor, setSelectedMonitor] = useState(null)
     const [selectedWebsite, setSelectedWebsite] = useState("")
@@ -154,7 +154,6 @@ export default function MonitorsTable() {
             console.error('Error:', error)
         } finally {
             setLoading(false)
-            setDialogOpen(false)
         }
     }
 
@@ -237,7 +236,7 @@ export default function MonitorsTable() {
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="lg:w-96 w-52 pl-9" // Added left padding to make room for icon
                     />
-                    <Button onClick={() => setDialogOpen(true)}>Add Website</Button>
+                    <Button onClick={() => setEditDialogOpen(true)}>Add Website</Button>
                 </div>
 
                 {/* Add search input */}
@@ -256,16 +255,20 @@ export default function MonitorsTable() {
                                 filteredMonitors.map((monitor) => (
                                     <TableRow key={monitor.id}>
                                         <TableCell>
+                                            {/* Mostrar el nombre del monitor con un enlace a la página de monitoreo */}
                                             <a
                                                 href={`/dashboard/monitor/${monitor.id}`}
-                                                className="text-blue-500 underline"
+                                                className="flex items-center space-x-2 uppercase"
                                             >
+                                                <TargetIcon className="h-4 w-4 mr-2" />
                                                 {monitor.name}
                                             </a>
                                         </TableCell>
                                         <TableCell>
                                             {/* Mostrar el número total de productos monitoreados */}
-                                            {monitor.totalProducts} events
+                                            <Badge variant={
+                                                monitor.totalProducts > 0 ? "primary" : "destructive"
+                                            }>{monitor.totalProducts} events</Badge>
                                         </TableCell>
                                         <TableCell>
                                             <DropdownMenu>
@@ -276,9 +279,11 @@ export default function MonitorsTable() {
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
                                                     <DropdownMenuItem onClick={() => handleEditMonitor(monitor)}>
+                                                        <MixerHorizontalIcon className="h-4 w-4 mr-2" />
                                                         Edit Monitor
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem onClick={() => handleDeleteMonitor(monitor.id)}>
+                                                        <TrashIcon className="h-4 w-4 mr-2" />
                                                         Delete Monitor
                                                     </DropdownMenuItem>
                                                 </DropdownMenuContent>
@@ -297,75 +302,8 @@ export default function MonitorsTable() {
                     </Table>
                 </div>
 
-                {/* Dialogo para agregar un nuevo monitor */}
-                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>Add Website Monitor</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4">
-                            {/* Combobox de selección de website */}
-                            <Popover open={open} onOpenChange={setOpen}>
-                                <PopoverTrigger asChild>
-                                    <Button
-                                        variant="outline"
-                                        role="combobox"
-                                        aria-expanded={open}
-                                        className="w-full justify-between"
-                                    >
-                                        {selectedWebsite
-                                            ? websites.find((site) => site.value === selectedWebsite)?.label
-                                            : "Select website..."}
-                                        <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-full p-0">
-                                    <Command>
-                                        <CommandInput placeholder="Search website..." className="h-9" />
-                                        <CommandList>
-                                            <CommandEmpty>No website found.</CommandEmpty>
-                                            <CommandGroup>
-                                                {websites.map((site) => (
-                                                    <CommandItem
-                                                        key={site.value}
-                                                        value={site.value}
-                                                        onSelect={(currentValue) => {
-                                                            setSelectedWebsite(currentValue === selectedWebsite ? "" : currentValue)
-                                                            setOpen(false)
-                                                        }}
-                                                    >
-                                                        {site.label}
-                                                        <CheckIcon
-                                                            className={cn(
-                                                                "ml-auto h-4 w-4",
-                                                                selectedWebsite === site.value ? "opacity-100" : "opacity-0"
-                                                            )}
-                                                        />
-                                                    </CommandItem>
-                                                ))}
-                                            </CommandGroup>
-                                        </CommandList>
-                                    </Command>
-                                </PopoverContent>
-                            </Popover>
-
-                            <Input
-                                type="text"
-                                placeholder="https://discord.com/api/webhooks/"
-                                value={webhook}
-                                onChange={(e) => setWebhook(e.target.value)}
-                            />
-                        </div>
-                        <DialogFooter>
-                            <Button onClick={handleAddMonitor} disabled={loading}>
-                                {loading ? "Saving..." : "Save Monitor"}
-                            </Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
-
                 {/* Dialogo para editar un monitor */}
-                <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+                <Dialog id="edit-monitor" open={editDialogOpen} onOpenChange={setEditDialogOpen}>
                     <DialogContent>
                         <DialogHeader>
                             <DialogTitle>Edit Monitor</DialogTitle>
