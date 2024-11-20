@@ -239,9 +239,10 @@ export default function ProductsTable({ params }) {
         }
 
         // Validación de URL
-        if (!newEventUrl.startsWith(`https://${monitorName}`) && !newEventUrl.startsWith(`https://www.${monitorName}`)) {
-            setError(`The URL must start with 'https://${monitorName}' or 'https://www.${monitorName}'.`);
-            return;
+        if (newUrl && !newUrl.includes(monitorName)) {
+            setError("The URL must start with 'https://' and contain the monitor name.");
+            setLoading(false)
+            return
         }
 
         // Validación de Webhook URL
