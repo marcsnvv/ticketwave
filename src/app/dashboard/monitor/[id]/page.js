@@ -500,6 +500,7 @@ export default function ProductsTable({ params }) {
                     setResell={setResell}
                     handleAddEvent={handleAddEvent}
                     error={error}
+                    monitorType={monitorName}
                 />
 
 
