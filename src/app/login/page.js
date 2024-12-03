@@ -13,16 +13,31 @@ export default function Login() {
     const [email, setEmail] = useState('');
     const [error, setError] = useState('');
 
-    const emailList = [
-        "busines1244@gmail.com",
-        "marcsnvv@gmail.com",
-        "vaskotomas6@gmail.com",
-        "jozi71mut@seznam.cz",
-        "timotej.liskay@gmail.com",
-    ]
+    const checkUserEmail = async (email) => {
+        const { data, error } = await supabase
+            .from('users')
+            .select('email, company_id')
+            .eq('email', email)
+
+        if (error) {
+            console.error('Error checking email:', error.message);
+            return false;
+        }
+
+        if (data.length === 0) {
+            return false
+        } else {
+            // Setea el company_id en el local storage
+            localStorage.setItem('company_id', data[0].company_id);
+            return true
+        }
+
+    };
 
     const handleLogin = async () => {
-        if (emailList.includes(email)) {
+        const userExists = await checkUserEmail(email);
+
+        if (userExists) {
             const { error } = await supabase.auth.signInWithOtp({ email });
             if (error) {
                 setError(error.message);
@@ -30,7 +45,7 @@ export default function Login() {
                 alert('Check your email for the login link!');
             }
         } else {
-            setError('Access denied');
+            setError('Access denied - Email not authorized');
         }
     };
 

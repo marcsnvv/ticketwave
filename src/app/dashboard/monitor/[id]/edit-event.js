@@ -126,7 +126,7 @@ export default function EditEventDialog({
                                                         >
                                                             {channel.title}
                                                             <CheckIcon
-                                                                className={`ml-auto h-4 w-4 ${newEventWebhookUrl === channel.webhook_url ? "opacity-100" : "opacity-0"}`}
+                                                                className={`ml-auto h-4 w-4 ${newEventWebhookUrl === channel.id ? "opacity-100" : "opacity-0"}`}
                                                             />
                                                         </CommandItem>
                                                     ))}

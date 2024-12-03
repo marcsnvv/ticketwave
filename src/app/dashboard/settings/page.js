@@ -280,7 +280,7 @@ export default function Settings() {
         .sort((a, b) => a.title.localeCompare(b.title))
 
     return (
-        <main className='flex items-center justify-center mx-48 p-5'>
+        <main className='flex items-center justify-center lg:mx-48 p-5'>
             <div className="container mx-auto">
                 <div className="space-y-8 mb-8 ">
                     {/* Roles Section */}

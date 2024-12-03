@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CheckIcon, ChevronDownIcon, CalendarIcon } from "@radix-ui/react-icons";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils"
 import Image from "next/image"
 
@@ -46,6 +46,22 @@ export default function AddEvent({
     const [roleTitle, setRoleTitle] = useState("Select role")
     const [searchResults, setSearchResults] = useState([])
     const [isSearching, setIsSearching] = useState(false)
+    const [availableChannels, setAvailableChannels] = useState([]);
+
+    useEffect(() => {
+        const fetchChannels = async () => {
+            try {
+                const companyId = localStorage.getItem('company_id');
+                const response = await fetch(`/api/channels?company_id=${companyId}`);
+                const data = await response.json();
+                setAvailableChannels(data);
+            } catch (error) {
+                console.error('Error fetching channels:', error);
+            }
+        };
+
+        fetchChannels();
+    }, []);
 
     const searchEventim = async (searchTerm) => {
         if (!searchTerm || searchTerm.length < 3) {
@@ -138,7 +154,7 @@ export default function AddEvent({
                                                 className="col-span-3"
                                             />
                                             {searchResults.length > 0 && (
-                                                <div className="absolute w-full mt-1 bg-black rounded-md border shadow-lg max-h-96 overflow-auto z-50">
+                                                <div className="absolute w-full mt-1 bg-background rounded-md border shadow-lg max-h-96 overflow-auto z-50">
                                                     {searchResults.map((event) => (
                                                         <div
                                                             key={monitorType.includes('ticketmaster') ? event.id : event.productGroupId}
@@ -211,41 +227,25 @@ export default function AddEvent({
                                 <Label htmlFor="event-webhook-url">
                                     Webhook URL *
                                 </Label>
-                                <Popover open={openWebhook} onOpenChange={setOpenWebhook}>
-                                    <PopoverTrigger asChild>
-                                        <Button variant="outline" className="w-full justify-between">
-                                            {webhookTitle}
-                                            <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-full p-0 h-48">
-                                        <Command>
-                                            <CommandInput placeholder="Search webhook..." className="h-9" />
-                                            <CommandList>
-                                                <CommandEmpty>No webhook found.</CommandEmpty>
-                                                <CommandGroup>
-                                                    {channels.sort((a, b) => a.title.localeCompare(b.title)).map((channel) => (
-                                                        <CommandItem
-                                                            key={channel.id}
-                                                            value={channel.title}
-                                                            onSelect={() => {
-                                                                const webhookValue = newEventWebhookUrl === channel.webhook_url ? "" : channel.webhook_url
-                                                                setNewEventWebhookUrl(webhookValue)
-                                                                setWebhookTitle(channel.title)
-                                                                setOpenWebhook(false)
-                                                            }}
-                                                        >
-                                                            {channel.title}
-                                                            <CheckIcon
-                                                                className={`ml-auto h-4 w-4 ${newEventWebhookUrl === channel.webhook_url ? "opacity-100" : "opacity-0"}`}
-                                                            />
-                                                        </CommandItem>
-                                                    ))}
-                                                </CommandGroup>
-                                            </CommandList>
-                                        </Command>
-                                    </PopoverContent>
-                                </Popover>
+                                <Select
+                                    value={newEventWebhookUrl}
+                                    onValueChange={(value) => {
+                                        setNewEventWebhookUrl(value);
+                                        const selectedChannel = availableChannels.find(ch => ch.id === value);
+                                        setWebhookTitle(selectedChannel?.title || "Select webhook");
+                                    }}
+                                >
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Select webhook" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {availableChannels.map((channel) => (
+                                            <SelectItem key={channel.id} value={channel.id}>
+                                                {channel.title}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
                             <div className="flex justify-between gap-2 items-center">
                                 <div className="grid gap-4 w-1/2">

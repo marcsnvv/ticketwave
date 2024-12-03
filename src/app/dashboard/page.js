@@ -65,20 +65,29 @@ export default function MonitorsTable() {
     const [open, setOpen] = useState(false)
     const [searchTerm, setSearchTerm] = useState("")
     const [addDialogOpen, setAddDialogOpen] = useState(false) // Agregar este nuevo estado
+    const [sortColumn, setSortColumn] = useState(null)
+    const [sortDirection, setSortDirection] = useState('asc')
 
-    const fetchTotalProducts = async (monitorId) => {
-        const { data, error } = await supabase
-            .from('products')
-            .select('id')
-            .eq('monitor_id', monitorId)
+    const fetchTotalProducts = async ({ monitorId, companyId }) => {
+        try {
+            const { data, error } = await supabase
+                .from('products')
+                .select('id')
+                .eq('monitor_id', monitorId)
+                .eq('company_id', companyId)
 
-        if (error) {
-            console.error('Error fetching products:', error)
-            return 0
+            if (error) {
+                console.error('Error fetching products:', error.message);
+                return 0;
+            }
+
+            return data.length; // Devuelve el número de productos
+        } catch (err) {
+            console.error('Unexpected error fetching products:', err);
+            return 0;
         }
+    };
 
-        return data.length
-    }
 
     useEffect(() => {
         async function fetchMonitors() {
@@ -86,9 +95,18 @@ export default function MonitorsTable() {
             if (!session) {
                 router.push("/login")
             }
+
+            const company_id = localStorage.getItem('company_id')
+
+            if (!company_id) {
+                console.error('Company ID not found.')
+                return
+            }
+
             const { data, error } = await supabase
                 .from('monitors')
                 .select('*')
+                .eq('company_id', company_id)
 
             if (error) {
                 console.error('Error fetching monitors:', error)
@@ -97,7 +115,7 @@ export default function MonitorsTable() {
 
             const monitorsWithProducts = await Promise.all(
                 data.map(async (monitor) => {
-                    const totalProducts = await fetchTotalProducts(monitor.id)
+                    const totalProducts = await fetchTotalProducts({ monitorId: monitor.id, companyId: company_id })
                     return { ...monitor, totalProducts }
                 })
             )
@@ -219,12 +237,39 @@ export default function MonitorsTable() {
         }
     }
 
+    const handleSort = (column) => {
+        if (sortColumn === column) {
+            setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+        } else {
+            setSortColumn(column)
+            setSortDirection('asc')
+        }
+    }
+
+    const getSortedMonitors = () => {
+        if (!sortColumn) return filteredMonitors
+
+        return [...filteredMonitors].sort((a, b) => {
+            if (sortColumn === 'website') {
+                return sortDirection === 'asc'
+                    ? a.name.localeCompare(b.name)
+                    : b.name.localeCompare(a.name)
+            }
+            if (sortColumn === 'monitoring') {
+                return sortDirection === 'asc'
+                    ? a.totalProducts - b.totalProducts
+                    : b.totalProducts - a.totalProducts
+            }
+            return 0
+        })
+    }
+
     const filteredMonitors = monitors.filter(monitor =>
         monitor.name.toLowerCase().includes(searchTerm.toLowerCase())
     )
 
     return (
-        <main className='flex items-center justify-center mx-48 p-5'>
+        <main className='flex items-center justify-center lg:mx-48 p-5'>
             <div className="w-full">
                 <div className="flex justify-between mb-4">
                     <MagnifyingGlassIcon className="absolute mt-2 ml-2 text-white h-5 w-5" />
@@ -244,19 +289,29 @@ export default function MonitorsTable() {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Website</TableHead>
-                                <TableHead>Monitoring</TableHead>
+                                <TableHead
+                                    className="cursor-pointer"
+                                    onClick={() => handleSort('website')}
+                                >
+                                    Website {sortColumn === 'website' && (sortDirection === 'asc' ? '↑' : '↓')}
+                                </TableHead>
+                                <TableHead
+                                    className="cursor-pointer"
+                                    onClick={() => handleSort('monitoring')}
+                                >
+                                    Monitoring {sortColumn === 'monitoring' && (sortDirection === 'asc' ? '↑' : '↓')}
+                                </TableHead>
                                 <TableHead>Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {filteredMonitors.length ? (
-                                filteredMonitors.map((monitor) => (
+                            {getSortedMonitors().length ? (
+                                getSortedMonitors().map((monitor) => (
                                     <TableRow key={monitor.id}>
                                         <TableCell>
                                             {/* Mostrar el nombre del monitor con un enlace a la página de monitoreo */}
                                             <a
-                                                href={`/dashboard/monitor/${monitor.id}`}
+                                                href={`/dashboard/monitor/${monitor.name}`}
                                                 className="flex items-center space-x-2 uppercase"
                                             >
                                                 <TargetIcon className="h-4 w-4 mr-2" />

@@ -42,7 +42,7 @@ import EditEventDialog from './edit-event'
 export default function ProductsTable({ params }) {
     const router = useRouter()
 
-    const id = params.id
+    const label = params.id // Ahora params.id contiene el label
     const [products, setProducts] = useState([])
     const [editProduct, setEditProduct] = useState(null)
     const [newName, setNewName] = useState("")
@@ -51,7 +51,7 @@ export default function ProductsTable({ params }) {
     const [newEvent, setNewEvent] = useState(false)
     const [newEventName, setNewEventName] = useState("")
     const [newEventUrl, setNewEventUrl] = useState("")
-    const [newEventWebhookUrl, setNewEventWebhookUrl] = useState("") // Nuevo estado para el webhook del evento
+    const [newEventChannelId, setNewEventChannelId] = useState("") // Nuevo estado para el webhook del evento
     const [resell, setResell] = useState(false)
     const [rolePing, setNewRolePing] = useState("")
     const [loading, setLoading] = useState(false) // Estado para el spinner de carga
@@ -69,50 +69,53 @@ export default function ProductsTable({ params }) {
 
     // Cargar productos asociados a un monitor específico
     useEffect(() => {
-        if (id) {
+        if (label) {
             async function fetchProducts() {
                 const { data: { session } } = await supabase.auth.getSession()
                 if (!session) {
                     router("/login")
                 }
 
+                // Primero obtener el monitor por label
+                const { data: monitorData, error: monitorError } = await supabase
+                    .from('monitors')
+                    .select('id, name')
+                    .eq('name', label)
+
+                if (monitorError) {
+                    console.error('Error fetching monitor:', monitorError)
+                    return
+                }
+
+
+                // Luego obtener los productos usando el id del monitor
                 const { data, error } = await supabase
                     .from('products')
-                    .select('*, webhooks(webhook_url), monitors(name)')
-                    .eq('monitor_id', id)
+                    .select('*, channels(title,webhook_url), monitors(name)')
+                    .eq('monitor_id', monitorData[0].id)
 
                 if (error) {
                     console.error('Error fetching products:', error)
                 } else {
                     setProducts(data)
-
-                    if (!data.length > 0) {
-                        const { data: monitorNameData } = await supabase
-                            .from('monitors')
-                            .select('name')
-                            .eq('id', id)
-
-                        setMonitorName(monitorNameData[0].name)
-
-                    } else {
-                        setMonitorName(data[0]?.monitors?.name)
-                    }
+                    console.log(data)
+                    setMonitorName(monitorData[0].name)
                 }
             }
             fetchProducts()
         }
-    }, [id])
+    }, [label])
 
     // Add this to your existing useEffect or create a new one
-    useEffect(() => {
-        const fetchData = async () => {
-            const { data: rolesData } = await supabase.from('roles').select('*')
-            const { data: channelsData } = await supabase.from('channels').select('*')
-            setRoles(rolesData || [])
-            setChannels(channelsData || [])
-        }
-        fetchData()
-    }, [])
+    // useEffect(() => {
+    //     const fetchData = async () => {
+    //         const { data: rolesData } = await supabase.from('roles').select('*')
+    //         const { data: channelsData } = await supabase.from('channels').select('*')
+    //         setRoles(rolesData || [])
+    //         setChannels(channelsData || [])
+    //     }
+    //     fetchData()
+    // }, [])
 
     // Agrupar productos por nombre
     const groupedProducts = products.reduce((acc, product) => {
@@ -223,6 +226,17 @@ export default function ProductsTable({ params }) {
     const handleAddEvent = async () => {
         setError("")
 
+        // Obtener el id del monitor usando el label
+        const { data: monitorData, error: monitorError } = await supabase
+            .from('monitors')
+            .select('id')
+            .eq('name', label)
+
+        if (monitorError) {
+            console.error('Error fetching monitor:', monitorError)
+            return
+        }
+
         if (monitorName === "" || !monitorName) {
             // Haz una petición a la base de datos para obtener el nombre del monitor
             const { data: monitorData, error: monitorError } = await supabase
@@ -246,7 +260,7 @@ export default function ProductsTable({ params }) {
         }
 
         // Validación de Webhook URL
-        if (!newEventWebhookUrl.startsWith("https://discord.com/api")) {
+        if (!newEventChannelId.startsWith("https://discord.com/api")) {
             setError("The Webhook URL must start with 'https://discord.com/api'.");
             return;
         }
@@ -269,23 +283,20 @@ export default function ProductsTable({ params }) {
             .insert([{
                 name: newEventName,
                 url: newEventUrl,
-                monitor_id: id,
+                monitor_id: monitorData.id, // Usar el id obtenido del monitor
                 max_price: newEventMaxPrice,
                 role_ping: rolePing,
                 resell: resell,
-                autodelete_event: autoDeleteDate
+                autodelete_event: autoDeleteDate,
+                channel: newEventChannelId
             }])
             .select('id')
 
         if (!productError && productData.length > 0) {
             const product_id = productData[0].id;
-            const { error: webhookError } = await supabase
-                .from('webhooks')
-                .insert([{ webhook_url: newEventWebhookUrl, monitor_id: id, product_id }]);
 
-            if (webhookError) {
-                console.error('Error adding webhook:', webhookError);
-            }
+            // 
+
         }
 
         if (productError) {
@@ -297,14 +308,14 @@ export default function ProductsTable({ params }) {
                 max_price: newEventMaxPrice,
                 role_ping: rolePing,
                 resell: resell,
-                webhooks: [{ webhook_url: newEventWebhookUrl }],
+                channel: newEventChannelId,
                 monitor_id: id,
                 autodelete_event: autoDeleteDate
             }])
             setNewEvent(false) // Cerrar el diálogo
             setNewEventName('') // Resetear el nombre
             setNewEventUrl('') // Resetear la URL
-            setNewEventWebhookUrl('') // Resetear la URL del webhook
+            setNewEventChannelId('') // Resetear la URL del webhook
         }
     }
 
@@ -313,7 +324,7 @@ export default function ProductsTable({ params }) {
     )
 
     return (
-        <main className='flex items-center justify-center mx-48 p-5'>
+        <main className='flex items-center justify-center lg:mx-48 p-5'>
             <div className="w-full">
                 {/* Sección para añadir nuevos eventos */}
                 <div className="flex justify-between mb-4">
@@ -348,7 +359,7 @@ export default function ProductsTable({ params }) {
                         </TableHeader>
                         <TableBody>
                             {filteredProducts.length ? (
-                                filteredProducts.map((group) => (
+                                filteredProducts?.map((group) => (
                                     <>
                                         <TableRow key={group.name} className="cursor-pointer" onClick={() => handleToggleExpand(group.name)}>
                                             <TableCell>
@@ -381,19 +392,21 @@ export default function ProductsTable({ params }) {
                                                         </a>
                                                     </TableCell>
                                                     <TableCell>
-                                                        {product.webhooks.map((webhook, index) => (
-                                                            <div key={index}>
+                                                        {
+                                                            product.channels ? (
                                                                 <a
-                                                                    href={webhook.webhook_url}
-                                                                    className="text-blue-500 underline flex items-center gap-1"
+                                                                    href={product.channels?.webhook_url}
+                                                                    className="text-blue-500 hover:underline flex items-center gap-1"
                                                                     target="_blank"
                                                                     rel="noopener noreferrer"
                                                                 >
                                                                     <DiscordLogoIcon className="w-4 h-4 mr-1" />
-                                                                    {webhook.webhook_url.slice(0, 25)}...
+                                                                    {product.channels?.title}
                                                                 </a>
-                                                            </div>
-                                                        ))}
+                                                            ) : (
+                                                                "--"
+                                                            )
+                                                        }
                                                     </TableCell>
                                                     <TableCell>
                                                         <Badge
@@ -457,8 +470,8 @@ export default function ProductsTable({ params }) {
                     setNewEventMaxPrice={setNewEventMaxPrice}
                     newEventUrl={newEventUrl}
                     setNewEventUrl={setNewEventUrl}
-                    newEventWebhookUrl={newEventWebhookUrl}
-                    setNewEventWebhookUrl={setNewEventWebhookUrl}
+                    newEventChannelId={newEventChannelId}
+                    setNewEventChannelId={setNewEventChannelId}
                     openWebhook={openWebhook}
                     setOpenWebhook={setOpenWebhook}
                     openRole={openRole}
@@ -484,8 +497,8 @@ export default function ProductsTable({ params }) {
                     setNewEventMaxPrice={setNewEventMaxPrice}
                     newEventUrl={newEventUrl}
                     setNewEventUrl={setNewEventUrl}
-                    newEventWebhookUrl={newEventWebhookUrl}
-                    setNewEventWebhookUrl={setNewEventWebhookUrl}
+                    newEventChannelId={newEventChannelId}
+                    setNewEventChannelId={setNewEventChannelId}
                     openWebhook={openWebhook}
                     setOpenWebhook={setOpenWebhook}
                     openRole={openRole}

@@ -12,7 +12,7 @@ export default function Navbar() {
     const router = useRouter()
 
     return (
-        <div className="flex items-center justify-between p-5 text-white mx-48">
+        <div className="flex items-center justify-between p-5 text-white lg:mx-48">
             <div className="flex items-center">
                 <Link href={"/"}>
                     <Image src="/logo.png" alt="Logo" width={35} height={35} />
