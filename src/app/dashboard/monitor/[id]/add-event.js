@@ -84,11 +84,19 @@ export default function AddEvent({
 
     const handleEventSelect = (event) => {
         setNewEventName(event.name)
-        setNewEventUrl(event.url)
-        // Si hay rangos de precios disponibles, usar el máximo
-        if (event.priceRanges?.[0]) {
-            setNewEventMaxPrice(event.priceRanges[0].max)
+
+        // Manejar URLs según el tipo de monitor
+        if (monitorType.includes('ticketmaster')) {
+            setNewEventUrl(event.url)
+            // Si hay rangos de precios disponibles, usar el máximo
+            if (event.priceRanges?.[0]) {
+                setNewEventMaxPrice(event.priceRanges[0].max)
+            }
+        } else if (monitorType === 'eventim.de') {
+            // Para Eventim, construir la URL usando el productUrl del evento
+            setNewEventUrl(event.link)
         }
+
         setSearchResults([])
     }
 
