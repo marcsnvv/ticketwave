@@ -64,6 +64,7 @@ export default function MonitorsTable() {
     const [loading, setLoading] = useState(false)
     const [open, setOpen] = useState(false)
     const [searchTerm, setSearchTerm] = useState("")
+    const [addDialogOpen, setAddDialogOpen] = useState(false) // Agregar este nuevo estado
 
     const fetchTotalProducts = async (monitorId) => {
         const { data, error } = await supabase
@@ -234,7 +235,7 @@ export default function MonitorsTable() {
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="lg:w-96 w-52 pl-9" // Added left padding to make room for icon
                     />
-                    <Button onClick={() => setEditDialogOpen(true)}>Add Website</Button>
+                    <Button onClick={() => setAddDialogOpen(true)}>Add Website</Button>
                 </div>
 
                 {/* Add search input */}
@@ -299,6 +300,72 @@ export default function MonitorsTable() {
                         </TableBody>
                     </Table>
                 </div>
+
+                {/* Dialog para agregar un nuevo monitor */}
+                <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Add New Monitor</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                            <Popover open={open} onOpenChange={setOpen}>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        role="combobox"
+                                        aria-expanded={open}
+                                        className="w-full justify-between"
+                                    >
+                                        {selectedWebsite
+                                            ? websites.find((site) => site.value === selectedWebsite)?.label
+                                            : "Select website..."}
+                                        <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-full p-0">
+                                    <Command>
+                                        <CommandInput placeholder="Search website..." className="h-9" />
+                                        <CommandList>
+                                            <CommandEmpty>No website found.</CommandEmpty>
+                                            <CommandGroup>
+                                                {websites.map((site) => (
+                                                    <CommandItem
+                                                        key={site.value}
+                                                        value={site.value}
+                                                        onSelect={(currentValue) => {
+                                                            setSelectedWebsite(currentValue === selectedWebsite ? "" : currentValue)
+                                                            setOpen(false)
+                                                        }}
+                                                    >
+                                                        {site.label}
+                                                        <CheckIcon
+                                                            className={cn(
+                                                                "ml-auto h-4 w-4",
+                                                                selectedWebsite === site.value ? "opacity-100" : "opacity-0"
+                                                            )}
+                                                        />
+                                                    </CommandItem>
+                                                ))}
+                                            </CommandGroup>
+                                        </CommandList>
+                                    </Command>
+                                </PopoverContent>
+                            </Popover>
+
+                            <Input
+                                type="text"
+                                placeholder="Enter webhook URL"
+                                value={webhook}
+                                onChange={(e) => setWebhook(e.target.value)}
+                            />
+                        </div>
+                        <DialogFooter>
+                            <Button onClick={handleAddMonitor} disabled={loading}>
+                                {loading ? "Adding..." : "Add Monitor"}
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
 
                 {/* Dialogo para editar un monitor */}
                 <Dialog id="edit-monitor" open={editDialogOpen} onOpenChange={setEditDialogOpen}>
@@ -367,6 +434,7 @@ export default function MonitorsTable() {
                     </DialogContent>
                 </Dialog>
             </div>
+
         </main>
     )
 }
