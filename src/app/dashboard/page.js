@@ -65,7 +65,6 @@ export default function MonitorsTable() {
     const [open, setOpen] = useState(false)
     const [searchTerm, setSearchTerm] = useState("")
 
-    // Función para obtener el número de productos monitoreados
     const fetchTotalProducts = async (monitorId) => {
         const { data, error } = await supabase
             .from('products')
@@ -80,7 +79,6 @@ export default function MonitorsTable() {
         return data.length
     }
 
-    // Cargar los monitores desde Supabase y el número de productos monitoreados
     useEffect(() => {
         async function fetchMonitors() {
             const { data: { session } } = await supabase.auth.getSession()
@@ -96,7 +94,6 @@ export default function MonitorsTable() {
                 return
             }
 
-            // Obtener el número de productos monitoreados para cada monitor
             const monitorsWithProducts = await Promise.all(
                 data.map(async (monitor) => {
                     const totalProducts = await fetchTotalProducts(monitor.id)
