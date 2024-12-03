@@ -50,6 +50,8 @@ const websites = [
     { "value": "axs.com", "label": "Axs.com" },
     { "value": "queue.ticketmaster.com", "label": "TM Queue" },
     { "value": "ticketportal.cz", "label": "Ticketportal.cz" },
+    { "value": "eventim.de", "label": "Eventim.de" },
+    { "value": "ticketone.it", "label": "Ticketone.it" },
 ]
 
 export default function MonitorsTable() {
