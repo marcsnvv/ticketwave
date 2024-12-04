@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CheckIcon, ChevronDownIcon, CalendarIcon } from "@radix-ui/react-icons";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function EditEventDialog({
     editProduct,
@@ -21,8 +21,8 @@ export default function EditEventDialog({
     setNewEventMaxPrice,
     newEventUrl,
     setNewEventUrl,
-    newEventWebhookUrl,
-    setNewEventWebhookUrl,
+    newEventChannelId,
+    setNewEventChannelId,
     openWebhook,
     setOpenWebhook,
     openRole,
@@ -41,6 +41,18 @@ export default function EditEventDialog({
     const [openCalendar, setOpenCalendar] = useState(false)
     const [webhookTitle, setWebhookTitle] = useState("Select webhook")
     const [roleTitle, setRoleTitle] = useState("Select role")
+
+    useEffect(() => {
+        if (editProduct) {
+            // Actualizar los títulos cuando se abre el diálogo
+            if (editProduct.channels) {
+                setWebhookTitle(editProduct.channels.title)
+            }
+            if (editProduct.roles) {
+                setRoleTitle(editProduct.roles.title)
+            }
+        }
+    }, [editProduct])
 
     return (
         <>
@@ -105,7 +117,9 @@ export default function EditEventDialog({
                                 <Popover open={openWebhook} onOpenChange={setOpenWebhook}>
                                     <PopoverTrigger asChild>
                                         <Button variant="outline" className="w-full justify-between">
-                                            {newEventWebhookUrl || "Select webhook"}
+                                            {channels.find(ch => ch.id === newEventChannelId)?.title ||
+                                                editProduct?.channels?.title ||
+                                                "Select webhook"}
                                             <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                         </Button>
                                     </PopoverTrigger>
@@ -119,14 +133,14 @@ export default function EditEventDialog({
                                                         <CommandItem
                                                             key={channel.id}
                                                             value={channel.title}
-                                                            onSelect={(currentValue) => {
-                                                                setNewEventWebhookUrl(currentValue === newEventWebhookUrl ? "" : currentValue)
+                                                            onSelect={() => {
+                                                                setNewEventChannelId(channel.id)
                                                                 setOpenWebhook(false)
                                                             }}
                                                         >
                                                             {channel.title}
                                                             <CheckIcon
-                                                                className={`ml-auto h-4 w-4 ${newEventWebhookUrl === channel.id ? "opacity-100" : "opacity-0"}`}
+                                                                className={`ml-auto h-4 w-4 ${newEventChannelId === channel.id ? "opacity-100" : "opacity-0"}`}
                                                             />
                                                         </CommandItem>
                                                     ))}
@@ -157,12 +171,14 @@ export default function EditEventDialog({
                                     </Label>
                                     <Popover open={openRole} onOpenChange={setOpenRole}>
                                         <PopoverTrigger asChild>
-                                            <Button variant="outline" className="w-full justify-between">
-                                                {rolePing || "Select role"}
+                                            <Button variant="outline" className="justify-between">
+                                                {roles.find(r => r.id === rolePing)?.title ||
+                                                    editProduct?.roles?.title ||
+                                                    "Select role"}
                                                 <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                             </Button>
                                         </PopoverTrigger>
-                                        <PopoverContent className="w-full p-0 h-48">
+                                        <PopoverContent className="p-0 h-48">
                                             <Command>
                                                 <CommandInput placeholder="Search role..." className="h-9" />
                                                 <CommandList>
@@ -172,14 +188,14 @@ export default function EditEventDialog({
                                                             <CommandItem
                                                                 key={role.id}
                                                                 value={role.title}
-                                                                onSelect={(currentValue) => {
-                                                                    setNewRolePing(currentValue === rolePing ? "" : currentValue)
+                                                                onSelect={() => {
+                                                                    setNewRolePing(role.id)
                                                                     setOpenRole(false)
                                                                 }}
                                                             >
                                                                 {role.title}
                                                                 <CheckIcon
-                                                                    className={`ml-auto h-4 w-4 ${rolePing === role.role_id ? "opacity-100" : "opacity-0"}`}
+                                                                    className={`ml-auto h-4 w-4 ${rolePing === role.id ? "opacity-100" : "opacity-0"}`}
                                                                 />
                                                             </CommandItem>
                                                         ))}

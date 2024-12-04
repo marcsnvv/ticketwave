@@ -60,11 +60,10 @@ export default function MonitorsTable() {
     const [editDialogOpen, setEditDialogOpen] = useState(false)
     const [selectedMonitor, setSelectedMonitor] = useState(null)
     const [selectedWebsite, setSelectedWebsite] = useState("")
-    const [webhook, setWebhook] = useState("")
     const [loading, setLoading] = useState(false)
     const [open, setOpen] = useState(false)
     const [searchTerm, setSearchTerm] = useState("")
-    const [addDialogOpen, setAddDialogOpen] = useState(false) // Agregar este nuevo estado
+    const [addDialogOpen, setAddDialogOpen] = useState(false)
     const [sortColumn, setSortColumn] = useState(null)
     const [sortDirection, setSortDirection] = useState('asc')
 
@@ -130,11 +129,11 @@ export default function MonitorsTable() {
     const handleAddMonitor = async () => {
         setLoading(true)
         try {
-            // Verificar si ya existe un monitor con el mismo nombre
             const { data: existingMonitors, error: fetchError } = await supabase
                 .from('monitors')
                 .select('*')
                 .eq('name', selectedWebsite)
+                .eq('company_id', localStorage.getItem('company_id'))
 
             if (fetchError) {
                 console.error('Error fetching monitors:', fetchError)
@@ -150,27 +149,21 @@ export default function MonitorsTable() {
 
             const { data, error } = await supabase
                 .from('monitors')
-                .insert([{ name: selectedWebsite }])
-
-            const monitorId = data[0].id; // Obtener el ID del monitor recién creado
-            const { error: webhookError } = await supabase
-                .from('webhooks')
-                .insert([{ url: webhook, monitor_id: monitorId }])
-
-            if (webhookError) {
-                console.error('Error adding webhook:', webhookError)
-            }
+                .insert([{
+                    name: selectedWebsite,
+                    company_id: localStorage.getItem('company_id')
+                }])
 
             if (error) {
                 console.error('Error adding monitor:', error)
             } else {
-                // Agregar el nuevo monitor con 0 productos monitoreados inicialmente
                 setMonitors((prev) => [...prev, { ...data[0], totalProducts: 0 }])
             }
         } catch (error) {
             console.error('Error:', error)
         } finally {
             setLoading(false)
+            setAddDialogOpen(false)
         }
     }
 
@@ -181,11 +174,7 @@ export default function MonitorsTable() {
                 .from('monitors')
                 .delete()
                 .eq('id', monitorId)
-
-            await supabase
-                .from('webhooks')
-                .delete()
-                .eq('monitor_id', monitorId)
+                .eq('company_id', localStorage.getItem('company_id'))
 
             setMonitors((prev) => prev.filter((monitor) => monitor.id !== monitorId))
         } catch (error) {
@@ -208,15 +197,6 @@ export default function MonitorsTable() {
                 .from('monitors')
                 .update({ name: selectedWebsite })
                 .eq('id', selectedMonitor.id)
-
-            const { error: webhookError } = await supabase
-                .from('webhooks')
-                .update({ url: webhook })
-                .eq('monitor_id', selectedMonitor.id)
-
-            if (webhookError) {
-                console.error('Error updating webhook:', webhookError)
-            }
 
             if (error) {
                 console.error('Error updating monitor:', error)
@@ -406,13 +386,6 @@ export default function MonitorsTable() {
                                     </Command>
                                 </PopoverContent>
                             </Popover>
-
-                            <Input
-                                type="text"
-                                placeholder="Enter webhook URL"
-                                value={webhook}
-                                onChange={(e) => setWebhook(e.target.value)}
-                            />
                         </div>
                         <DialogFooter>
                             <Button onClick={handleAddMonitor} disabled={loading}>
@@ -473,13 +446,6 @@ export default function MonitorsTable() {
                                     </Command>
                                 </PopoverContent>
                             </Popover>
-
-                            <Input
-                                type="text"
-                                placeholder="Enter webhook URL"
-                                value={webhook}
-                                onChange={(e) => setWebhook(e.target.value)}
-                            />
                         </div>
                         <DialogFooter>
                             <Button onClick={handleUpdateMonitor} disabled={loading}>

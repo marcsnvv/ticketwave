@@ -37,7 +37,15 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { Badge } from '@/components/ui/badge'
 import AddEvent from './add-event'
 import EditEventDialog from './edit-event'
+import { format } from "date-fns"; // Asegúrate de que este import esté presente
+import { useToast } from "@/hooks/use-toast"
 
+
+// Función auxiliar para truncar texto
+const truncateText = (text, maxLength) => {
+    if (text.length <= maxLength) return text;
+    return text.slice(0, maxLength) + '...';
+};
 
 export default function ProductsTable({ params }) {
     const router = useRouter()
@@ -47,7 +55,6 @@ export default function ProductsTable({ params }) {
     const [editProduct, setEditProduct] = useState(null)
     const [newName, setNewName] = useState("")
     const [newUrl, setNewUrl] = useState("")
-    const [newWebhookUrl, setNewWebhookUrl] = useState("") // Nuevo estado para el webhook
     const [newEvent, setNewEvent] = useState(false)
     const [newEventName, setNewEventName] = useState("")
     const [newEventUrl, setNewEventUrl] = useState("")
@@ -67,55 +74,114 @@ export default function ProductsTable({ params }) {
     const [openWebhook, setOpenWebhook] = useState(false)
     const [openRole, setOpenRole] = useState(false)
 
-    // Cargar productos asociados a un monitor específico
+    // Añadir el hook useToast
+    const { toast } = useToast()
+
+    // Extraer la función fetchData del useEffect
+    const fetchData = async () => {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (!session) {
+            router("/login")
+        }
+
+        // Primero obtener el monitor por label
+        const { data: monitorData, error: monitorError } = await supabase
+            .from('monitors')
+            .select('id, name')
+            .eq('name', label)
+
+        if (monitorError) {
+            console.error('Error fetching monitor:', monitorError)
+            return
+        }
+
+        // Luego obtener los productos usando el id del monitor
+        const { data, error } = await supabase
+            .from('products')
+            .select(`
+                *,
+                channels (
+                    title,
+                    webhook_url
+                ),
+                roles (
+                    title,
+                    role_id,
+                    color
+                )
+            `)
+            .eq('monitor_id', monitorData[0].id)
+
+        if (error) {
+            console.error('Error fetching products:', error)
+        } else {
+            setProducts(data)
+            setMonitorName(monitorData[0].name)
+        }
+
+        // Buscar channels y roles
+        const { data: rolesData } = await supabase
+            .from('roles')
+            .select('*')
+            .eq('company_id', localStorage.getItem('company_id'))
+
+        const { data: channelsData } = await supabase
+            .from('channels')
+            .select('*')
+            .eq('company_id', localStorage.getItem('company_id'))
+
+        setRoles(rolesData || [])
+        setChannels(channelsData || [])
+    }
+
+    // Efecto inicial
     useEffect(() => {
         if (label) {
-            async function fetchProducts() {
-                const { data: { session } } = await supabase.auth.getSession()
-                if (!session) {
-                    router("/login")
-                }
-
-                // Primero obtener el monitor por label
-                const { data: monitorData, error: monitorError } = await supabase
-                    .from('monitors')
-                    .select('id, name')
-                    .eq('name', label)
-
-                if (monitorError) {
-                    console.error('Error fetching monitor:', monitorError)
-                    return
-                }
-
-
-                // Luego obtener los productos usando el id del monitor
-                const { data, error } = await supabase
-                    .from('products')
-                    .select('*, channels(title,webhook_url), monitors(name)')
-                    .eq('monitor_id', monitorData[0].id)
-
-                if (error) {
-                    console.error('Error fetching products:', error)
-                } else {
-                    setProducts(data)
-                    console.log(data)
-                    setMonitorName(monitorData[0].name)
-                }
-            }
-            fetchProducts()
+            fetchData()
         }
     }, [label])
 
-    // Add this to your existing useEffect or create a new one
-    // useEffect(() => {
-    //     const fetchData = async () => {
-    //         const { data: rolesData } = await supabase.from('roles').select('*')
-    //         const { data: channelsData } = await supabase.from('channels').select('*')
-    //         setRoles(rolesData || [])
-    //         setChannels(channelsData || [])
-    //     }
-    //     fetchData()
-    // }, [])
+    // Nuevo efecto para actualizar datos cuando products cambie
+    useEffect(() => {
+        if (products.length > 0) {
+            const updateProductsData = async () => {
+                const updatedProducts = await Promise.all(
+                    products.map(async (product) => {
+                        // Obtener datos actualizados del canal
+                        if (product.channel) {
+                            const { data: channelData } = await supabase
+                                .from('channels')
+                                .select('title, webhook_url')
+                                .eq('id', product.channel)
+                                .single()
+
+                            if (channelData) {
+                                product.channels = channelData
+                            }
+                        }
+
+                        // Obtener datos actualizados del rol
+                        if (product.role) {
+                            const { data: roleData } = await supabase
+                                .from('roles')
+                                .select('title,role_id,color')
+                                .eq('id', product.role)
+                                .single()
+
+                            if (roleData) {
+                                product.roles = roleData
+                            }
+                        }
+
+                        return product
+                    })
+                )
+                setProducts(updatedProducts)
+            }
+
+            updateProductsData()
+        }
+    }, [products.length]) // Se ejecuta cuando cambia la longitud de products
 
     // Agrupar productos por nombre
     const groupedProducts = products.reduce((acc, product) => {
@@ -146,9 +212,17 @@ export default function ProductsTable({ params }) {
             .eq('id', productId)
 
         if (error) {
-            console.error('Error deleting product:', error)
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Error deleting product"
+            })
         } else {
             setProducts(products.filter(product => product.id !== productId))
+            toast({
+                title: "Success",
+                description: "Product deleted successfully"
+            })
         }
     }
 
@@ -157,8 +231,9 @@ export default function ProductsTable({ params }) {
         setEditProduct(product)
         setNewName(product.name)
         setNewUrl(product.url)
-        setNewWebhookUrl(product.webhook_url)
-        setNewRolePing(product.role_ping)
+        setNewEventMaxPrice(product.max_price)
+        setNewEventChannelId(product.channel)
+        setNewRolePing(product.role)
         setResell(product.resell)
         setAutoDeleteDate(product.autodelete_event || '') // Add this line
     }
@@ -170,29 +245,34 @@ export default function ProductsTable({ params }) {
 
         // Validación de URL
         if (newUrl && !newUrl.includes(monitorName)) {
-            setError("The URL must start with 'https://' and contain the monitor name.");
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "The URL must start with 'https://' and contain the monitor name."
+            })
             setLoading(false)
             return
         }
 
-        // Validación de Webhook URL
-        if (newWebhookUrl && !newWebhookUrl.startsWith("https://discord.com/api")) {
-            setError("The Webhook URL must start with 'https://discord.com/api'.");
-            setLoading(false);
-            return;
-        }
-
         // Validación de Max Price
         if (newEventMaxPrice && isNaN(newEventMaxPrice)) {
-            setError("Max Price must be a number.");
-            setLoading(false);
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Max Price must be a number."
+            })
+            setLoading(false)
             return;
         }
 
         // Validación de Auto Delete Date, no es una fecha válida
         if (autoDeleteDate && isNaN(new Date(autoDeleteDate).getTime())) {
-            setError("Auto Delete Date must be a valid date.");
-            setLoading(false);
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Auto Delete Date must be a valid date."
+            })
+            setLoading(false)
             return;
         }
 
@@ -200,7 +280,8 @@ export default function ProductsTable({ params }) {
         if (newName) updates.name = newName;
         if (newUrl) updates.url = newUrl;
         if (newEventMaxPrice) updates.max_price = newEventMaxPrice;
-        if (rolePing) updates.role_ping = rolePing;
+        if (newEventChannelId) updates.channel = newEventChannelId;
+        if (rolePing) updates.role = rolePing;
         if (resell !== null) updates.resell = resell;
         if (autoDeleteDate) updates.autodelete_event = autoDeleteDate; // Add this line
 
@@ -211,10 +292,46 @@ export default function ProductsTable({ params }) {
                 .eq('id', editProduct.id)
 
             if (error) {
-                console.error('Error updating product:', error)
+                toast({
+                    variant: "destructive",
+                    title: "Error",
+                    description: "Error updating product"
+                })
             } else {
+                toast({
+                    title: "Success",
+                    description: "Product updated successfully"
+                })
+                // Obtener los datos actualizados del canal y rol
+                let updatedProduct = { ...editProduct, ...updates }
+
+                if (updates.channel) {
+                    const { data: channelData } = await supabase
+                        .from('channels')
+                        .select('title, webhook_url')
+                        .eq('id', updates.channel)
+                        .single()
+
+                    if (channelData) {
+                        updatedProduct.channels = channelData
+                    }
+                }
+
+                if (updates.role) {
+                    const { data: roleData } = await supabase
+                        .from('roles')
+                        .select('title, role_id, color')
+                        .eq('id', updates.role)
+                        .single()
+
+                    if (roleData) {
+                        updatedProduct.roles = roleData
+                    }
+                }
+
+                // Actualizar el estado con los nuevos datos
                 setProducts(products.map(product =>
-                    product.id === editProduct.id ? { ...product, ...updates } : product
+                    product.id === editProduct.id ? updatedProduct : product
                 ))
             }
         }
@@ -254,42 +371,52 @@ export default function ProductsTable({ params }) {
 
         // Validación de URL
         if (newUrl && !newUrl.includes(monitorName)) {
-            setError("The URL must start with 'https://' and contain the monitor name.");
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "The URL must start with 'https://' and contain the monitor name."
+            })
             setLoading(false)
             return
         }
 
-        // Validación de Webhook URL
-        if (!newEventChannelId.startsWith("https://discord.com/api")) {
-            setError("The Webhook URL must start with 'https://discord.com/api'.");
-            return;
-        }
-
         // Validación de Max Price
         if (newEventMaxPrice && isNaN(newEventMaxPrice)) {
-            setError("Max Price must be a number.");
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Max Price must be a number."
+            })
             return;
         }
 
         // Validación de Auto Delete Date, no es una fecha válida
         if (newEventAutoDeleteDate && isNaN(new Date(newEventAutoDeleteDate).getTime())) {
-            setError("Auto Delete Date must be a valid date.");
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Auto Delete Date must be a valid date."
+            })
             return;
         }
 
+        const newEvent = {
+            name: newEventName,
+            url: newEventUrl,
+            monitor_id: monitorData[0]?.id, // Usar el id obtenido del monitor
+            max_price: newEventMaxPrice,
+            role: rolePing,
+            resell: resell,
+            autodelete_event: autoDeleteDate,
+            channel: newEventChannelId,
+            company_id: localStorage.getItem('company_id'),
+        }
+
+        console.log(newEvent)
 
         const { data: productData, error: productError } = await supabase
             .from('products')
-            .insert([{
-                name: newEventName,
-                url: newEventUrl,
-                monitor_id: monitorData.id, // Usar el id obtenido del monitor
-                max_price: newEventMaxPrice,
-                role_ping: rolePing,
-                resell: resell,
-                autodelete_event: autoDeleteDate,
-                channel: newEventChannelId
-            }])
+            .insert([newEvent])
             .select('id')
 
         if (!productError && productData.length > 0) {
@@ -300,17 +427,25 @@ export default function ProductsTable({ params }) {
         }
 
         if (productError) {
-            console.error('Error adding new event:', productError)
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Error adding new event"
+            })
         } else {
+            toast({
+                title: "Success",
+                description: "Event added successfully"
+            })
             setProducts([...products, {
                 name: newEventName,
                 url: newEventUrl,
                 max_price: newEventMaxPrice,
-                role_ping: rolePing,
                 resell: resell,
+                monitor_id: monitorData[0].id,
+                autodelete_event: autoDeleteDate,
+                role: rolePing,
                 channel: newEventChannelId,
-                monitor_id: id,
-                autodelete_event: autoDeleteDate
             }])
             setNewEvent(false) // Cerrar el diálogo
             setNewEventName('') // Resetear el nombre
@@ -352,8 +487,9 @@ export default function ProductsTable({ params }) {
                                 <TableHead>Event</TableHead>
                                 <TableHead>URL</TableHead>
                                 <TableHead>Webhook URL</TableHead>
+                                <TableHead>Role</TableHead>  {/* Nueva columna */}
                                 <TableHead>Max Price</TableHead>
-                                <TableHead>Auto Delete</TableHead>  {/* New column */}
+                                <TableHead>Auto Delete</TableHead>
                                 <TableHead>Actions</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -369,7 +505,7 @@ export default function ProductsTable({ params }) {
                                                     ) : (
                                                         <ChevronRightIcon className="mr-2" />
                                                     )}
-                                                    {group.name}
+                                                    <span title={group.name}>{truncateText(group.name, 30)}</span>
                                                 </div>
                                             </TableCell>
 
@@ -383,12 +519,11 @@ export default function ProductsTable({ params }) {
                                                     <TableCell>
                                                         <a
                                                             href={product.url}
-                                                            className="text-blue-500 underline flex items-center gap-1"
+                                                            className="text-blue-500 hover:underline flex items-center gap-1"
                                                             target="_blank"
                                                             rel="noopener noreferrer"
                                                         >
-                                                            <Link1Icon className="w-4 h-4 mr-1" />
-                                                            {product.url.slice(0, 25)}...
+                                                            <Link1Icon className="w-4 h-4" />
                                                         </a>
                                                     </TableCell>
                                                     <TableCell>
@@ -400,13 +535,26 @@ export default function ProductsTable({ params }) {
                                                                     target="_blank"
                                                                     rel="noopener noreferrer"
                                                                 >
-                                                                    <DiscordLogoIcon className="w-4 h-4 mr-1" />
+                                                                    <DiscordLogoIcon className="w-4 h-4" />
                                                                     {product.channels?.title}
                                                                 </a>
                                                             ) : (
                                                                 "--"
                                                             )
                                                         }
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {product.roles ? (
+                                                            <Badge
+                                                                style={{
+                                                                    backgroundColor: product.roles?.color || '#fff',
+                                                                }}
+                                                            >
+                                                                {product.roles?.title || "--"}
+                                                            </Badge>
+                                                        ) : (
+                                                            "--"
+                                                        )}
                                                     </TableCell>
                                                     <TableCell>
                                                         <Badge
@@ -420,7 +568,12 @@ export default function ProductsTable({ params }) {
                                                             <LapTimerIcon className='w-4 h-4' />
 
                                                             {product.autodelete_event ? (
-                                                                <time className='text-sm text-gray-300' dateTime={new Date(product.autodelete_event).toLocaleString()}>{new Date(product.autodelete_event).toLocaleString()}</time>
+                                                                <time
+                                                                    className='text-sm text-gray-300'
+                                                                    dateTime={product.autodelete_event}
+                                                                >
+                                                                    {format(new Date(product.autodelete_event), 'dd/MM/yyyy')}
+                                                                </time>
                                                             ) : (
                                                                 "Not set"
                                                             )}
@@ -516,10 +669,8 @@ export default function ProductsTable({ params }) {
                     monitorType={monitorName}
                 />
 
-
                 {loading && <Loader />} {/* Muestra un spinner de carga si loading es true */}
             </div>
-
         </main>
     )
 }

@@ -13,6 +13,7 @@ import { format } from "date-fns";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils"
 import Image from "next/image"
+import { supabase } from "../../../../../supabase";
 
 export default function AddEvent({
     addEvent,
@@ -23,8 +24,8 @@ export default function AddEvent({
     setNewEventMaxPrice,
     newEventUrl,
     setNewEventUrl,
-    newEventWebhookUrl,
-    setNewEventWebhookUrl,
+    newEventChannelId,
+    setNewEventChannelId,
     openWebhook,
     setOpenWebhook,
     channels,
@@ -46,22 +47,7 @@ export default function AddEvent({
     const [roleTitle, setRoleTitle] = useState("Select role")
     const [searchResults, setSearchResults] = useState([])
     const [isSearching, setIsSearching] = useState(false)
-    const [availableChannels, setAvailableChannels] = useState([]);
-
-    useEffect(() => {
-        const fetchChannels = async () => {
-            try {
-                const companyId = localStorage.getItem('company_id');
-                const response = await fetch(`/api/channels?company_id=${companyId}`);
-                const data = await response.json();
-                setAvailableChannels(data);
-            } catch (error) {
-                console.error('Error fetching channels:', error);
-            }
-        };
-
-        fetchChannels();
-    }, []);
+    const [openWebhookSelect, setOpenWebhookSelect] = useState(false)  // Añadir este estado
 
     const searchEventim = async (searchTerm) => {
         if (!searchTerm || searchTerm.length < 3) {
@@ -227,25 +213,40 @@ export default function AddEvent({
                                 <Label htmlFor="event-webhook-url">
                                     Webhook URL *
                                 </Label>
-                                <Select
-                                    value={newEventWebhookUrl}
-                                    onValueChange={(value) => {
-                                        setNewEventWebhookUrl(value);
-                                        const selectedChannel = availableChannels.find(ch => ch.id === value);
-                                        setWebhookTitle(selectedChannel?.title || "Select webhook");
-                                    }}
-                                >
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Select webhook" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {availableChannels.map((channel) => (
-                                            <SelectItem key={channel.id} value={channel.id}>
-                                                {channel.title}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                <Popover open={openWebhookSelect} onOpenChange={setOpenWebhookSelect}>
+                                    <PopoverTrigger asChild>
+                                        <Button variant="outline" className="w-full justify-between">
+                                            {webhookTitle}
+                                            <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-full p-0">
+                                        <Command>
+                                            <CommandInput placeholder="Search webhook..." className="h-9" />
+                                            <CommandList className="max-h-[300px] overflow-auto">
+                                                <CommandEmpty>No webhook found.</CommandEmpty>
+                                                <CommandGroup className="overflow-auto">
+                                                    {channels.sort((a, b) => a.title.localeCompare(b.title)).map((channel) => (
+                                                        <CommandItem
+                                                            key={channel.id}
+                                                            value={channel.title}
+                                                            onSelect={() => {
+                                                                setNewEventChannelId(channel.id);
+                                                                setWebhookTitle(channel.title);
+                                                                setOpenWebhookSelect(false);
+                                                            }}
+                                                        >
+                                                            {channel.title}
+                                                            <CheckIcon
+                                                                className={`ml-auto h-4 w-4 ${newEventChannelId === channel.id ? "opacity-100" : "opacity-0"}`}
+                                                            />
+                                                        </CommandItem>
+                                                    ))}
+                                                </CommandGroup>
+                                            </CommandList>
+                                        </Command>
+                                    </PopoverContent>
+                                </Popover>
                             </div>
                             <div className="flex justify-between gap-2 items-center">
                                 <div className="grid gap-4 w-1/2">
@@ -273,10 +274,10 @@ export default function AddEvent({
                                                 <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                             </Button>
                                         </PopoverTrigger>
-                                        <PopoverContent className="w-full p-0 h-48">
+                                        <PopoverContent className="w-full p-0">
                                             <Command>
                                                 <CommandInput placeholder="Search role..." className="h-9" />
-                                                <CommandList>
+                                                <CommandList className="max-h-[300px] overflow-auto">
                                                     <CommandEmpty>No role found.</CommandEmpty>
                                                     <CommandGroup>
                                                         {roles.sort((a, b) => a.title.localeCompare(b.title)).map((role) => (
@@ -284,7 +285,7 @@ export default function AddEvent({
                                                                 key={role.id}
                                                                 value={role.title}
                                                                 onSelect={() => {
-                                                                    const roleId = rolePing === role.role_id ? "" : role.role_id
+                                                                    const roleId = rolePing === role.id ? "" : role.id
                                                                     setNewRolePing(roleId)
                                                                     setRoleTitle(role.title)
                                                                     setOpenRole(false)
@@ -292,7 +293,7 @@ export default function AddEvent({
                                                             >
                                                                 {role.title}
                                                                 <CheckIcon
-                                                                    className={`ml-auto h-4 w-4 ${rolePing === role.role_id ? "opacity-100" : "opacity-0"}`}
+                                                                    className={`ml-auto h-4 w-4 ${rolePing === role.id ? "opacity-100" : "opacity-0"}`}
                                                                 />
                                                             </CommandItem>
                                                         ))}
