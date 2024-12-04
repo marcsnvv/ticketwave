@@ -74,7 +74,19 @@ export default function AddEvent({
 
         setIsSearching(true)
         try {
-            const response = await fetch(`https://app.ticketmaster.com/discovery/v2/events.json?keyword=${encodeURIComponent(searchTerm)}&apikey=tMmCSMo188JnXvT6KPWWcpBY7fWcp84Y`)
+            const region = monitorType.split(".")[1]
+            // Posibles locale; es, de, nl, pl, co.uk, etc.
+            let countryCode = 'US'
+            if (!region) {
+                console.error('Error searching events: Invalid region')
+                return
+            } else if (region === 'co.uk') {
+                countryCode = 'GB'
+            } else {
+                countryCode = region.toUpperCase()
+            }
+
+            const response = await fetch(`https://app.ticketmaster.com/discovery/v2/events.json?keyword=${encodeURIComponent(searchTerm)}&countryCode=${countryCode}&apikey=tMmCSMo188JnXvT6KPWWcpBY7fWcp84Y`)
             const data = await response.json()
             const events = data._embedded?.events || []
             setSearchResults(events)
@@ -94,9 +106,24 @@ export default function AddEvent({
             if (event.priceRanges?.[0]) {
                 setNewEventMaxPrice(event.priceRanges[0].max)
             }
+
+            // Establecer fecha de auto-eliminación para Ticketmaster
+            if (event.dates?.start?.localDate) {
+                const eventDate = new Date(event.dates.start.localDate)
+                const nextDay = new Date(eventDate)
+                nextDay.setDate(eventDate.getDate() + 1)
+                setAutoDeleteDate(nextDay.toISOString())
+            }
         } else if (monitorType === 'eventim.de') {
-            // Para Eventim, construir la URL usando el productUrl del evento
             setNewEventUrl(event.link)
+
+            // Establecer fecha de auto-eliminación para Eventim
+            if (event.startDate) {
+                const eventDate = new Date(event.startDate)
+                const nextDay = new Date(eventDate)
+                nextDay.setDate(eventDate.getDate() + 1)
+                setAutoDeleteDate(nextDay.toISOString())
+            }
         }
 
         setSearchResults([])

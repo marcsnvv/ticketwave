@@ -10,29 +10,28 @@ import { Alert } from '@/components/ui/alert';
 import Image from 'next/image';
 
 export default function Login() {
-    const [email, setEmail] = useState('');
-    const [error, setError] = useState('');
+    const [email, setEmail] = useState('')
+    const [error, setError] = useState('')
 
     const checkUserEmail = async (email) => {
         const { data, error } = await supabase
             .from('users')
-            .select('email, company_id')
+            .select('email,company_id')
             .eq('email', email)
 
         if (error) {
+            setError('An error occurred while checking email');
             console.error('Error checking email:', error.message);
-            return false;
+            return false
         }
 
         if (data.length === 0) {
             return false
         } else {
-            // Setea el company_id en el local storage
             localStorage.setItem('company_id', data[0].company_id);
             return true
         }
-
-    };
+    }
 
     const handleLogin = async () => {
         const userExists = await checkUserEmail(email);
