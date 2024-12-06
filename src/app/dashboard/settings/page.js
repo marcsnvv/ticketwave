@@ -41,20 +41,35 @@ export default function Settings() {
     const [sendingTest, setSendingTest] = useState(false)
 
     const saveSettings = async () => {
-        const { error } = await supabase
+        // First check if a record exists
+        const { data: existingSettings } = await supabase
             .from('notification_settings')
-            .update([{
-                company_title: companyTitle,
-                image_url: imageUrl,
-                color: color
-            }])
+            .select()
             .eq("company_id", localStorage.getItem("company_id"))
+
+        // Prepare the data object
+        const settingsData = {
+            company_title: companyTitle,
+            image_url: imageUrl,
+            color: color,
+            company_id: localStorage.getItem("company_id")
+        }
+
+        // Choose insert or update based on existence
+        const { error } = existingSettings?.length > 0
+            ? await supabase
+                .from('notification_settings')
+                .update([settingsData])
+                .eq("company_id", localStorage.getItem("company_id"))
+            : await supabase
+                .from('notification_settings')
+                .insert([settingsData])
 
         if (error) {
             toast({
                 variant: "destructive",
                 title: "Error",
-                description: "Error saving settings"
+                description: "Error saving settings: " + error.message
             })
         } else {
             toast({
@@ -79,7 +94,6 @@ export default function Settings() {
             if (error) {
                 console.error(error)
             }
-            console.log(data)
 
             setColor(data[0]?.color)
             setCompanyTitle(data[0]?.company_title)
@@ -209,20 +223,23 @@ export default function Settings() {
             return
         }
 
+        const companyId = localStorage.getItem("company_id")
+        console.log(companyId)
+
         const { data, error } = await supabase
             .from('channels')
-            .insert([{ ...newChannel, company_id: localStorage.getItem("company_id") }])
-            .select()
+            .insert([{ ...newChannel, company_id: companyId }])
+        // .select()
+        // .eq('company_id', localStorage.getItem("company_id"))
 
         if (error) {
             toast({
                 variant: "destructive",
                 title: "Error",
-                description: "Error adding channel"
+                description: "Error adding channel " + error.message
             })
         } else {
-            console.log(data)
-            setChannels([...channels, data[0]])
+            setChannels([...channels, data?.[0]])
             setNewChannel({ title: '', webhook_url: '' })
             setAddChannelDialogOpen(false)
             toast({
@@ -256,7 +273,7 @@ export default function Settings() {
             toast({
                 variant: "destructive",
                 title: "Error",
-                description: "Error deleting channel"
+                description: "Error deleting channel " + error.message
             })
         } else {
             setChannels(channels.filter(channel => channel.id !== id))

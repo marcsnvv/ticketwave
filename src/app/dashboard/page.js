@@ -157,7 +157,7 @@ export default function MonitorsTable() {
             if (error) {
                 console.error('Error adding monitor:', error)
             } else {
-                setMonitors((prev) => [...prev, { ...data[0], totalProducts: 0 }])
+                setMonitors((prev) => [...prev, { ...data?.[0], totalProducts: 0 }])
             }
         } catch (error) {
             console.error('Error:', error)

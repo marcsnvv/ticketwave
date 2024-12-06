@@ -111,6 +111,7 @@ export default function ProductsTable({ params }) {
                 )
             `)
             .eq('monitor_id', monitorData[0].id)
+            .eq('company_id', localStorage.getItem('company_id'))
 
         if (error) {
             console.error('Error fetching products:', error)
@@ -153,6 +154,7 @@ export default function ProductsTable({ params }) {
                                 .from('channels')
                                 .select('title, webhook_url')
                                 .eq('id', product.channel)
+                                .eq('company_id', localStorage.getItem('company_id'))
                                 .single()
 
                             if (channelData) {
@@ -166,6 +168,7 @@ export default function ProductsTable({ params }) {
                                 .from('roles')
                                 .select('title,role_id,color')
                                 .eq('id', product.role)
+                                .eq('company_id', localStorage.getItem('company_id'))
                                 .single()
 
                             if (roleData) {
@@ -310,6 +313,7 @@ export default function ProductsTable({ params }) {
                         .from('channels')
                         .select('title, webhook_url')
                         .eq('id', updates.channel)
+                        .eq('company_id', localStorage.getItem('company_id'))
                         .single()
 
                     if (channelData) {
@@ -322,6 +326,7 @@ export default function ProductsTable({ params }) {
                         .from('roles')
                         .select('title, role_id, color')
                         .eq('id', updates.role)
+                        .eq('company_id', localStorage.getItem('company_id'))
                         .single()
 
                     if (roleData) {
@@ -348,6 +353,7 @@ export default function ProductsTable({ params }) {
             .from('monitors')
             .select('id')
             .eq('name', label)
+            .eq('company_id', localStorage.getItem('company_id'))
 
         if (monitorError) {
             console.error('Error fetching monitor:', monitorError)
@@ -360,6 +366,7 @@ export default function ProductsTable({ params }) {
                 .from('monitors')
                 .select('name')
                 .eq('id', id)
+                .eq('company_id', localStorage.getItem('company_id'))
 
             if (monitorError) {
                 console.error('Error fetching monitor name:', monitorError)
@@ -412,7 +419,6 @@ export default function ProductsTable({ params }) {
             company_id: localStorage.getItem('company_id'),
         }
 
-        console.log(newEvent)
 
         const { data: productData, error: productError } = await supabase
             .from('products')
