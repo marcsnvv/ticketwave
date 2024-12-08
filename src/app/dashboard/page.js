@@ -51,6 +51,9 @@ const websites = [
     { "value": "ticketportal.cz", "label": "Ticketportal.cz" },
     { "value": "eventim.de", "label": "Eventim.de" },
     { "value": "ticketone.it", "label": "Ticketone.it" },
+    { "value": "ticketcorner.ch", "label": "Ticketcorner.ch" },
+    { "value": "oeticket.com", "label": "Oeticket.com" },
+
 ]
 
 export default function MonitorsTable() {
