@@ -35,6 +35,13 @@ import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from '@/components/ui/command'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge'
+import {
+    Alert,
+    AlertDescription,
+    AlertTitle,
+} from "@/components/ui/alert"
+
+import { CircleAlert } from 'lucide-react'
 import AddEvent from './add-event'
 import EditEventDialog from './edit-event'
 import { format } from "date-fns"; // Asegúrate de que este import esté presente
@@ -466,7 +473,21 @@ export default function ProductsTable({ params }) {
 
     return (
         <main className='flex items-center justify-center lg:mx-48 p-5'>
+
             <div className="w-full">
+                {
+                    monitorName.includes("ticketportal") && (
+                        <Alert className="mb-4">
+                            <CircleAlert className="h-4 w-4" />
+                            <AlertTitle>Heads up!</AlertTitle>
+                            <AlertDescription>
+                                The "idp" parameter is the event identifier, make sure your url has this parameter. A correct url will look something like this: https://www.ticketportal.cz/event/EWA-FARNA-10-let-haly-Polarka?idp=1394054
+                            </AlertDescription>
+                        </Alert>
+                    )
+                }
+
+
                 {/* Sección para añadir nuevos eventos */}
                 <div className="flex justify-between mb-4">
                     <div className="relative">
