@@ -475,7 +475,7 @@ export default function ProductsTable({ params }) {
         <main className='flex items-center justify-center lg:mx-48 p-5'>
 
             <div className="w-full">
-                {
+                {/* {
                     monitorName.includes("ticketportal") && (
                         <Alert className="mb-4">
                             <CircleAlert className="h-4 w-4" />
@@ -485,7 +485,7 @@ export default function ProductsTable({ params }) {
                             </AlertDescription>
                         </Alert>
                     )
-                }
+                } */}
 
 
                 {/* Sección para añadir nuevos eventos */}

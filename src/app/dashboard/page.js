@@ -53,6 +53,7 @@ const websites = [
     { "value": "ticketone.it", "label": "Ticketone.it" },
     { "value": "ticketcorner.ch", "label": "Ticketcorner.ch" },
     { "value": "oeticket.com", "label": "Oeticket.com" },
+    { "value": "eticketing.co.uk", "label": "Eticketing.co.uk" },
 
 ]
 
