@@ -481,7 +481,7 @@ export default function ProductsTable({ params }) {
                             <CircleAlert className="h-4 w-4" />
                             <AlertTitle>Heads up!</AlertTitle>
                             <AlertDescription>
-                                The "idp" parameter is the event identifier, make sure your url has this parameter. A correct url will look something like this: https://www.ticketportal.cz/event/EWA-FARNA-10-let-haly-Polarka?idp=1394054
+                                The 'idp' parameter is the event identifier, make sure your url has this parameter. A correct url will look something like this: https://www.ticketportal.cz/event/EWA-FARNA-10-let-haly-Polarka?idp=1394054
                             </AlertDescription>
                         </Alert>
                     )
