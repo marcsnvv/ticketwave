@@ -16,7 +16,8 @@ export default function Navbar() {
     const [user, setUser] = useState(null)
     const [isAdmin, setIsAdmin] = useState(false)
 
-    function logout() {
+    function logout(event) {
+        event.preventDefault()
         supabase.auth.signOut()
         router.push("/login")
     }
@@ -26,22 +27,23 @@ export default function Navbar() {
             const { data: { user } } = await supabase.auth.getUser()
             if (!user) {
                 router.push("/login")
+            } else {
+                if (admins_emails.includes(user.email)) {
+                    setIsAdmin(true)
+                }
+
+                const { data, error } = await supabase
+                    .from('users')
+                    .select('name,email,avatar_url')
+                    .eq('id', user.id)
+
+                if (error) {
+                    console.log(error)
+                }
+
+                setUser(data?.[0])
             }
 
-            if (admins_emails.includes(user.email)) {
-                setIsAdmin(true)
-            }
-
-            const { data, error } = await supabase
-                .from('users')
-                .select('name,email,avatar_url')
-                .eq('id', user.id)
-
-            if (error) {
-                console.log(error)
-            }
-
-            setUser(data?.[0])
         }
 
         fetchData()
@@ -85,7 +87,7 @@ export default function Navbar() {
                                 : null
                         }
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onSelect={() => logout()}>
+                        <DropdownMenuItem onSelect={(e) => logout(e)}>
                             <ExitIcon className="w-4 h-4 mr-2" />
                             Logout
                         </DropdownMenuItem>
