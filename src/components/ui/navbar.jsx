@@ -7,11 +7,19 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '../../../supabase'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ListBulletIcon, MixerHorizontalIcon, ExitIcon } from "@radix-ui/react-icons"
+import { ListBulletIcon, MixerHorizontalIcon, ExitIcon, RocketIcon } from "@radix-ui/react-icons"
+
+const admins_emails = [process.env.ADMIN_EMAIL1, process.env.ADMIN_EMAIL2, "marcsnvv@gmail.com", "busines1244@gmail.com"]
 
 export default function Navbar() {
     const router = useRouter()
     const [user, setUser] = useState(null)
+    const [isAdmin, setIsAdmin] = useState(false)
+
+    function logout() {
+        supabase.auth.signOut()
+        router.push("/login")
+    }
 
     useEffect(() => {
         async function fetchData() {
@@ -20,14 +28,14 @@ export default function Navbar() {
                 router.push("/login")
             }
 
-            console.log(user)
+            if (admins_emails.includes(user.email)) {
+                setIsAdmin(true)
+            }
 
             const { data, error } = await supabase
                 .from('users')
                 .select('name,email,avatar_url')
                 .eq('id', user.id)
-
-            console.log(data)
 
             if (error) {
                 console.log(error)
@@ -68,8 +76,16 @@ export default function Navbar() {
                             <MixerHorizontalIcon className="w-4 h-4 mr-2" />
                             Settings
                         </DropdownMenuItem>
+                        {
+                            isAdmin
+                                ? <DropdownMenuItem onSelect={() => router.push("/dashboard/admin")}>
+                                    <RocketIcon className="w-4 h-4 mr-2" />
+                                    Admin
+                                </DropdownMenuItem>
+                                : null
+                        }
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onSelect={() => supabase.auth.signOut()}>
+                        <DropdownMenuItem onSelect={() => logout()}>
                             <ExitIcon className="w-4 h-4 mr-2" />
                             Logout
                         </DropdownMenuItem>
