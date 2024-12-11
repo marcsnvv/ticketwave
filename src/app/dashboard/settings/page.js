@@ -95,9 +95,9 @@ export default function Settings() {
                 console.error(error)
             }
 
-            setColor(data[0]?.color)
-            setCompanyTitle(data[0]?.company_title)
-            setImageUrl(data[0]?.image_url)
+            setColor(data?.[0]?.color)
+            setCompanyTitle(data?.[0]?.company_title)
+            setImageUrl(data?.[0]?.image_url)
         }
 
         getData()

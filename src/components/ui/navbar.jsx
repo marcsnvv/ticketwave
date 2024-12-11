@@ -35,13 +35,16 @@ export default function Navbar() {
                 const { data, error } = await supabase
                     .from('users')
                     .select('name,email,avatar_url')
-                    .eq('id', user.id)
+                    .eq('email', user.email)
 
                 if (error) {
                     console.log(error)
                 }
 
-                setUser(data?.[0])
+                if (data) {
+                    console.log(data[0])
+                    setUser(data[0])
+                }
             }
 
         }

@@ -108,7 +108,7 @@ export default function Login() {
 
                         <Button
                             onClick={handleDiscordLogin}
-                            className="w-full bg-[#5865F2] hover:bg-[#4752C4]"
+                            className="w-full bg-[#5865F2] hover:bg-[#4752C4] text-white"
                         >
                             <DiscordLogoIcon className="mr-2 h-5 w-5" />
                             Login with Discord

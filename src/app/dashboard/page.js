@@ -27,6 +27,7 @@ import { supabase } from '../../../supabase'
 import { cn } from "@/lib/utils"
 import { useRouter } from 'next/navigation'
 import { Badge } from "@/components/ui/badge"
+import CreateCompany from '@/components/ui/create-company'
 
 const websites = [
     { "value": "viagogo.com", "label": "Viagogo.com" },
@@ -70,6 +71,8 @@ export default function MonitorsTable() {
     const [addDialogOpen, setAddDialogOpen] = useState(false)
     const [sortColumn, setSortColumn] = useState(null)
     const [sortDirection, setSortDirection] = useState('asc')
+    const [needsCompany, setNeedsCompany] = useState(true)
+    const [user, setUser] = useState(null)
 
     const fetchTotalProducts = async ({ monitorId, companyId }) => {
         try {
@@ -126,8 +129,52 @@ export default function MonitorsTable() {
             setMonitors(monitorsWithProducts)
         }
 
-        fetchMonitors()
+        async function checkUserCompany() {
+            const { data: { session } } = await supabase.auth.getSession()
+
+            if (!session) {
+                router.push("/login")
+                return
+            }
+
+            setUser(session.user)
+
+            const { data: userData, error: userError } = await supabase
+                .from('users')
+                .select('*')
+                .eq('email', session.user.email)
+                .single()
+
+            if (userError || !userData) {
+                setNeedsCompany(true)
+                return
+            }
+
+            localStorage.setItem('company_id', userData.company_id)
+            setNeedsCompany(false)
+            // Continue with existing monitor fetching logic
+            fetchMonitors()
+        }
+
+        checkUserCompany()
     }, [])
+
+    const handleCompanyCreated = (companyId) => {
+        setNeedsCompany(false)
+        // Refresh monitors
+        fetchMonitors()
+    }
+
+    if (needsCompany) {
+        return (
+            <div className="flex items-center justify-center h-[80vh]">
+                <CreateCompany
+                    userData={user}
+                    onCompanyCreated={handleCompanyCreated}
+                />
+            </div>
+        )
+    }
 
     // Función para agregar un nuevo monitor
     const handleAddMonitor = async () => {
@@ -249,7 +296,7 @@ export default function MonitorsTable() {
     }
 
     const filteredMonitors = monitors.filter(monitor =>
-        monitor.name.toLowerCase().includes(searchTerm.toLowerCase())
+        monitor?.name?.toLowerCase().includes(searchTerm.toLowerCase())
     )
 
     return (
