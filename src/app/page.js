@@ -44,6 +44,24 @@ function Page() {
         const hasAccess = await checkDiscordMembership(session.provider_token);
         if (!hasAccess) {
           await supabase.auth.signOut();
+        } else {
+          // Recuperar el usuario de Supabase y insertar el company id en localStorage
+          const { data: user, error } = await supabase
+            .from('users')
+            .select('company_id')
+            .eq('email', session.user.email)
+
+          if (error) {
+            console.error('Error fetching user:', error.message);
+            return;
+          }
+
+          if (user.length === 0) {
+            console.error('User not found');
+            return;
+          }
+
+          localStorage.setItem('company_id', user[0].company_id);
         }
       }
     });
