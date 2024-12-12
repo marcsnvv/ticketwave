@@ -70,6 +70,7 @@ export default function ProductsTable({ params }) {
     const [rolePing, setNewRolePing] = useState("")
     const [loading, setLoading] = useState(false) // Estado para el spinner de carga
     const [monitorName, setMonitorName] = useState("") // Estado para el nombre del monitor
+    const [monitorId, setMonitorId] = useState("") // Estado para el ID del monitor
     const [newEventMaxPrice, setNewEventMaxPrice] = useState("") // Nuevo estado para el Max Price
     const [expanded, setExpanded] = useState(null) // Estado para controlar qué fila está expandida
     const [error, setError] = useState(""); // Estado para manejar errores
@@ -86,6 +87,8 @@ export default function ProductsTable({ params }) {
 
     // Extraer la función fetchData del useEffect
     const fetchData = async () => {
+        const companyId = localStorage.getItem('company_id')
+
         const { data: { session } } = await supabase.auth.getSession()
         if (!session) {
             router("/login")
@@ -94,7 +97,8 @@ export default function ProductsTable({ params }) {
         // Primero obtener el monitor por label
         const { data: monitorData, error: monitorError } = await supabase
             .from('monitors')
-            .select('id, name')
+            .select('id,name')
+            .eq('company_id', companyId)
             .eq('name', label)
 
         if (monitorError) {
@@ -103,6 +107,19 @@ export default function ProductsTable({ params }) {
         }
 
         // Luego obtener los productos usando el id del monitor
+        let monitorId = monitorData[0].id
+        setMonitorId(monitorId)
+
+        if (!monitorId) {
+            console.error('Monitor ID not found')
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Monitor ID not found, contact with support."
+            })
+            return
+        }
+
         const { data, error } = await supabase
             .from('products')
             .select(`
@@ -117,10 +134,12 @@ export default function ProductsTable({ params }) {
                     color
                 )
             `)
-            .eq('monitor_id', monitorData[0].id)
-            .eq('company_id', localStorage.getItem('company_id'))
+            .eq('monitor_id', monitorId)
+            .eq('company_id', companyId)
 
-        if (error) {
+        console.log("Products data:", data)
+
+        if (error || data.length === 0) {
             console.error('Error fetching products:', error)
         } else {
             setProducts(data)
@@ -131,12 +150,12 @@ export default function ProductsTable({ params }) {
         const { data: rolesData } = await supabase
             .from('roles')
             .select('*')
-            .eq('company_id', localStorage.getItem('company_id'))
+            .eq('company_id', companyId)
 
         const { data: channelsData } = await supabase
             .from('channels')
             .select('*')
-            .eq('company_id', localStorage.getItem('company_id'))
+            .eq('company_id', companyId)
 
         setRoles(rolesData || [])
         setChannels(channelsData || [])
@@ -372,7 +391,7 @@ export default function ProductsTable({ params }) {
             const { data: monitorData, error: monitorError } = await supabase
                 .from('monitors')
                 .select('name')
-                .eq('id', id)
+                .eq('id', monitorId)
                 .eq('company_id', localStorage.getItem('company_id'))
 
             if (monitorError) {
@@ -414,18 +433,27 @@ export default function ProductsTable({ params }) {
             return;
         }
 
+        const companyId = localStorage.getItem('company_id')
+        if (!companyId) {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Company ID not found, contact with support."
+            })
+            return;
+        }
+
         const newEvent = {
             name: newEventName,
             url: newEventUrl,
-            monitor_id: monitorData[0]?.id, // Usar el id obtenido del monitor
+            monitor_id: monitorId, // Usar el id obtenido del monitor
             max_price: newEventMaxPrice,
             role: rolePing,
             resell: resell,
             autodelete_event: autoDeleteDate,
             channel: newEventChannelId,
-            company_id: localStorage.getItem('company_id'),
+            company_id: companyId,
         }
-
 
         const { data: productData, error: productError } = await supabase
             .from('products')
@@ -450,20 +478,15 @@ export default function ProductsTable({ params }) {
                 title: "Success",
                 description: "Event added successfully"
             })
-            setProducts([...products, {
-                name: newEventName,
-                url: newEventUrl,
-                max_price: newEventMaxPrice,
-                resell: resell,
-                monitor_id: monitorData[0].id,
-                autodelete_event: autoDeleteDate,
-                role: rolePing,
-                channel: newEventChannelId,
-            }])
+            setProducts([...products, newEvent])
             setNewEvent(false) // Cerrar el diálogo
             setNewEventName('') // Resetear el nombre
             setNewEventUrl('') // Resetear la URL
             setNewEventChannelId('') // Resetear la URL del webhook
+            setNewEventMaxPrice('') // Resetear el Max Price
+            setNewRolePing('') // Resetear el rol
+            setAutoDeleteDate('') // Resetear la fecha de autodelete
+            setResell(false) // Resetear la opción de reventa
         }
     }
 

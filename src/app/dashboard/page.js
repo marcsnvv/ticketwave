@@ -92,43 +92,42 @@ export default function MonitorsTable() {
             console.error('Unexpected error fetching products:', err);
             return 0;
         }
-    };
+    }
 
-
-    useEffect(() => {
-        async function fetchMonitors() {
-            const { data: { session } } = await supabase.auth.getSession()
-            if (!session) {
-                router.push("/login")
-            }
-
-            const company_id = localStorage.getItem('company_id')
-
-            if (!company_id) {
-                console.error('Company ID not found.')
-                return
-            }
-
-            const { data, error } = await supabase
-                .from('monitors')
-                .select('*')
-                .eq('company_id', company_id)
-
-            if (error) {
-                console.error('Error fetching monitors:', error)
-                return
-            }
-
-            const monitorsWithProducts = await Promise.all(
-                data.map(async (monitor) => {
-                    const totalProducts = await fetchTotalProducts({ monitorId: monitor.id, companyId: company_id })
-                    return { ...monitor, totalProducts }
-                })
-            )
-
-            setMonitors(monitorsWithProducts)
+    const fetchMonitors = async () => {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (!session) {
+            router.push("/login")
         }
 
+        const company_id = localStorage.getItem('company_id')
+
+        if (!company_id) {
+            console.error('Company ID not found.')
+            return
+        }
+
+        const { data, error } = await supabase
+            .from('monitors')
+            .select('*')
+            .eq('company_id', company_id)
+
+        if (error) {
+            console.error('Error fetching monitors:', error)
+            return
+        }
+
+        const monitorsWithProducts = await Promise.all(
+            data.map(async (monitor) => {
+                const totalProducts = await fetchTotalProducts({ monitorId: monitor.id, companyId: company_id })
+                return { ...monitor, totalProducts }
+            })
+        )
+
+        setMonitors(monitorsWithProducts)
+    }
+
+    useEffect(() => {
         async function checkUserCompany() {
             const { data: { session } } = await supabase.auth.getSession()
 
@@ -214,6 +213,7 @@ export default function MonitorsTable() {
             console.error('Error:', error)
         } finally {
             setLoading(false)
+            fetchMonitors()
             setAddDialogOpen(false)
         }
     }
@@ -351,9 +351,7 @@ export default function MonitorsTable() {
                                         </TableCell>
                                         <TableCell>
                                             {/* Mostrar el número total de productos monitoreados */}
-                                            <Badge variant={
-                                                monitor.totalProducts > 0 ? "primary" : "destructive"
-                                            }>{monitor.totalProducts} events</Badge>
+                                            <Badge>{monitor.totalProducts} events</Badge>
                                         </TableCell>
                                         <TableCell>
                                             <DropdownMenu>
