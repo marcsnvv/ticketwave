@@ -9,7 +9,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ListBulletIcon, MixerHorizontalIcon, ExitIcon, RocketIcon } from "@radix-ui/react-icons"
 
-const admins_emails = [process.env.ADMIN_EMAIL1, process.env.ADMIN_EMAIL2, "marcsnvv@gmail.com", "busines1244@gmail.com"]
+const admins_emails = [process.env.ADMIN_EMAIL1, process.env.ADMIN_EMAIL2, "vuntagecom@gmail.com", "busines1244@gmail.com"]
 
 export default function Navbar() {
     const router = useRouter()

@@ -44,10 +44,6 @@ function Page() {
         const hasAccess = await checkDiscordMembership(session.provider_token);
         if (!hasAccess) {
           await supabase.auth.signOut();
-        } else {
-          // Primero, quitamos el company_id del localStorage
-          localStorage.removeItem('company_id');
-          router.push('/dashboard');
         }
       }
     });
