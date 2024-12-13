@@ -99,8 +99,8 @@ export default function ClientsSection() {
             console.log(customersData)
 
             setCustomers(customersData)
-            setRevenueData(chartdata)
-            setExpensesData(chartdata)
+            // setRevenueData(chartdata)
+            // setExpensesData(chartdata)
         }
 
         fetchData()

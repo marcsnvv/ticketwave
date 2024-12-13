@@ -18,6 +18,10 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import { motion, AnimatePresence } from 'framer-motion'
+import { Input } from "@/components/ui/input" // Importar el componente Input
+import { Button } from "@/components/ui/button" // Importar el componente Button
+import { RefreshCw } from 'lucide-react'
 
 const websites = [
     { "value": "viagogo.com", "label": "Viagogo.com" },
@@ -52,9 +56,54 @@ export default function LogsSection() {
     const [logsData, setLogsData] = useState({ filename: '', total_lines: 0, lines: [] })
     const [loading, setLoading] = useState(true)
     const [selectedMonitor, setSelectedMonitor] = useState('ticketmaster.ae')
+    const [newLogs, setNewLogs] = useState([])
+    const [searchTerm, setSearchTerm] = useState('')
+
+    const parseLine = (line) => {
+        const match = line.match(/\[(.*?)\](.*)/);
+        if (match) {
+            const timestamp = match[1];
+            const message = match[2].trim();
+            const isError = message.toLowerCase().includes('error');
+            return { timestamp, message, isError };
+        }
+        return { timestamp: '', message: line, isError: false };
+    }
+
+    const filteredLogs = logsData.lines.filter(line => {
+        const { message } = parseLine(line)
+        return message.toLowerCase().includes(searchTerm.toLowerCase())
+    })
+
+    const forceRefresh = async () => {
+        setLoading(true)
+        try {
+            const response = await fetch(`https://ticketwave-api.fly.dev/logs?filename=${selectedMonitor}.log`, {
+                method: 'GET',
+                headers: {
+                    'X-API-KEY': 'T!CK3TW@V3M0N1T0R$',
+                    'Content-Type': 'application/json',
+                }
+            })
+            const data = await response.json()
+            setLogsData(data)
+        } catch (error) {
+            console.error('Error fetching logs:', error)
+        } finally {
+            // Espera 1 segundo antes de cambiar el estado de loading
+            setTimeout(() => setLoading(false), 1000)
+        }
+    }
 
     useEffect(() => {
-        async function fetchLogs() {
+        setLogsData(prevData => ({
+            ...prevData,
+            lines: [...newLogs, ...prevData.lines]
+        }))
+    }, [newLogs])
+
+    useEffect(() => {
+        async function fetchInitialLogs() {
             setLoading(true)
             try {
                 const response = await fetch(`https://ticketwave-api.fly.dev/logs?filename=${selectedMonitor}.log`, {
@@ -73,26 +122,41 @@ export default function LogsSection() {
             }
         }
 
-        // Ejecutar fetchLogs inmediatamente
-        fetchLogs()
+        // Ejecutar fetchInitialLogs inmediatamente
+        fetchInitialLogs()
+    }, [selectedMonitor])
+
+    useEffect(() => {
+        async function fetchLogs() {
+            try {
+                const response = await fetch(`https://ticketwave-api.fly.dev/logs?filename=${selectedMonitor}.log`, {
+                    method: 'GET',
+                    headers: {
+                        'X-API-KEY': 'T!CK3TW@V3M0N1T0R$',
+                        'Content-Type': 'application/json',
+                    }
+                })
+                const data = await response.json()
+                if (logsData.total_lines < data.total_lines) {
+                    const newLines = data.lines.slice(logsData.total_lines)
+                    setNewLogs(newLines)
+                    setLogsData(prevData => ({
+                        ...prevData,
+                        total_lines: data.total_lines,
+                        lines: [...newLines, ...prevData.lines]
+                    }))
+                }
+            } catch (error) {
+                console.error('Error fetching logs:', error)
+            }
+        }
 
         // Configurar el intervalo para actualizar cada 5 segundos
         const interval = setInterval(fetchLogs, 5000)
 
         // Limpiar el intervalo cuando el componente se desmonte
         return () => clearInterval(interval)
-    }, [selectedMonitor])
-
-    const parseLine = (line) => {
-        const match = line.match(/\[(.*?)\](.*)/);
-        if (match) {
-            const timestamp = match[1];
-            const message = match[2].trim();
-            const isError = message.toLowerCase().includes('error');
-            return { timestamp, message, isError };
-        }
-        return { timestamp: '', message: line, isError: false };
-    }
+    }, [logsData.total_lines, selectedMonitor])
 
     return (
         <Card className='p-4 border rounded-lg'>
@@ -102,6 +166,13 @@ export default function LogsSection() {
                     <Badge variant="outline">
                         {logsData.filename} ({logsData.total_lines} lines)
                     </Badge>
+                    <Button
+                        variant="outline"
+                        onClick={forceRefresh}>
+                        <div className={loading ? 'animate-spin' : ''}>
+                            <RefreshCw />
+                        </div>
+                    </Button>
                 </div>
                 <Select
                     value={selectedMonitor}
@@ -118,23 +189,34 @@ export default function LogsSection() {
                         ))}
                     </SelectContent>
                 </Select>
+                <Input
+                    type="text"
+                    placeholder="Search logs..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="mt-4"
+                />
             </div>
 
-            {loading ? (
-                <div className="text-center">Loading logs...</div>
-            ) : (
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead className="w-48">Timestamp</TableHead>
-                            <TableHead>Message</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {logsData.lines.map((line, index) => {
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead className="w-48">Timestamp</TableHead>
+                        <TableHead>Message</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    <AnimatePresence>
+                        {filteredLogs.map((line, index) => {
                             const { timestamp, message, isError } = parseLine(line);
                             return (
-                                <TableRow key={index}>
+                                <motion.tr
+                                    key={index}
+                                    initial={{ opacity: 0, y: -20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: 20 }}
+                                    transition={{ duration: 0.3 }}
+                                >
                                     <TableCell className="font-mono text-sm">
                                         {timestamp}
                                     </TableCell>
@@ -143,12 +225,12 @@ export default function LogsSection() {
                                             {message}
                                         </span>
                                     </TableCell>
-                                </TableRow>
+                                </motion.tr>
                             );
                         })}
-                    </TableBody>
-                </Table>
-            )}
+                    </AnimatePresence>
+                </TableBody>
+            </Table>
         </Card>
     )
 }
