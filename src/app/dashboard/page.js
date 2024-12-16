@@ -46,6 +46,7 @@ const websites = [
     { "value": "ticketmaster.ch", "label": "Ticketmaster.ch" },
     { "value": "ticketmaster.cz", "label": "Ticketmaster.cz" },
     { "value": "ticketmaster.co.za", "label": "Ticketmaster.co.za" },
+    { "value": "ticketmaster.co.uk", "label": "Ticketmaster.co.uk" },
     { "value": "ticketmaster.com", "label": "Ticketmaster.com" },
     { "value": "axs.com", "label": "Axs.com" },
     { "value": "queue.ticketmaster.com", "label": "TM Queue" },
