@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/select"
 
 export default function RevenueSection() {
+    const [totalCustomers, setTotalCustomers] = useState(0)
     const [chartdata, setChartData] = useState(null)
     const [rawData, setRawData] = useState([]) // Nuevo estado para guardar todos los datos
     const [open, setOpen] = useState(false)
@@ -102,7 +103,21 @@ export default function RevenueSection() {
     }
 
     useEffect(() => {
+        async function getTotalCustomers() {
+            const { data, error } = await supabase
+                .from('users')
+                .select('id')
+
+            if (error) {
+                console.error(error)
+                return
+            }
+
+            setTotalCustomers(data.length)
+        }
+
         fetchChartData()
+        getTotalCustomers()
     }, []) // Solo se ejecuta al montar el componente
 
     useEffect(() => {
@@ -227,7 +242,9 @@ export default function RevenueSection() {
                         <Users className="h-4 w-4 text-gray-500" />
                         <h3 className="text-sm font-medium">Total Customers</h3>
                     </div>
-                    <p className="text-2xl font-bold">150</p>
+                    <p className="text-2xl font-bold">
+                        {totalCustomers}
+                    </p>
                 </Card>
                 <Card className="p-4 border rounded-lg">
                     <div className="flex items-center space-x-2">
