@@ -1,9 +1,9 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { Card, Title } from "@tremor/react"
 import { PageAnalytics } from '@/components/page-analytics'
-import { Users, DollarSign, ArrowUpCircle, ArrowDownCircle, Plus } from 'lucide-react'
+import { Users, DollarSign, ArrowUpCircle, ArrowDownCircle, Plus, Edit2 } from 'lucide-react'
 import { supabase } from "../../../../../supabase"
 import { Button } from "@/components/ui/button"
 import {
@@ -24,12 +24,89 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 
+// Nuevo componente para las cards editables
+const EditableCard = ({
+    icon: Icon,
+    iconColor,
+    title,
+    value,
+    onSave,
+    disabled
+}) => {
+    const [isEditing, setIsEditing] = useState(false)
+    const [editValue, setEditValue] = useState(value)
+    const inputRef = useRef(null)
+
+    const handleSave = async () => {
+        await onSave(editValue)
+        setIsEditing(false)
+    }
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            handleSave()
+        } else if (e.key === 'Escape') {
+            setIsEditing(false)
+            setEditValue(value)
+        }
+    }
+
+    useEffect(() => {
+        setEditValue(value)
+    }, [value])
+
+    useEffect(() => {
+        if (isEditing) {
+            inputRef.current.focus()
+        }
+    }, [isEditing])
+
+    return (
+        <Card className="p-4 border rounded-lg relative transition-colors">
+            <div className="flex items-center space-x-2">
+                <Icon className={`h-4 w-4 ${iconColor}`} />
+                <h3 className="text-sm font-medium">{title}</h3>
+            </div>
+            <div className="relative flex items-center justify-start gap-1">
+                <p className="text-2xl">$</p>
+                {!isEditing ? (
+                    <>
+                        <p className="text-2xl font-bold">
+                            {typeof value === 'number' ? value.toFixed(2) : '0.00'}
+                        </p>
+                        {!disabled && (
+                            <button
+                                onClick={() => setIsEditing(true)}
+                            >
+                                <Edit2 className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                            </button>
+                        )
+                        }
+                    </>
+                ) : (
+                    <Input
+                        ref={inputRef}
+                        type="number"
+                        value={editValue}
+                        onChange={(e) => setEditValue(parseFloat(e.target.value))}
+                        onBlur={handleSave}
+                        onKeyDown={handleKeyDown}
+                        className="text-2xl font-bold p-0"
+                        step="0.01"
+                    />
+                )}
+            </div>
+        </Card>
+    )
+}
+
 export default function RevenueSection() {
     const [totalCustomers, setTotalCustomers] = useState(0)
     const [chartdata, setChartData] = useState(null)
     const [rawData, setRawData] = useState([]) // Nuevo estado para guardar todos los datos
     const [open, setOpen] = useState(false)
     const [selectedMonth, setSelectedMonth] = useState(null)
+    const [selectedYear, setSelectedYear] = useState(null)
     const [graphData, setGraphData] = useState([])
     const { toast } = useToast()
 
@@ -46,6 +123,11 @@ export default function RevenueSection() {
         { value: "10", label: "October" },
         { value: "11", label: "November" },
         { value: "12", label: "December" },
+    ]
+
+    const years = [
+        { value: "2024", label: "2024" },
+        { value: "2025", label: "2025" },
     ]
 
     async function fetchChartData() {
@@ -161,6 +243,53 @@ export default function RevenueSection() {
         fetchChartData()
     }
 
+    const handleUpdateValue = async (field, value) => {
+        if (!selectedMonth || !chartdata) return
+
+        const updates = {
+            [field]: value,
+        }
+
+        // Si estamos actualizando income o expenses, recalcular net_profit
+        if (field === 'total_income') {
+            updates.total_income = value
+        } else if (field === 'total_expenses') {
+            updates.total_expenses = value
+        }
+
+        console.log("Chartdata", chartdata)
+
+        const { error } = await supabase
+            .from('billing')
+            .update(updates)
+            .eq('month', `01-${selectedMonth}-${selectedYear}`)
+
+        if (error) {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Could not update the value"
+            })
+            return
+        }
+
+        // Actualizar datos locales
+        const updatedData = rawData.map(item => {
+            if (item.month === chartdata.month) {
+                return { ...item, ...updates }
+            }
+            return item
+        })
+
+        setRawData(updatedData)
+        processData(updatedData, selectedMonth)
+
+        toast({
+            title: "Success",
+            description: "Value updated successfully"
+        })
+    }
+
     return (
         <div className="grid gap-5">
             <div className="flex justify-between items-center">
@@ -177,6 +306,20 @@ export default function RevenueSection() {
                                 {months.map((month) => (
                                     <SelectItem key={month.value} value={month.value}>
                                         {month.label}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <Select value={selectedYear} onValueChange={setSelectedYear}>
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue>
+                                    {selectedYear ? years.find((y) => y.value === selectedYear).label : "Select Year"}
+                                </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent>
+                                {years.map((year) => (
+                                    <SelectItem key={year.value} value={year.value}>
+                                        {year.label}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -246,20 +389,25 @@ export default function RevenueSection() {
                         {totalCustomers}
                     </p>
                 </Card>
-                <Card className="p-4 border rounded-lg">
-                    <div className="flex items-center space-x-2">
-                        <ArrowUpCircle className="h-4 w-4 text-green-500" />
-                        <h3 className="text-sm font-medium">Total Revenue</h3>
-                    </div>
-                    <p className="text-2xl font-bold">${chartdata?.total_income || 0}</p>
-                </Card>
-                <Card className="p-4 border rounded-lg">
-                    <div className="flex items-center space-x-2">
-                        <ArrowDownCircle className="h-4 w-4 text-red-500" />
-                        <h3 className="text-sm font-medium">Total Expenses</h3>
-                    </div>
-                    <p className="text-2xl font-bold">${chartdata?.total_expenses || 0}</p>
-                </Card>
+
+                <EditableCard
+                    icon={ArrowUpCircle}
+                    iconColor="text-green-500"
+                    title="Total Revenue"
+                    value={chartdata?.total_income || 0}
+                    onSave={(value) => handleUpdateValue('total_income', value)}
+                    disabled={!selectedMonth}
+                />
+
+                <EditableCard
+                    icon={ArrowDownCircle}
+                    iconColor="text-red-500"
+                    title="Total Expenses"
+                    value={chartdata?.total_expenses || 0}
+                    onSave={(value) => handleUpdateValue('total_expenses', value)}
+                    disabled={!selectedMonth}
+                />
+
                 <Card className="p-4 border rounded-lg">
                     <div className="flex items-center space-x-2">
                         <DollarSign className="h-4 w-4 text-blue-500" />
