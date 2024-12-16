@@ -244,7 +244,21 @@ export default function RevenueSection() {
     }
 
     const handleUpdateValue = async (field, value) => {
-        if (!selectedMonth || !chartdata) return
+        if (!selectedMonth || !chartdata) {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Please select a month"
+            })
+        }
+
+        if (!selectedYear) {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Please select a year"
+            })
+        }
 
         const updates = {
             [field]: value,
@@ -257,7 +271,6 @@ export default function RevenueSection() {
             updates.total_expenses = value
         }
 
-        console.log("Chartdata", chartdata)
 
         const { error } = await supabase
             .from('billing')
