@@ -58,9 +58,8 @@ export default function ClientsSection() {
     const router = useRouter()
     const { toast } = useToast()
     const [customers, setCustomers] = useState([])
+    const [products, setProducts] = useState([])
     const [searchTerm, setSearchTerm] = useState("")
-    const [revenueData, setRevenueData] = useState([])
-    const [expensesData, setExpensesData] = useState([])
     const [isOpen, setIsOpen] = useState(false)
     const [newCustomer, setNewCustomer] = useState({
         name: '',
@@ -69,9 +68,6 @@ export default function ClientsSection() {
         avatar_url: '' // Añadimos el nuevo campo
     })
     const [customerToDelete, setCustomerToDelete] = useState(null)
-
-    // Mantener la lógica del manejo de clientes del archivo original
-    // ... (código de gestión de clientes)
 
     useEffect(() => {
         async function fetchData() {
@@ -99,8 +95,18 @@ export default function ClientsSection() {
             console.log(customersData)
 
             setCustomers(customersData)
-            // setRevenueData(chartdata)
-            // setExpensesData(chartdata)
+
+            // Obtener datos de los eventos monitoreados por cada usuario
+            const { data: eventsData, error: eventsError } = await supabase
+                .from('products')
+                .select('name,url,company_id')
+
+            if (eventsError) {
+                console.error('Error fetching events:', eventsError)
+                return
+            }
+            setProducts(eventsData)
+
         }
 
         fetchData()
@@ -267,14 +273,24 @@ export default function ClientsSection() {
                             <TableHead>Company</TableHead>
                             <TableHead>Email</TableHead>
                             <TableHead>Company</TableHead>
+                            <TableHead>Events</TableHead>
                             <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {filteredCustomers.map((customer) => (
                             <TableRow key={customer.id}>
-                                <TableCell>{customer.name}</TableCell>                                    <TableCell>{customer.email}</TableCell>                                    <TableCell>
+                                <TableCell>{customer.name}</TableCell>
+                                <TableCell>{customer.email}</TableCell>
+                                <TableCell>
                                     <Badge color="blue">{customer.companies?.name}</Badge>
+                                </TableCell>
+                                <TableCell>
+                                    <Badge>{
+                                        // Filtrar los eventos, por el company id del usuario
+                                        products.filter(product => product.company_id === customer.company_id).length
+
+                                    }</Badge>
                                 </TableCell>
                                 <TableCell className="text-right">
                                     <DropdownMenu>
