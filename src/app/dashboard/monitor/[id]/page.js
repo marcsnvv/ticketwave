@@ -54,6 +54,20 @@ const truncateText = (text, maxLength) => {
     return text.slice(0, maxLength) + '...';
 };
 
+function extractID(url) {
+    const urlObj = new URL(url);
+    const hostname = urlObj.hostname;
+    const pathSegments = urlObj.pathname.split("/").filter(Boolean);
+    if (hostname.includes("ticketcorner.ch")) {
+        return pathSegments.pop().split("?")[0];
+    } else if (hostname.includes("axs.com")) {
+        return pathSegments[pathSegments.length - 2];
+    } else if (hostname.includes("eventim.de")) {
+        return pathSegments.pop().split("?")[0];
+    }
+    return pathSegments.pop().split("?")[0];
+}
+
 export default function ProductsTable({ params }) {
     const router = useRouter()
 
@@ -512,7 +526,7 @@ export default function ProductsTable({ params }) {
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Event</TableHead>
-                                <TableHead>URL</TableHead>
+                                <TableHead>ID</TableHead>
                                 <TableHead>Webhook URL</TableHead>
                                 <TableHead>Role</TableHead>  {/* Nueva columna */}
                                 <TableHead>Max Price</TableHead>
@@ -550,7 +564,8 @@ export default function ProductsTable({ params }) {
                                                             target="_blank"
                                                             rel="noopener noreferrer"
                                                         >
-                                                            <Link1Icon className="w-4 h-4" />
+                                                            {/* Show the event ID */}
+                                                            {extractID(product.url)}
                                                         </a>
                                                     </TableCell>
                                                     <TableCell>
