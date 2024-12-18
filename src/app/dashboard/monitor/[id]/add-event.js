@@ -100,7 +100,7 @@ export default function AddEvent({
                 console.error('Error searching events: Invalid region')
                 setSearchResults([])
                 return
-            } else if (region.includes('uk')) {
+            } else if (region === 'co') {
                 countryCode = 'GB'
             } else {
                 countryCode = region.toUpperCase()
