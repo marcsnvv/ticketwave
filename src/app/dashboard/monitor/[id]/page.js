@@ -137,9 +137,8 @@ export default function ProductsTable({ params }) {
             .eq('monitor_id', monitorId)
             .eq('company_id', companyId)
 
-        console.log("Products data:", data)
 
-        if (error || data.length === 0) {
+        if (error) {
             console.error('Error fetching products:', error)
         } else {
             setProducts(data)
@@ -235,22 +234,39 @@ export default function ProductsTable({ params }) {
 
     // Función para eliminar un producto
     const handleDelete = async (productId) => {
-        const { error } = await supabase
-            .from('products')
-            .delete()
-            .eq('id', productId)
+        try {
+            // Validar que existe el ID
+            if (!productId) {
+                throw new Error("Product ID is required")
+            }
 
-        if (error) {
-            toast({
-                variant: "destructive",
-                title: "Error",
-                description: "Error deleting product"
-            })
-        } else {
+            // Validar que el ID tiene un formato válido
+            if (typeof productId !== 'string' || productId.trim() === '') {
+                throw new Error("Invalid product ID format")
+            }
+
+            const { error } = await supabase
+                .from('products')
+                .delete()
+                .eq('id', productId)
+
+            if (error) {
+                throw new Error(error.message)
+            }
+
+            // Si la eliminación fue exitosa, actualizar el estado
             setProducts(products.filter(product => product.id !== productId))
+
             toast({
                 title: "Success",
                 description: "Product deleted successfully"
+            })
+        } catch (error) {
+            console.error('Error deleting product:', error)
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: `Error deleting product: ${error.message}`
             })
         }
     }
@@ -373,120 +389,81 @@ export default function ProductsTable({ params }) {
     // Función para añadir un nuevo evento
     const handleAddEvent = async () => {
         setError("")
+        setLoading(true)
 
-        // Obtener el id del monitor usando el label
-        const { data: monitorData, error: monitorError } = await supabase
-            .from('monitors')
-            .select('id')
-            .eq('name', label)
-            .eq('company_id', localStorage.getItem('company_id'))
-
-        if (monitorError) {
-            console.error('Error fetching monitor:', monitorError)
-            return
-        }
-
-        if (monitorName === "" || !monitorName) {
-            // Haz una petición a la base de datos para obtener el nombre del monitor
-            const { data: monitorData, error: monitorError } = await supabase
-                .from('monitors')
-                .select('name')
-                .eq('id', monitorId)
-                .eq('company_id', localStorage.getItem('company_id'))
-
-            if (monitorError) {
-                console.error('Error fetching monitor name:', monitorError)
-                return;
+        try {
+            // Validaciones básicas
+            if (!newEventName?.trim()) {
+                throw new Error("Event name is required")
             }
 
-            setMonitorName(monitorData[0].name)
-        }
+            if (!newEventUrl?.trim()) {
+                throw new Error("URL is required")
+            }
 
-        // Validación de URL
-        if (newUrl && !newUrl.includes(monitorName)) {
-            toast({
-                variant: "destructive",
-                title: "Error",
-                description: "The URL must start with 'https://' and contain the monitor name."
-            })
-            setLoading(false)
-            return
-        }
+            if (!newEventChannelId) {
+                throw new Error("Webhook channel is required")
+            }
 
-        // Validación de Max Price
-        if (newEventMaxPrice && isNaN(newEventMaxPrice)) {
-            toast({
-                variant: "destructive",
-                title: "Error",
-                description: "Max Price must be a number."
-            })
-            return;
-        }
+            const companyId = localStorage.getItem('company_id')
+            if (!companyId) {
+                throw new Error("Company ID not found")
+            }
 
-        // Validación de Auto Delete Date, no es una fecha válida
-        if (newEventAutoDeleteDate && isNaN(new Date(newEventAutoDeleteDate).getTime())) {
-            toast({
-                variant: "destructive",
-                title: "Error",
-                description: "Auto Delete Date must be a valid date."
-            })
-            return;
-        }
+            if (!monitorId) {
+                throw new Error("Monitor ID not found")
+            }
 
-        const companyId = localStorage.getItem('company_id')
-        if (!companyId) {
-            toast({
-                variant: "destructive",
-                title: "Error",
-                description: "Company ID not found, contact with support."
-            })
-            return;
-        }
+            // Crear el objeto del nuevo evento solo con campos válidos
+            const newEventData = {
+                name: newEventName.trim(),
+                url: newEventUrl.trim(),
+                monitor_id: monitorId,
+                channel: newEventChannelId,
+                company_id: companyId,
+                // Añadir campos opcionales solo si tienen valor
+                ...(newEventMaxPrice && { max_price: Number(newEventMaxPrice) }),
+                ...(rolePing && { role: rolePing }),
+                ...(autoDeleteDate && { autodelete_event: autoDeleteDate }),
+                resell: !!resell // Convertir a booleano
+            }
 
-        const newEvent = {
-            name: newEventName,
-            url: newEventUrl,
-            monitor_id: monitorId, // Usar el id obtenido del monitor
-            max_price: newEventMaxPrice,
-            role: rolePing,
-            resell: resell,
-            autodelete_event: autoDeleteDate,
-            channel: newEventChannelId,
-            company_id: companyId,
-        }
+            const { data: productData, error: productError } = await supabase
+                .from('products')
+                .insert([newEventData])
+                .select('*')
 
-        const { data: productData, error: productError } = await supabase
-            .from('products')
-            .insert([newEvent])
-            .select('id')
+            if (productError) {
+                throw new Error(productError.message)
+            }
 
-        if (!productError && productData.length > 0) {
-            const product_id = productData[0].id;
-
-            // 
-
-        }
-
-        if (productError) {
-            toast({
-                variant: "destructive",
-                title: "Error",
-                description: "Error adding new event"
-            })
-        } else {
+            // Éxito
             toast({
                 title: "Success",
                 description: "Event added successfully"
             })
-            setProducts([...products, newEvent])
-            setNewEvent(false) // Cerrar el diálogo
-            setNewEventName('') // Resetear el nombre
-            setNewEventUrl('') // Resetear la URL
-            setNewEventChannelId('') // Resetear la URL del webhook
-            setNewEventMaxPrice('') // Resetear el Max Price
-            setNewRolePing('') // Resetear el rol
-            setAutoDeleteDate('') // Resetear la fecha de autodelete
-            setResell(false) // Resetear la opción de reventa
+
+            // Actualizar la lista de productos
+            setProducts(prev => [...prev, productData[0]])
+
+            // Resetear el formulario
+            setNewEvent(false)
+            setNewEventName('')
+            setNewEventUrl('')
+            setNewEventChannelId('')
+            setNewEventMaxPrice('')
+            setNewRolePing('')
+            setAutoDeleteDate('')
+            setResell(false)
+
+        } catch (error) {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: error.message
+            })
+        } finally {
+            setLoading(false)
         }
     }
 

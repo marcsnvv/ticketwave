@@ -48,6 +48,20 @@ export default function AddEvent({
     const [searchResults, setSearchResults] = useState([])
     const [isSearching, setIsSearching] = useState(false)
     const [openWebhookSelect, setOpenWebhookSelect] = useState(false)  // Añadir este estado
+    const [searchTerm, setSearchTerm] = useState("")
+
+    // Añadir el useEffect para el debounce
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            if (monitorType.includes('ticketmaster')) {
+                searchTicketmaster(searchTerm)
+            } else if (monitorType.includes('eventim')) {
+                searchEventim(searchTerm)
+            }
+        }, 300) // 300ms de delay
+
+        return () => clearTimeout(timeoutId) // Limpieza del timeout
+    }, [searchTerm, monitorType])
 
     const searchEventim = async (searchTerm) => {
         if (!searchTerm || searchTerm.length < 3) {
@@ -59,15 +73,20 @@ export default function AddEvent({
         try {
             const response = await fetch(`https://public-api.eventim.com/websearch/search/api/exploration/v2/productGroups?webId=web__eventim-de&search_term=${encodeURIComponent(searchTerm)}&language=de&retail_partner=EVE&sort=Recommendation&auto_suggest=true`)
             const data = await response.json()
-            setSearchResults(data.productGroups || [])
+
+            // Modificar esta parte para manejar el caso de no resultados
+            const results = data.productGroups || []
+            setSearchResults(results)
         } catch (error) {
             console.error('Error searching events:', error)
+            setSearchResults([])
+        } finally {
+            setIsSearching(false)
         }
-        setIsSearching(false)
     }
 
     const searchTicketmaster = async (searchTerm) => {
-        if (!searchTerm || searchTerm.length < 3) {
+        if (!searchTerm || searchTerm.length < 2) {
             setSearchResults([])
             return
         }
@@ -79,8 +98,9 @@ export default function AddEvent({
             let countryCode = 'US'
             if (!region) {
                 console.error('Error searching events: Invalid region')
+                setSearchResults([])
                 return
-            } else if (region === 'co') {
+            } else if (region.includes('co.uk')) {
                 countryCode = 'GB'
             } else {
                 countryCode = region.toUpperCase()
@@ -93,15 +113,18 @@ export default function AddEvent({
                 "l73WtjKgx7NK1sq9GRE5nfMGrRxBsiEy"
             ]
             const endpoint = `https://app.ticketmaster.com/discovery/v2/events.json?keyword=${encodeURIComponent(searchTerm)}&countryCode=${countryCode}&apikey=${apikeys[Math.floor(Math.random() * apikeys.length)]}`
-            console.log(endpoint)
             const response = await fetch(endpoint)
             const data = await response.json()
+
+            // Modificar esta parte para manejar el caso de no resultados
             const events = data._embedded?.events || []
             setSearchResults(events)
         } catch (error) {
             console.error('Error searching events:', error)
+            setSearchResults([])
+        } finally {
+            setIsSearching(false)
         }
-        setIsSearching(false)
     }
 
     const handleEventSelect = (event) => {
@@ -138,13 +161,9 @@ export default function AddEvent({
     }
 
     // Modificar la función de búsqueda según el tipo de monitor
-    const handleSearch = (searchTerm) => {
-        setNewEventName(searchTerm)
-        if (monitorType.includes('ticketmaster')) {
-            searchTicketmaster(searchTerm)
-        } else if (monitorType.includes('eventim')) {
-            searchEventim(searchTerm)
-        }
+    const handleSearch = (value) => {
+        setNewEventName(value)
+        setSearchTerm(value)
     }
 
     return (
@@ -171,10 +190,17 @@ export default function AddEvent({
                                             <Input
                                                 id="event-name"
                                                 value={newEventName}
-                                                onChange={(e) => handleSearch(e.target.value)}
+                                                onChange={(e) => {
+                                                    handleSearch(e.target.value)
+                                                    setNewEventName(e.target.value) // Asegurarnos de que el valor se actualice siempre
+                                                }}
                                                 className="col-span-3"
                                             />
-                                            {searchResults.length > 0 && (
+                                            {isSearching ? (
+                                                <div className="absolute w-full mt-1 bg-background rounded-md border shadow-lg p-4">
+                                                    Searching...
+                                                </div>
+                                            ) : searchResults.length > 0 ? (
                                                 <div className="absolute w-full mt-1 bg-background rounded-md border shadow-lg max-h-96 overflow-auto z-50">
                                                     {searchResults.map((event) => (
                                                         <div
@@ -201,7 +227,7 @@ export default function AddEvent({
                                                         </div>
                                                     ))}
                                                 </div>
-                                            )}
+                                            ) : null}
                                         </div>
                                     ) : (
                                         <Input
