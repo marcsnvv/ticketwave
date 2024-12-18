@@ -80,13 +80,21 @@ export default function AddEvent({
             if (!region) {
                 console.error('Error searching events: Invalid region')
                 return
-            } else if (region === 'co.uk') {
+            } else if (region === 'co') {
                 countryCode = 'GB'
             } else {
                 countryCode = region.toUpperCase()
             }
 
-            const response = await fetch(`https://app.ticketmaster.com/discovery/v2/events.json?keyword=${encodeURIComponent(searchTerm)}&countryCode=${countryCode}&apikey=tMmCSMo188JnXvT6KPWWcpBY7fWcp84Y`)
+            const apikeys = [
+                "Jl3DTIoeq2jaGjIue8OHxVINLAMdP4vL",
+                "tbNFigIf0gl2whzkuE0w1301KAqFlTGW",
+                "s3aH6zPmoGPFJsNDpHAQEGZrpC7RZ7C5",
+                "l73WtjKgx7NK1sq9GRE5nfMGrRxBsiEy"
+            ]
+            const endpoint = `https://app.ticketmaster.com/discovery/v2/events.json?keyword=${encodeURIComponent(searchTerm)}&countryCode=${countryCode}&apikey=${apikeys[Math.floor(Math.random() * apikeys.length)]}`
+            console.log(endpoint)
+            const response = await fetch(endpoint)
             const data = await response.json()
             const events = data._embedded?.events || []
             setSearchResults(events)
@@ -134,7 +142,7 @@ export default function AddEvent({
         setNewEventName(searchTerm)
         if (monitorType.includes('ticketmaster')) {
             searchTicketmaster(searchTerm)
-        } else if (monitorType === 'eventim.de') {
+        } else if (monitorType.includes('eventim')) {
             searchEventim(searchTerm)
         }
     }
