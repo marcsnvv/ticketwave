@@ -15,6 +15,14 @@ import { cn } from "@/lib/utils"
 import Image from "next/image"
 import { supabase } from "../../../../../supabase";
 
+const monitorsForAutocomplete = [
+    "ticketmaster",
+    "eventim.de",
+    "ticketcorner.ch",
+    "ticketone.it",
+    "oeticket.com"
+]
+
 export default function AddEvent({
     addEvent,
     setAddEvent,
@@ -55,7 +63,7 @@ export default function AddEvent({
         const timeoutId = setTimeout(() => {
             if (monitorType.includes('ticketmaster')) {
                 searchTicketmaster(searchTerm)
-            } else if (monitorType.includes('eventim')) {
+            } else if (monitorsForAutocomplete.pop('ticketmaster').includes(monitorType)) {
                 searchEventim(searchTerm)
             }
         }, 300) // 300ms de delay
@@ -71,7 +79,9 @@ export default function AddEvent({
 
         setIsSearching(true)
         try {
-            const response = await fetch(`https://public-api.eventim.com/websearch/search/api/exploration/v2/productGroups?webId=web__eventim-de&search_term=${encodeURIComponent(searchTerm)}&language=de&retail_partner=EVE&sort=Recommendation&auto_suggest=true`)
+            // webId:web__eventim-de
+            const webId = `web__${monitorType.replace('.', '-')}`
+            const response = await fetch(`https://public-api.eventim.com/websearch/search/api/exploration/v2/productGroups?webId=${webId}&search_term=${encodeURIComponent(searchTerm)}&language=de&retail_partner=EVE&sort=Recommendation&auto_suggest=true`)
             const data = await response.json()
 
             // Modificar esta parte para manejar el caso de no resultados
@@ -145,7 +155,7 @@ export default function AddEvent({
                 nextDay.setDate(eventDate.getDate() + 1)
                 setAutoDeleteDate(nextDay.toISOString())
             }
-        } else if (monitorType === 'eventim.de') {
+        } else if (monitorsForAutocomplete.pop('ticketmaster').includes(monitorType)) {
             setNewEventUrl(event.link)
 
             // Establecer fecha de auto-eliminación para Eventim
@@ -185,7 +195,7 @@ export default function AddEvent({
                                     <Label htmlFor="event-name">
                                         Name *
                                     </Label>
-                                    {(monitorType.includes('ticketmaster') || monitorType === 'eventim.de') ? (
+                                    {monitorsForAutocomplete.includes(monitorType) ? (
                                         <div className="relative">
                                             <Input
                                                 id="event-name"

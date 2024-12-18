@@ -46,6 +46,7 @@ import AddEvent from './add-event'
 import EditEventDialog from './edit-event'
 import { format } from "date-fns"; // Asegúrate de que este import esté presente
 import { useToast } from "@/hooks/use-toast"
+import { Checkbox } from "@/components/ui/checkbox" // Añadir este import
 
 
 // Función auxiliar para truncar texto
@@ -95,6 +96,8 @@ export default function ProductsTable({ params }) {
     const [channels, setChannels] = useState([])
     const [openWebhook, setOpenWebhook] = useState(false)
     const [openRole, setOpenRole] = useState(false)
+    const [selectedProducts, setSelectedProducts] = useState([])
+    const [showBulkEdit, setShowBulkEdit] = useState(false)
 
     // Añadir el hook useToast
     const { toast } = useToast()
@@ -481,6 +484,53 @@ export default function ProductsTable({ params }) {
         }
     }
 
+    const handleSelectAll = (checked) => {
+        if (checked) {
+            const allProductIds = products.map(product => product.id)
+            setSelectedProducts(allProductIds)
+        } else {
+            setSelectedProducts([])
+        }
+    }
+
+    const handleSelectProduct = (productId, checked) => {
+        setSelectedProducts(prev => {
+            if (checked) {
+                return [...prev, productId]
+            }
+            return prev.filter(id => id !== productId)
+        })
+    }
+
+    const handleBulkEdit = async (updates) => {
+        setLoading(true)
+        try {
+            const { error } = await supabase
+                .from('products')
+                .update(updates)
+                .in('id', selectedProducts)
+
+            if (error) throw error
+
+            // Actualizar la UI
+            await fetchData()
+            setSelectedProducts([])
+            setShowBulkEdit(false)
+
+            toast({
+                title: "Success",
+                description: "Products updated successfully"
+            })
+        } catch (error) {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: error.message
+            })
+        }
+        setLoading(false)
+    }
+
     const filteredProducts = groupedProducts.filter(product =>
         product.name.toLowerCase().includes(searchTerm.toLowerCase())
     )
@@ -521,11 +571,32 @@ export default function ProductsTable({ params }) {
 
                 </div>
 
+                {/* Añadir botón de Bulk Edit cuando haya selección */}
+                {selectedProducts.length > 0 && (
+                    <div className="mb-4 flex items-center gap-2">
+                        <span className="text-sm text-gray-500">
+                            {selectedProducts.length} selected
+                        </span>
+                        <Button
+                            variant="outline"
+                            onClick={() => setShowBulkEdit(true)}
+                        >
+                            Bulk Edit
+                        </Button>
+                    </div>
+                )}
+
                 <div className="rounded-md border">
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Event</TableHead>
+                                <TableHead className="min-w-1/5">
+                                    <Checkbox
+                                        checked={selectedProducts.length === products.length}
+                                        onCheckedChange={handleSelectAll}
+                                    />
+                                </TableHead>
+                                {/* <TableHead>Event</TableHead> */}
                                 <TableHead>ID</TableHead>
                                 <TableHead>Webhook URL</TableHead>
                                 <TableHead>Role</TableHead>  {/* Nueva columna */}
@@ -555,7 +626,14 @@ export default function ProductsTable({ params }) {
                                         {expanded === group.name && (
                                             group.items.map((product) => (
                                                 <TableRow key={product.id}>
-                                                    <TableCell></TableCell>
+                                                    <TableCell>
+                                                        <Checkbox
+                                                            checked={selectedProducts.includes(product.id)}
+                                                            onCheckedChange={(checked) =>
+                                                                handleSelectProduct(product.id, checked)
+                                                            }
+                                                        />
+                                                    </TableCell>
 
                                                     <TableCell>
                                                         <a
@@ -647,7 +725,7 @@ export default function ProductsTable({ params }) {
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan="3" className="text-center">
+                                    <TableCell colSpan="8" className="text-center">
                                         No products found.
                                     </TableCell>
                                 </TableRow>
@@ -710,6 +788,98 @@ export default function ProductsTable({ params }) {
                     error={error}
                     monitorType={monitorName}
                 />
+
+                {/* Diálogo de Bulk Edit */}
+                <Dialog open={showBulkEdit} onOpenChange={setShowBulkEdit}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Bulk Edit Products</DialogTitle>
+                            <DialogDescription>
+                                Edit multiple products at once. Only filled fields will be updated.
+                            </DialogDescription>
+                        </DialogHeader>
+
+                        <div className="grid gap-4 py-4">
+                            <div className="grid gap-2">
+                                <Label>Webhook Channel</Label>
+                                <Select
+                                    onValueChange={(value) => setNewEventChannelId(value)}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select channel" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {channels.map((channel) => (
+                                            <SelectItem key={channel.id} value={channel.id}>
+                                                {channel.title}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label>Role Ping</Label>
+                                <Select
+                                    onValueChange={(value) => setNewRolePing(value)}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select role" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {roles.map((role) => (
+                                            <SelectItem key={role.id} value={role.id}>
+                                                {role.title}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label>Max Price</Label>
+                                <Input
+                                    type="number"
+                                    onChange={(e) => setNewEventMaxPrice(e.target.value)}
+                                    placeholder="Enter max price"
+                                />
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label>Auto Delete Date</Label>
+                                <Input
+                                    type="date"
+                                    onChange={(e) => setAutoDeleteDate(e.target.value)}
+                                />
+                            </div>
+
+                            <div className="flex items-center space-x-2">
+                                <Checkbox
+                                    id="resell"
+                                    checked={resell}
+                                    onCheckedChange={setResell}
+                                />
+                                <Label htmlFor="resell">Resell</Label>
+                            </div>
+                        </div>
+
+                        <DialogFooter>
+                            <Button
+                                onClick={() => {
+                                    const updates = {}
+                                    if (newEventChannelId) updates.channel = newEventChannelId
+                                    if (rolePing) updates.role = rolePing
+                                    if (newEventMaxPrice) updates.max_price = Number(newEventMaxPrice)
+                                    if (autoDeleteDate) updates.autodelete_event = autoDeleteDate
+                                    if (resell !== null) updates.resell = resell
+                                    handleBulkEdit(updates)
+                                }}
+                            >
+                                Save Changes
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
 
                 {loading && <Loader />} {/* Muestra un spinner de carga si loading es true */}
             </div>
