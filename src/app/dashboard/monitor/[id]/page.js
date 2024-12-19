@@ -531,9 +531,20 @@ export default function ProductsTable({ params }) {
         setLoading(false)
     }
 
-    const filteredProducts = groupedProducts.filter(product =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    const filteredProducts = groupedProducts.filter(product => {
+        const searchTermLower = searchTerm.toLowerCase();
+
+        // Buscar en el nombre del evento
+        const nameMatch = product.name.toLowerCase().includes(searchTermLower);
+
+        // Buscar en las URLs de los items
+        const urlMatch = product.items.some(item => {
+            const urlId = extractID(item.url).toLowerCase();
+            return urlId.includes(searchTermLower);
+        });
+
+        return nameMatch || urlMatch;
+    });
 
     return (
         <main className='flex items-center justify-center lg:mx-48 p-5'>

@@ -28,7 +28,8 @@ export default function Settings() {
     const [editingChannel, setEditingChannel] = useState(null)
     const [roleError, setRoleError] = useState("")
     const [channelError, setChannelError] = useState("")
-    const [editDialogOpen, setEditDialogOpen] = useState(false)
+    const [editRoleDialogOpen, setEditRoleDialogOpen] = useState(false)
+    const [editChannelDialogOpen, setEditChannelDialogOpen] = useState(false)
     const [editError, setEditError] = useState("")
     const [roleSearch, setRoleSearch] = useState("")
     const [channelSearch, setChannelSearch] = useState("")
@@ -284,9 +285,15 @@ export default function Settings() {
         }
     }
 
-    const handleEdit = (role) => {
+    const handleEditRole = (role) => {
         setEditingRole(role)
-        setEditDialogOpen(true)
+        setEditRoleDialogOpen(true)
+        setEditError("")
+    }
+
+    const handleEditChannel = (channel) => {
+        setEditingChannel(channel)
+        setEditChannelDialogOpen(true)
         setEditError("")
     }
 
@@ -319,16 +326,10 @@ export default function Settings() {
             setRoles(roles.map(role =>
                 role.id === editingRole.id ? editingRole : role
             ))
-            setEditDialogOpen(false)
+            setEditRoleDialogOpen(false)
             setEditingRole(null)
             setEditError("")
         }
-    }
-
-    const handleEditChannel = (channel) => {
-        setEditingChannel(channel)
-        setEditDialogOpen(true)
-        setEditError("")
     }
 
     const handleUpdateChannel = async () => {
@@ -360,7 +361,7 @@ export default function Settings() {
             setChannels(channels.map(channel =>
                 channel.id === editingChannel.id ? editingChannel : channel
             ))
-            setEditDialogOpen(false)
+            setEditChannelDialogOpen(false)
             setEditingChannel(null)
             setEditError("")
         }
@@ -488,7 +489,7 @@ export default function Settings() {
                                         {role.title}
                                     </Badge>
                                     <div className="flex">
-                                        <Button variant="ghost" size="sm" onClick={() => handleEdit(role)}>
+                                        <Button variant="ghost" size="sm" onClick={() => handleEditRole(role)}>
                                             <Pencil className="h-4 w-4" />
                                         </Button>
                                         <Button variant="ghost" size="sm" onClick={() => deleteRole(role.id)}>
@@ -623,17 +624,17 @@ export default function Settings() {
                 </div>
             </div>
 
-            {/* Edit Dialog */}
-            <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+            {/* Edit Role Dialog */}
+            <Dialog open={editRoleDialogOpen} onOpenChange={setEditRoleDialogOpen}>
                 <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
                         <DialogTitle>Edit Role</DialogTitle>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                         <div className="grid gap-2">
-                            <Label htmlFor="edit-title">Title</Label>
+                            <Label htmlFor="edit-role-title">Title</Label>
                             <Input
-                                id="edit-title"
+                                id="edit-role-title"
                                 value={editingRole?.title || ''}
                                 onChange={(e) => setEditingRole({
                                     ...editingRole,
@@ -662,16 +663,16 @@ export default function Settings() {
             </Dialog>
 
             {/* Edit Channel Dialog */}
-            <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+            <Dialog open={editChannelDialogOpen} onOpenChange={setEditChannelDialogOpen}>
                 <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
                         <DialogTitle>Edit Channel</DialogTitle>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                         <div className="grid gap-2">
-                            <Label htmlFor="edit-title">Title</Label>
+                            <Label htmlFor="edit-channel-title">Title</Label>
                             <Input
-                                id="edit-title"
+                                id="edit-channel-title"
                                 value={editingChannel?.title || ''}
                                 onChange={(e) => setEditingChannel({
                                     ...editingChannel,
@@ -680,9 +681,9 @@ export default function Settings() {
                             />
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="edit-webhook">Webhook URL *</Label>
+                            <Label htmlFor="edit-channel-webhook">Webhook URL *</Label>
                             <Input
-                                id="edit-webhook"
+                                id="edit-channel-webhook"
                                 value={editingChannel?.webhook_url || ''}
                                 onChange={(e) => setEditingChannel({
                                     ...editingChannel,
