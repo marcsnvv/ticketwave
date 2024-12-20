@@ -47,6 +47,7 @@ import EditEventDialog from './edit-event'
 import { format } from "date-fns"; // Asegúrate de que este import esté presente
 import { useToast } from "@/hooks/use-toast"
 import { Checkbox } from "@/components/ui/checkbox" // Añadir este import
+import { AlertCircle } from 'lucide-react' // Añadir este import
 
 
 // Función auxiliar para truncar texto
@@ -546,6 +547,175 @@ export default function ProductsTable({ params }) {
         return nameMatch || urlMatch;
     });
 
+    const exportToCSV = () => {
+        // Preparar los datos para exportar
+        const csvData = products.map(product => ({
+            name: product.name,
+            url: product.url,
+            max_price: product.max_price || '',
+            channel: product.channels?.title || '',
+            role: product.roles?.title || '',
+            autodelete_event: product.autodelete_event || '',
+            resell: product.resell ? 'true' : 'false'
+        }));
+
+        // Crear el contenido CSV
+        const headers = ['name', 'url', 'max_price', 'channel', 'role', 'autodelete_event', 'resell'];
+        const csvContent = [
+            headers.join(','),
+            ...csvData.map(row => headers.map(header => `"${row[header]}"`).join(','))
+        ].join('\n');
+
+        // Crear y descargar el archivo
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `${monitorName}_products.csv`;
+        link.click();
+    }
+
+    const [importFile, setImportFile] = useState(null);
+    const [importData, setImportData] = useState(null);
+    const [importErrors, setImportErrors] = useState([]);
+    const [showImportDialog, setShowImportDialog] = useState(false);
+    const [showImportConfirm, setShowImportConfirm] = useState(false);
+
+    const validateImportData = (data) => {
+        const errors = [];
+        let errorCount = 0;
+        const MAX_ERRORS = 5;
+
+        for (let index = 0; index < data.length; index++) {
+            const row = data[index];
+
+            // Si ya tenemos 5 errores, salimos del bucle
+            if (errorCount >= MAX_ERRORS) {
+                errors.push(`... and more errors (showing first ${MAX_ERRORS} only)`);
+                break;
+            }
+
+            // Validaciones
+            if (!row.name || typeof row.name !== 'string') {
+                errors.push(`Row ${index + 1}: Invalid name`);
+                errorCount++;
+            }
+
+            if (!row.url || !row.url.includes(monitorName)) {
+                errors.push(`Row ${index + 1}: Invalid URL format`);
+                errorCount++;
+            }
+
+            if (row.max_price && isNaN(Number(row.max_price))) {
+                errors.push(`Row ${index + 1}: Invalid max price`);
+                errorCount++;
+            }
+
+            if (row.channel && !channels.some(c => c.title === row.channel)) {
+                errors.push(`Row ${index + 1}: Invalid channel`);
+                errorCount++;
+            }
+
+            if (row.role && !roles.some(r => r.title === row.role)) {
+                errors.push(`Row ${index + 1}: Invalid role`);
+                errorCount++;
+            }
+
+            if (row.autodelete_event && isNaN(new Date(row.autodelete_event).getTime())) {
+                errors.push(`Row ${index + 1}: Invalid date format`);
+                errorCount++;
+            }
+
+            if (row.resell && !['true', 'false'].includes(row.resell.toLowerCase())) {
+                errors.push(`Row ${index + 1}: Invalid resell value`);
+                errorCount++;
+            }
+        }
+
+        return errors;
+    }
+
+    const handleFileUpload = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            setImportFile(file);
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const text = e.target.result;
+                const rows = text.split('\n');
+                const headers = rows[0].split(',').map(h => h.trim());
+
+                const data = rows.slice(1).map(row => {
+                    const values = row.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+                    return headers.reduce((obj, header, index) => {
+                        obj[header] = values[index];
+                        return obj;
+                    }, {});
+                });
+
+                setImportData(data);
+                const errors = validateImportData(data);
+                setImportErrors(errors);
+                setShowImportConfirm(errors.length === 0);
+            };
+            reader.readAsText(file);
+        }
+    }
+
+    const handleImport = async () => {
+        try {
+            setLoading(true);
+
+            // Mapear los datos importados a los IDs correctos
+            const mappedData = await Promise.all(importData.map(async (row) => {
+                const channelId = channels.find(c => c.title === row.channel)?.id;
+                const roleId = roles.find(r => r.title === row.role)?.id;
+
+                return {
+                    name: row.name,
+                    url: row.url,
+                    monitor_id: monitorId,
+                    company_id: localStorage.getItem('company_id'),
+                    max_price: row.max_price ? Number(row.max_price) : null,
+                    channel: channelId,
+                    role: roleId,
+                    autodelete_event: row.autodelete_event || null,
+                    resell: row.resell?.toLowerCase() === 'true'
+                };
+            }));
+
+            const { data, error } = await supabase
+                .from('products')
+                .insert(mappedData)
+                .select();
+
+            if (error) throw error;
+
+            toast({
+                title: "Success",
+                description: `Imported ${data.length} products successfully`
+            });
+
+            // Actualizar la lista de productos
+            await fetchData();
+
+            // Limpiar el estado de importación
+            setImportFile(null);
+            setImportData(null);
+            setImportErrors([]);
+            setShowImportDialog(false);
+            setShowImportConfirm(false);
+
+        } catch (error) {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: error.message
+            });
+        } finally {
+            setLoading(false);
+        }
+    }
+
     return (
         <main className='flex items-center justify-center lg:mx-48 p-5'>
 
@@ -575,11 +745,26 @@ export default function ProductsTable({ params }) {
                             className="lg:w-96 w-52 pl-9" // Added padding for the icon
                         />
                     </div>
-                    <Button
-                        onClick={() => setNewEvent(true)}
-                        variant="outline"
-                    >Add New Event</Button>
-
+                    <div className="flex gap-2">
+                        <Button
+                            variant="outline"
+                            onClick={() => exportToCSV()}
+                        >
+                            Export CSV
+                        </Button>
+                        <Button
+                            variant="outline"
+                            onClick={() => setShowImportDialog(true)}
+                        >
+                            Import CSV
+                        </Button>
+                        <Button
+                            onClick={() => setNewEvent(true)}
+                            variant="outline"
+                        >
+                            Add New Event
+                        </Button>
+                    </div>
                 </div>
 
                 {/* Añadir botón de Bulk Edit cuando haya selección */}
@@ -887,6 +1072,74 @@ export default function ProductsTable({ params }) {
                                 }}
                             >
                                 Save Changes
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+
+                <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Import Products from CSV</DialogTitle>
+                            <DialogDescription>
+                                Upload a CSV file with product data. The file should have the following columns:
+                                name, url, max_price, channel, role, autodelete_event, resell
+                            </DialogDescription>
+                        </DialogHeader>
+
+                        <div className="grid gap-4 py-4">
+                            <Input
+                                type="file"
+                                accept=".csv"
+                                onChange={handleFileUpload}
+                            />
+
+                            {importErrors.length > 0 && (
+                                <Alert variant="destructive">
+                                    <AlertCircle className="h-4 w-4" />
+                                    <AlertTitle>Validation Errors</AlertTitle>
+                                    <AlertDescription>
+                                        <ul className="list-disc pl-4">
+                                            {importErrors.map((error, index) => (
+                                                <li key={index}>{error}</li>
+                                            ))}
+                                        </ul>
+                                    </AlertDescription>
+                                </Alert>
+                            )}
+                        </div>
+
+                        <DialogFooter>
+                            <Button
+                                onClick={() => setShowImportDialog(false)}
+                                variant="outline"
+                            >
+                                Cancel
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+
+                <Dialog open={showImportConfirm} onOpenChange={setShowImportConfirm}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Confirm Import</DialogTitle>
+                            <DialogDescription>
+                                Are you sure you want to import {importData?.length} products?
+                            </DialogDescription>
+                        </DialogHeader>
+
+                        <DialogFooter>
+                            <Button
+                                onClick={() => setShowImportConfirm(false)}
+                                variant="outline"
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                onClick={handleImport}
+                            >
+                                Import
                             </Button>
                         </DialogFooter>
                     </DialogContent>
