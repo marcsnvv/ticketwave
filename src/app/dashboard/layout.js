@@ -7,7 +7,9 @@ export default function DashboardLayout({ children }) {
         <html lang="en">
             <body className="h-screen">
                 <Navbar />
-                {children}
+                <main className="mt-16">
+                    {children}
+                </main>
                 {/* <Footer /> */}
                 <Toaster />
             </body>

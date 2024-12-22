@@ -788,6 +788,7 @@ export default function ProductsTable({ params }) {
                             <TableRow>
                                 <TableHead className="min-w-1/5">
                                     <Checkbox
+                                        className="cursor-pointer border-gray-400"
                                         checked={selectedProducts.length === products.length}
                                         onCheckedChange={handleSelectAll}
                                     />
@@ -824,6 +825,7 @@ export default function ProductsTable({ params }) {
                                                 <TableRow key={product.id}>
                                                     <TableCell>
                                                         <Checkbox
+                                                            className="cursor-pointer border-gray-400"
                                                             checked={selectedProducts.includes(product.id)}
                                                             onCheckedChange={(checked) =>
                                                                 handleSelectProduct(product.id, checked)
@@ -1051,6 +1053,7 @@ export default function ProductsTable({ params }) {
 
                             <div className="flex items-center space-x-2">
                                 <Checkbox
+                                    className="cursor-pointer border-gray-400"
                                     id="resell"
                                     checked={resell}
                                     onCheckedChange={setResell}

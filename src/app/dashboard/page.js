@@ -74,6 +74,7 @@ export default function MonitorsTable() {
     const [sortDirection, setSortDirection] = useState('asc')
     const [needsCompany, setNeedsCompany] = useState(true)
     const [user, setUser] = useState(null)
+    const [isInitialLoading, setIsInitialLoading] = useState(true)
 
     const fetchTotalProducts = async ({ monitorId, companyId }) => {
         try {
@@ -130,30 +131,34 @@ export default function MonitorsTable() {
 
     useEffect(() => {
         async function checkUserCompany() {
-            const { data: { session } } = await supabase.auth.getSession()
+            try {
+                const { data: { session } } = await supabase.auth.getSession()
 
-            if (!session) {
-                router.push("/login")
-                return
+                if (!session) {
+                    router.push("/login")
+                    return
+                }
+
+                setUser(session.user)
+
+                const { data: userData, error: userError } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('email', session.user.email)
+                    .single()
+
+                if (userError || !userData) {
+                    setNeedsCompany(true)
+                } else {
+                    localStorage.setItem('company_id', userData.company_id)
+                    setNeedsCompany(false)
+                    await fetchMonitors()
+                }
+            } catch (error) {
+                console.error('Error:', error)
+            } finally {
+                setIsInitialLoading(false)
             }
-
-            setUser(session.user)
-
-            const { data: userData, error: userError } = await supabase
-                .from('users')
-                .select('*')
-                .eq('email', session.user.email)
-                .single()
-
-            if (userError || !userData) {
-                setNeedsCompany(true)
-                return
-            }
-
-            localStorage.setItem('company_id', userData.company_id)
-            setNeedsCompany(false)
-            // Continue with existing monitor fetching logic
-            fetchMonitors()
         }
 
         checkUserCompany()
@@ -163,6 +168,16 @@ export default function MonitorsTable() {
         setNeedsCompany(false)
         // Refresh monitors
         fetchMonitors()
+    }
+
+    if (isInitialLoading) {
+        return (
+            <div className="min-h-screen bg-black flex items-center justify-center">
+                <div className="w-64 h-2 bg-gray-800 rounded-full overflow-hidden">
+                    <div className="w-full h-full bg-white animate-[loading_1s_ease-in-out_infinite]"></div>
+                </div>
+            </div>
+        )
     }
 
     if (needsCompany) {

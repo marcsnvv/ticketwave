@@ -54,48 +54,50 @@ export default function Navbar() {
 
 
     return (
-        <div className="flex items-center justify-between p-5 text-white lg:mx-48">
-            <div className="flex items-center">
-                <Link href={"/"}>
-                    <Image src="/logo.png" alt="Logo" width={35} height={35} />
-                </Link>
-            </div>
-            <div className="flex items-center">
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Avatar className="h-8 w-8 cursor-pointer">
-                            <AvatarImage src={user?.avatar_url} alt={user?.name} />
-                            <AvatarFallback>{user?.name?.substring(0, 2)?.toUpperCase() || 'TW'}</AvatarFallback>
-                        </Avatar>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>
-                            {user?.name || 'TicketWave'}
-                        </DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onSelect={() => router.push("/dashboard")} >
-                            <ListBulletIcon className="w-4 h-4 mr-2" />
-                            Monitors
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onSelect={() => router.push("/dashboard/settings")}>
-                            <MixerHorizontalIcon className="w-4 h-4 mr-2" />
-                            Settings
-                        </DropdownMenuItem>
-                        {
-                            isAdmin
-                                ? <DropdownMenuItem onSelect={() => router.push("/dashboard/admin")}>
-                                    <RocketIcon className="w-4 h-4 mr-2" />
-                                    Admin
-                                </DropdownMenuItem>
-                                : null
-                        }
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onSelect={(e) => logout(e)}>
-                            <ExitIcon className="w-4 h-4 mr-2" />
-                            Logout
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+        <div className="fixed top-0 left-0 right-0 z-50 backdrop-blur-sm bg-black/30">
+            <div className="flex items-center justify-between p-5 text-white lg:mx-48">
+                <div className="flex items-center">
+                    <Link href={"/"}>
+                        <Image src="/logo.png" alt="Logo" width={35} height={35} />
+                    </Link>
+                </div>
+                <div className="flex items-center">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Avatar className="h-8 w-8 cursor-pointer">
+                                <AvatarImage src={user?.avatar_url} alt={user?.name} />
+                                <AvatarFallback>{user?.name?.substring(0, 2)?.toUpperCase() || 'TW'}</AvatarFallback>
+                            </Avatar>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>
+                                {user?.name || 'TicketWave'}
+                            </DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onSelect={() => router.push("/dashboard")} >
+                                <ListBulletIcon className="w-4 h-4 mr-2" />
+                                Monitors
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onSelect={() => router.push("/dashboard/settings")}>
+                                <MixerHorizontalIcon className="w-4 h-4 mr-2" />
+                                Settings
+                            </DropdownMenuItem>
+                            {
+                                isAdmin
+                                    ? <DropdownMenuItem onSelect={() => router.push("/dashboard/admin")}>
+                                        <RocketIcon className="w-4 h-4 mr-2" />
+                                        Admin
+                                    </DropdownMenuItem>
+                                    : null
+                            }
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onSelect={(e) => logout(e)}>
+                                <ExitIcon className="w-4 h-4 mr-2" />
+                                Logout
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
             </div>
         </div>
     )
