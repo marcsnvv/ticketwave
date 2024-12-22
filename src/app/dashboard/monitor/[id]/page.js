@@ -582,19 +582,29 @@ export default function ProductsTable({ params }) {
 
     const validateImportData = (data) => {
         const errors = [];
+        const warnings = [];
         let errorCount = 0;
         const MAX_ERRORS = 5;
+
+        // Crear un mapa de eventos existentes para búsqueda rápida
+        const existingEvents = new Map();
+        products.forEach(product => {
+            existingEvents.set(product.url, product.name);
+        });
+
+        // Detectar duplicados dentro del archivo CSV
+        const csvEvents = new Map();
 
         for (let index = 0; index < data.length; index++) {
             const row = data[index];
 
-            // Si ya tenemos 5 errores, salimos del bucle
+            // Si ya tenemos 5 errores, salimos del bucle de errores
             if (errorCount >= MAX_ERRORS) {
                 errors.push(`... and more errors (showing first ${MAX_ERRORS} only)`);
                 break;
             }
 
-            // Validaciones
+            // Validaciones existentes...
             if (!row.name || typeof row.name !== 'string') {
                 errors.push(`Row ${index + 1}: Invalid name`);
                 errorCount++;
@@ -629,9 +639,21 @@ export default function ProductsTable({ params }) {
                 errors.push(`Row ${index + 1}: Invalid resell value`);
                 errorCount++;
             }
+
+            // Revisar duplicados dentro del CSV
+            if (csvEvents.has(row.url)) {
+                warnings.push(`Row ${index + 1}: Duplicate event within import file - "${row.name}"`);
+            } else {
+                csvEvents.set(row.url, row.name);
+            }
+
+            // Revisar duplicados con eventos existentes
+            if (existingEvents.has(row.url)) {
+                warnings.push(`Row ${index + 1}: Event already exists - "${row.name}"`);
+            }
         }
 
-        return errors;
+        return { errors, warnings };
     }
 
     const handleFileUpload = (event) => {
@@ -653,13 +675,20 @@ export default function ProductsTable({ params }) {
                 });
 
                 setImportData(data);
-                const errors = validateImportData(data);
+                const { errors, warnings } = validateImportData(data);
                 setImportErrors(errors);
+                // Solo mostrar el diálogo de confirmación si no hay errores (los warnings no bloquean)
                 setShowImportConfirm(errors.length === 0);
+
+                // Guardar los warnings en el estado
+                setImportWarnings(warnings);
             };
             reader.readAsText(file);
         }
     }
+
+    // Añadir este nuevo estado
+    const [importWarnings, setImportWarnings] = useState([]);
 
     const handleImport = async () => {
         try {
@@ -1129,6 +1158,19 @@ export default function ProductsTable({ params }) {
                             <DialogTitle>Confirm Import</DialogTitle>
                             <DialogDescription>
                                 Are you sure you want to import {importData?.length} products?
+                                {importWarnings.length > 0 && (
+                                    <Alert className="mt-4" variant="warning">
+                                        <AlertCircle className="h-4 w-4" />
+                                        <AlertTitle>Warnings</AlertTitle>
+                                        <AlertDescription>
+                                            <ul className="list-disc pl-4">
+                                                {importWarnings.map((warning, index) => (
+                                                    <li key={index}>{warning}</li>
+                                                ))}
+                                            </ul>
+                                        </AlertDescription>
+                                    </Alert>
+                                )}
                             </DialogDescription>
                         </DialogHeader>
 
@@ -1142,7 +1184,7 @@ export default function ProductsTable({ params }) {
                             <Button
                                 onClick={handleImport}
                             >
-                                Import
+                                Import Anyway
                             </Button>
                         </DialogFooter>
                     </DialogContent>
