@@ -595,22 +595,45 @@ export default function ProductsTable({ params }) {
         // Detectar duplicados dentro del archivo CSV
         const csvEvents = new Map();
 
+        // Función auxiliar para validar URL según el monitor
+        const isValidUrl = (url) => {
+            try {
+                const urlObj = new URL(url);
+                // Obtener el dominio base del monitor
+                const monitorDomain = monitorName.toLowerCase();
+                const urlDomain = urlObj.hostname.toLowerCase();
+
+                // Validar según el tipo de monitor
+                if (monitorDomain.includes('axs')) {
+                    return urlDomain.includes('axs.com');
+                } else if (monitorDomain.includes('eventim')) {
+                    return urlDomain.includes('eventim');
+                } else if (monitorDomain.includes('ticketcorner')) {
+                    return urlDomain.includes('ticketcorner.ch');
+                } else {
+                    // Para otros monitores, validar que la URL contenga el nombre del monitor
+                    return urlDomain.includes(monitorDomain);
+                }
+            } catch {
+                return false;
+            }
+        };
+
         for (let index = 0; index < data.length; index++) {
             const row = data[index];
 
-            // Si ya tenemos 5 errores, salimos del bucle de errores
             if (errorCount >= MAX_ERRORS) {
                 errors.push(`... and more errors (showing first ${MAX_ERRORS} only)`);
                 break;
             }
 
-            // Validaciones existentes...
+            // Validaciones básicas
             if (!row.name || typeof row.name !== 'string') {
                 errors.push(`Row ${index + 1}: Invalid name`);
                 errorCount++;
             }
 
-            if (!row.url || !row.url.includes(monitorName)) {
+            if (!row.url || !isValidUrl(row.url)) {
                 errors.push(`Row ${index + 1}: Invalid URL format`);
                 errorCount++;
             }
