@@ -201,54 +201,50 @@ export default function Settings() {
     }
 
     const addChannel = async () => {
-        setChannelError("")
+        setChannelError("");
 
         if (!newChannel.webhook_url) {
             toast({
                 variant: "destructive",
                 title: "Error",
                 description: "Webhook URL is required"
-            })
-            return
+            });
+            return;
         }
 
         const duplicateChannel = channels.find(
-            channel => channel.webhook_url === newChannel.webhook_url
-        )
+            channel => channel?.webhook_url === newChannel.webhook_url
+        );
         if (duplicateChannel) {
             toast({
                 variant: "destructive",
                 title: "Error",
                 description: "A channel with this webhook URL already exists"
-            })
-            return
+            });
+            return;
         }
-
-        const companyId = localStorage.getItem("company_id")
-        console.log(companyId)
 
         const { data, error } = await supabase
             .from('channels')
-            .insert([{ ...newChannel, company_id: companyId }])
-        // .select()
-        // .eq('company_id', localStorage.getItem("company_id"))
+            .insert([{ ...newChannel, company_id: localStorage.getItem("company_id") }])
+            .select(); // Make sure to select the data after insertion
 
         if (error) {
             toast({
                 variant: "destructive",
                 title: "Error",
                 description: "Error adding channel " + error.message
-            })
-        } else {
-            setChannels([...channels, data?.[0]])
-            setNewChannel({ title: '', webhook_url: '' })
-            setAddChannelDialogOpen(false)
+            });
+        } else if (data && data[0]) {
+            setChannels([...channels, data[0]]);
+            setNewChannel({ title: '', webhook_url: '' });
+            setAddChannelDialogOpen(false);
             toast({
                 title: "Success",
                 description: "Channel added successfully"
-            })
+            });
         }
-    }
+    };
 
     const updateChannel = async (id) => {
         const { error } = await supabase
@@ -806,3 +802,4 @@ export default function Settings() {
         </main>
     );
 }
+
