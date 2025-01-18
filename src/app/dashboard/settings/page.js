@@ -479,10 +479,10 @@ export default function Settings() {
                             </div>
                             <Button className="w-1/5" onClick={() => setAddRoleDialogOpen(true)}>
                                 <Plus className="h-4 w-4 mr-2" />
-                                Add Role
+                                <span className="hidden lg:block">Add Role</span>
                             </Button>
                         </div>
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
                             {filteredRoles.slice(0, visibleRoles).map((role) => (
                                 <div key={role.id} className="flex items-center justify-between p-2 border rounded hover:shadow-sm">
                                     <Badge style={{ backgroundColor: role.color }}>
@@ -521,10 +521,10 @@ export default function Settings() {
                             </div>
                             <Button className="w-1/5" onClick={() => setAddChannelDialogOpen(true)}>
                                 <Plus className="h-4 w-4 mr-2" />
-                                Add Channel
+                                <span className="hidden lg:block">Add Channel</span>
                             </Button>
                         </div>
-                        <div className="grid grid-cols-2 lg:grid-cols-3 gap-5">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
                             {filteredChannels.slice(0, visibleChannels).map((channel) => (
                                 <div key={channel.id} className="flex items-center justify-between p-2 border rounded">
                                     <div className='flex gap-2 items-center justify-center'>
@@ -550,9 +550,9 @@ export default function Settings() {
                     </div>
                 </div>
 
-                <div className="flex gap-8">
+                <div className="flex gap-8 flex-col lg:flex-row">
                     {/* Settings Section - 2/5 width */}
-                    <div className="w-2/5">
+                    <div className="w-full lg:w-2/5">
                         <h3 className="text-lg font-medium mb-4">Webhook Customization</h3>
                         <Card className="shadow-md">
                             <CardContent className="pt-6">
@@ -606,7 +606,7 @@ export default function Settings() {
                     </div>
 
                     {/* Preview Section - 3/5 width */}
-                    <div className="w-3/5">
+                    <div className="w-full lg:w-3/5">
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="text-lg font-medium">Preview</h3>
                             <Button onClick={() => setTestDialogOpen(true)}>

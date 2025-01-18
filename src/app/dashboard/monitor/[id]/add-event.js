@@ -11,9 +11,6 @@ import { CheckIcon, ChevronDownIcon, CalendarIcon } from "@radix-ui/react-icons"
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { useState, useEffect } from "react";
-import { cn } from "@/lib/utils"
-import Image from "next/image"
-import { supabase } from "../../../../../supabase";
 
 const monitorsForAutocomplete = [
     "ticketmaster",

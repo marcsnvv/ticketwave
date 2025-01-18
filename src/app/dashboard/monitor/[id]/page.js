@@ -799,12 +799,14 @@ export default function ProductsTable({ params }) {
                     </div>
                     <div className="flex gap-2">
                         <Button
+                            className="hidden lg:block"
                             variant="outline"
                             onClick={() => exportToCSV()}
                         >
                             Export CSV
                         </Button>
                         <Button
+                            className="hidden lg:block"
                             variant="outline"
                             onClick={() => setShowImportDialog(true)}
                         >
