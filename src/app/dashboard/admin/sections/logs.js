@@ -22,6 +22,14 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Input } from "@/components/ui/input" // Importar el componente Input
 import { Button } from "@/components/ui/button" // Importar el componente Button
 import { RefreshCw } from 'lucide-react'
+import { Calendar as CalendarIcon } from "lucide-react"
+import { Calendar } from "@/components/ui/calendar"
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover"
+import { format } from "date-fns"
 
 const websites = [
     { "value": "viagogo.com", "label": "Viagogo.com" },
@@ -55,12 +63,20 @@ const websites = [
 
 ]
 
+// Utility function to conditionally join class names
+function cn(...classes) {
+    return classes.filter(Boolean).join(' ');
+}
+
 export default function LogsSection() {
     const [logsData, setLogsData] = useState({ filename: '', total_lines: 0, lines: [] })
     const [loading, setLoading] = useState(true)
-    const [selectedMonitor, setSelectedMonitor] = useState('ticketmaster.ae')
+    const [selectedMonitor, setSelectedMonitor] = useState('viagogo.com')
     const [newLogs, setNewLogs] = useState([])
     const [searchTerm, setSearchTerm] = useState('')
+    const [maxLines, setMaxLines] = useState(50)
+    const [startDate, setStartDate] = useState(null)
+    const [endDate, setEndDate] = useState(null)
 
     const parseLine = (line) => {
         const match = line.match(/\[(.*?)\](.*)/);
@@ -73,7 +89,7 @@ export default function LogsSection() {
         return { timestamp: '', message: line, isError: false };
     }
 
-    const filteredLogs = logsData.lines.filter(line => {
+    const filteredLogs = (logsData.lines || []).filter(line => {
         const { message } = parseLine(line)
         return message.toLowerCase().includes(searchTerm.toLowerCase())
     })
@@ -81,7 +97,7 @@ export default function LogsSection() {
     const forceRefresh = async () => {
         setLoading(true)
         try {
-            const response = await fetch(`https://ticketwave-api.fly.dev/logs?filename=${selectedMonitor}.log`, {
+            const response = await fetch(buildApiUrl(), {
                 method: 'GET',
                 headers: {
                     'X-API-KEY': 'T!CK3TW@V3M0N1T0R$',
@@ -89,27 +105,34 @@ export default function LogsSection() {
                 }
             })
             const data = await response.json()
-            setLogsData(data)
+            setLogsData({
+                filename: data.filename || '',
+                total_lines: data.total_lines || 0,
+                lines: data.lines || []
+            })
         } catch (error) {
             console.error('Error fetching logs:', error)
+            setLogsData({ filename: '', total_lines: 0, lines: [] }) // Reset to default on error
         } finally {
-            // Espera 1 segundo antes de cambiar el estado de loading
             setTimeout(() => setLoading(false), 1000)
         }
     }
 
-    useEffect(() => {
-        setLogsData(prevData => ({
-            ...prevData,
-            lines: [...newLogs, ...prevData.lines]
-        }))
-    }, [newLogs])
+    const buildApiUrl = () => {
+        let url = `https://ticketwave-api.fly.dev/logs?filename=${selectedMonitor}.log&max_lines=${maxLines}`
+        if (startDate && endDate) {
+            const formattedStartDate = format(startDate, 'yyyy-MM-dd')
+            const formattedEndDate = format(endDate, 'yyyy-MM-dd')
+            url += `&start_date=${formattedStartDate}&end_date=${formattedEndDate}`
+        }
+        return url
+    }
 
     useEffect(() => {
         async function fetchInitialLogs() {
             setLoading(true)
             try {
-                const response = await fetch(`https://ticketwave-api.fly.dev/logs?filename=${selectedMonitor}.log`, {
+                const response = await fetch(buildApiUrl(), {
                     method: 'GET',
                     headers: {
                         'X-API-KEY': 'T!CK3TW@V3M0N1T0R$',
@@ -125,41 +148,16 @@ export default function LogsSection() {
             }
         }
 
-        // Ejecutar fetchInitialLogs inmediatamente
         fetchInitialLogs()
-    }, [selectedMonitor])
+    }, [selectedMonitor, maxLines, startDate, endDate])
 
-    useEffect(() => {
-        async function fetchLogs() {
-            try {
-                const response = await fetch(`https://ticketwave-api.fly.dev/logs?filename=${selectedMonitor}.log`, {
-                    method: 'GET',
-                    headers: {
-                        'X-API-KEY': 'T!CK3TW@V3M0N1T0R$',
-                        'Content-Type': 'application/json',
-                    }
-                })
-                const data = await response.json()
-                if (logsData.total_lines < data.total_lines) {
-                    const newLines = data.lines.slice(logsData.total_lines)
-                    setNewLogs(newLines)
-                    setLogsData(prevData => ({
-                        ...prevData,
-                        total_lines: data.total_lines,
-                        lines: [...newLines, ...prevData.lines]
-                    }))
-                }
-            } catch (error) {
-                console.error('Error fetching logs:', error)
-            }
-        }
-
-        // Configurar el intervalo para actualizar cada 5 segundos
-        const interval = setInterval(fetchLogs, 5000)
-
-        // Limpiar el intervalo cuando el componente se desmonte
-        return () => clearInterval(interval)
-    }, [logsData.total_lines, selectedMonitor])
+    const resetConfiguration = () => {
+        setSelectedMonitor('viagogo.com')
+        setSearchTerm('')
+        setMaxLines(50)
+        setStartDate(null)
+        setEndDate(null)
+    }
 
     return (
         <Card className='p-4 border rounded-lg'>
@@ -176,6 +174,7 @@ export default function LogsSection() {
                             <RefreshCw />
                         </div>
                     </Button>
+
                 </div>
                 <Select
                     value={selectedMonitor}
@@ -199,6 +198,75 @@ export default function LogsSection() {
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="mt-4"
                 />
+
+                <div className='flex justify-between gap-4'>
+                    <Select
+                        value={maxLines}
+                        onValueChange={setMaxLines}
+                    >
+                        <SelectTrigger className="w-[300px]">
+                            <SelectValue placeholder="Select number of lines" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {[50, 100, 200, 500].map((lines) => (
+                                <SelectItem key={lines} value={lines}>
+                                    {lines} lines
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button
+                                variant={"outline"}
+                                className={cn(
+                                    "justify-start text-left font-normal",
+                                    !startDate && "text-muted-foreground"
+                                )}
+                            >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {startDate ? format(startDate, "PPP") : <span>Select start date</span>}
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                            <Calendar
+                                mode="single"
+                                selected={startDate}
+                                onSelect={setStartDate}
+                                initialFocus
+                            />
+                        </PopoverContent>
+                    </Popover>
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button
+                                variant={"outline"}
+                                className={cn(
+                                    "justify-start text-left font-normal",
+                                    !endDate && "text-muted-foreground"
+                                )}
+                            >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {endDate ? format(endDate, "PPP") : <span>Select end date</span>}
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                            <Calendar
+                                mode="single"
+                                selected={endDate}
+                                onSelect={setEndDate}
+                                initialFocus
+                            />
+                        </PopoverContent>
+                    </Popover>
+                    <Button
+                        variant="outline"
+                        onClick={resetConfiguration}
+                        // className="ml-2"
+                    >
+                        Reset
+                    </Button>
+                </div>
             </div>
 
             <Table>
