@@ -68,7 +68,12 @@ export default function ClientsSection() {
         avatar_url: '' // Añadimos el nuevo campo
     })
     const [customerToDelete, setCustomerToDelete] = useState(null)
+    const [companies, setCompanies] = useState([])
+    const [companiesAccess, setCompaniesAccess] = useState([])
+    const [selectedUser, setSelectedUser] = useState(null)
+    const [isManageCompaniesOpen, setIsManageCompaniesOpen] = useState(false)
 
+    // First, add this to your useEffect where you fetch the initial data
     useEffect(() => {
         async function fetchData() {
             const { data: { session } } = await supabase.auth.getSession()
@@ -85,16 +90,30 @@ export default function ClientsSection() {
             // Obtener clientes
             const { data: customersData, error } = await supabase
                 .from('users')
-                .select('*,companies(name)')
+                .select('*,companies(name),companies_access(company_id)')
 
             if (error) {
                 console.error('Error fetching customers:', error)
                 return
             }
 
-            console.log(customersData)
-
             setCustomers(customersData)
+            setCompanies(customersData.map(company => ({
+                company_id: company.company_id,
+                name: company.companies.name
+            })))
+
+            const { data: companiesAccessData, error: cae } = await supabase
+                .from("companies_access")
+                .select("*")
+
+            if (cae) {
+                console.error('Error fetching companies access:', cae)
+                return
+            }
+
+            setCompaniesAccess(companiesAccessData)
+            console.log(companiesAccessData)
 
             // Obtener datos de los eventos monitoreados por cada usuario
             const { data: eventsData, error: eventsError } = await supabase
@@ -123,8 +142,6 @@ export default function ClientsSection() {
                 .from('companies')
                 .insert([{ name: newCustomer.company_name }])
                 .select()
-
-            console.log(companyData)
 
             if (companyError) throw companyError
 
@@ -190,6 +207,95 @@ export default function ClientsSection() {
 
     const handleSendEmail = (email) => {
         window.location.href = `mailto:${email}`
+    }
+
+    // Añade este nuevo estado
+    const [selectedCompany, setSelectedCompany] = useState(null)
+
+    // Modifica la función handleAddCompanyAccess
+    const handleAddCompanyAccess = async (userId, companyId) => {
+        try {
+            if (!userId || !companyId) {
+                throw new Error('User ID and Company ID are required')
+            }
+
+            // Create the access
+            const { data: newAccess, error: insertError } = await supabase
+                .from('companies_access')
+                .insert([{ 
+                    user_id: userId,
+                    company_id: companyId 
+                }])
+                .select()
+
+            if (insertError) throw insertError
+
+            // Update states
+            setCompaniesAccess(prev => [...prev, ...(newAccess || [])])
+            setSelectedCompany(null)
+            setSelectedUser(prev => ({
+                ...prev,
+                companies_access: [
+                    ...(prev.companies_access || []),
+                    { company_id: companyId }
+                ]
+            }))
+
+            toast({
+                title: "Access granted",
+                description: "Company access has been granted successfully",
+                variant: "success"
+            })
+        } catch (error) {
+            console.error('Error granting access:', error)
+            toast({
+                title: "Error",
+                description: error.message || "There was an error granting access",
+                variant: "destructive"
+            })
+        }
+    }
+
+    // Añade esta nueva función después de handleAddCompanyAccess
+    const handleRemoveCompanyAccess = async (userId, companyId) => {
+        try {
+            const { error } = await supabase
+                .from('companies_access')
+                .delete()
+                .match({ user_id: userId, company_id: companyId })
+
+            if (error) throw error
+
+            // Actualizar la lista de accesos
+            const { data: newAccess, error: accessError } = await supabase
+                .from('companies_access')
+                .select('*')
+
+            if (accessError) throw accessError
+
+            setCompaniesAccess(newAccess)
+
+            setCompanies(companies.filter(c => c.company_id !== companyId))
+            setSelectedUser(
+                {
+                    ...selectedUser,
+                    companies_access: selectedUser.companies_access.filter(ca => ca.company_id !== companyId)
+                }
+            )
+
+            toast({
+                title: "Access removed",
+                description: "Company access has been removed successfully",
+                variant: "success"
+            })
+        } catch (error) {
+            console.error('Error removing access:', error)
+            toast({
+                title: "Error",
+                description: "There was an error removing access: " + error.message,
+                variant: "destructive"
+            })
+        }
     }
 
     return (
@@ -300,6 +406,13 @@ export default function ClientsSection() {
                                             </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end">
+                                            <DropdownMenuItem onClick={() => {
+                                                setSelectedUser(customer)
+                                                setIsManageCompaniesOpen(true)
+                                            }}>
+                                                <Users className="h-4 w-4 mr-2" />
+                                                Manage Companies
+                                            </DropdownMenuItem>
                                             <DropdownMenuItem onClick={() => handleSendEmail(customer.email)}>
                                                 <Mail className="h-4 w-4 mr-2" />
                                                 Send Email
@@ -311,8 +424,73 @@ export default function ClientsSection() {
                                                 <Trash2 className="h-4 w-4 mr-2" />
                                                 Delete
                                             </DropdownMenuItem>
+
                                         </DropdownMenuContent>
                                     </DropdownMenu>
+                                    <Dialog open={isManageCompaniesOpen} onOpenChange={setIsManageCompaniesOpen}>
+                                        <DialogContent className="sm:max-w-[500px]">
+                                            <DialogHeader>
+                                                <DialogTitle>Manage Company Access</DialogTitle>
+                                            </DialogHeader>
+                                            <div className="flex flex-col gap-4">
+                                                <div>
+                                                    <h3 className="mb-2 font-medium">Current Access</h3>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {selectedUser?.companies_access?.map((access) => (
+                                                            <Badge
+                                                                key={access.company_id}
+                                                                variant="secondary"
+                                                                className="flex items-center gap-2"
+                                                            >
+                                                                {companies.find(c => c.company_id === access.company_id)?.name}
+                                                                <button
+                                                                    onClick={() => handleRemoveCompanyAccess(selectedUser.id, access.company_id)}
+                                                                    className="ml-2 hover:text-red-500"
+                                                                >
+                                                                    <Trash2 className="h-3 w-3" />
+                                                                </button>
+                                                            </Badge>
+                                                        ))}
+                                                    </div>
+                                                </div>
+
+                                                <h3 className="mb-2 font-medium">Add Access</h3>
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    {companies
+                                                        // Remove duplicates by filtering unique company_ids
+                                                        .filter((company, index, self) =>
+                                                            index === self.findIndex((c) => c.company_id === company.company_id)
+                                                        )
+                                                        .filter(company =>
+                                                            !companiesAccess?.some(
+                                                                access =>
+                                                                    access.company_id === company.company_id &&
+                                                                    access.user_id === selectedUser?.id
+                                                            ) &&
+                                                            company.company_id !== selectedUser?.company_id
+                                                        )
+                                                        .map(company => (
+                                                            <Button
+                                                                key={`company-${company.company_id}`}
+                                                                variant={selectedCompany?.company_id === company.company_id ? "default" : "outline"}
+                                                                className={`justify-start ${company.company_id === selectedUser?.company_id ? 'border-2 border-blue-500' : ''}`}
+                                                                onClick={() => setSelectedCompany(company)}
+                                                            >
+                                                                {company.name}
+                                                            </Button>
+                                                        ))
+                                                    }
+                                                </div>
+                                                <Button
+                                                    className="mt-4"
+                                                    onClick={() => handleAddCompanyAccess(selectedUser.id, selectedCompany.company_id)}
+                                                    disabled={!selectedCompany}
+                                                >
+                                                    Grant Access
+                                                </Button>
+                                            </div>
+                                        </DialogContent>
+                                    </Dialog>
                                 </TableCell>
                             </TableRow>
                         ))}
