@@ -1,11 +1,11 @@
 "use client"
 
 import { useEffect, useState, useRef } from "react"
-import { Card, Title } from "@tremor/react"
 import { PageAnalytics } from '@/components/page-analytics'
 import { Users, DollarSign, ArrowUpCircle, ArrowDownCircle, Plus, Edit2 } from 'lucide-react'
 import { supabase } from "../../../../../supabase"
 import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
 import {
     Dialog,
     DialogContent,
@@ -62,7 +62,7 @@ const EditableCard = ({
     }, [isEditing])
 
     return (
-        <Card className="p-4 border rounded-lg relative transition-colors">
+        <Card className="p-4 border border-white/25 relative transition-colors">
             <div className="flex items-center space-x-2">
                 <Icon className={`h-4 w-4 ${iconColor}`} />
                 <h3 className="text-sm font-medium">{title}</h3>
@@ -304,93 +304,99 @@ export default function RevenueSection() {
     }
 
     return (
-        <div className="grid gap-5">
-            <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold">Revenue</h2>
-                <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
-                        <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                            <SelectTrigger className="w-[180px]">
-                                <SelectValue>
-                                    {selectedMonth ? months.find((m) => m.value === selectedMonth).label : "Select Month"}
-                                </SelectValue>
-                            </SelectTrigger>
-                            <SelectContent>
-                                {months.map((month) => (
-                                    <SelectItem key={month.value} value={month.value}>
-                                        {month.label}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <Select value={selectedYear} onValueChange={setSelectedYear}>
-                            <SelectTrigger className="w-[180px]">
-                                <SelectValue>
-                                    {selectedYear ? years.find((y) => y.value === selectedYear).label : "Select Year"}
-                                </SelectValue>
-                            </SelectTrigger>
-                            <SelectContent>
-                                {years.map((year) => (
-                                    <SelectItem key={year.value} value={year.value}>
-                                        {year.label}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <Button variant="outline" onClick={handleReset}>
-                            Reset
-                        </Button>
-                    </div>
+        <div className="grid gap-5 w-full text-white">
+            <div className="w-full flex flex-col">
 
-                    <Dialog open={open} onOpenChange={setOpen}>
-                        <DialogTrigger asChild>
-                            <Button>
-                                <Plus className="h-4 w-4 mr-2" />
-                                Add Month
+                <div className="flex justify-between items-center">
+                    <h2 className='text-5xl font-semibold text-white mb-4'>Revenue</h2>
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
+                            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                                <SelectTrigger className="w-[180px]">
+                                    <SelectValue>
+                                        {selectedMonth ? months.find((m) => m.value === selectedMonth).label : "Select Month"}
+                                    </SelectValue>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {months.map((month) => (
+                                        <SelectItem key={month.value} value={month.value}>
+                                            {month.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <Select value={selectedYear} onValueChange={setSelectedYear}>
+                                <SelectTrigger className="w-[180px]">
+                                    <SelectValue>
+                                        {selectedYear ? years.find((y) => y.value === selectedYear).label : "Select Year"}
+                                    </SelectValue>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {years.map((year) => (
+                                        <SelectItem key={year.value} value={year.value}>
+                                            {year.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <Button variant="outline" onClick={handleReset}>
+                                Reset
                             </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>Add Monthly Data</DialogTitle>
-                            </DialogHeader>
-                            <form onSubmit={handleSubmit} className="space-y-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="month">Month</Label>
-                                    <Input
-                                        id="month"
-                                        name="month"
-                                        type="date"
-                                        required
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="revenue">Revenue</Label>
-                                    <Input
-                                        id="revenue"
-                                        name="revenue"
-                                        type="number"
-                                        step="0.01"
-                                        required
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="expenses">Expenses</Label>
-                                    <Input
-                                        id="expenses"
-                                        name="expenses"
-                                        type="number"
-                                        step="0.01"
-                                        required
-                                    />
-                                </div>
-                                <Button type="submit" className="w-full">
-                                    Confirm
+                        </div>
+
+                        <Dialog open={open} onOpenChange={setOpen}>
+                            <DialogTrigger asChild>
+                                <Button>
+                                    <Plus className="h-4 w-4 mr-2" />
+                                    Add Month
                                 </Button>
-                            </form>
-                        </DialogContent>
-                    </Dialog>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Add Monthly Data</DialogTitle>
+                                </DialogHeader>
+                                <form onSubmit={handleSubmit} className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="month">Month</Label>
+                                        <Input
+                                            id="month"
+                                            name="month"
+                                            type="date"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="revenue">Revenue</Label>
+                                        <Input
+                                            id="revenue"
+                                            name="revenue"
+                                            type="number"
+                                            step="0.01"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="expenses">Expenses</Label>
+                                        <Input
+                                            id="expenses"
+                                            name="expenses"
+                                            type="number"
+                                            step="0.01"
+                                            required
+                                        />
+                                    </div>
+                                    <Button type="submit" className="w-full">
+                                        Confirm
+                                    </Button>
+                                </form>
+                            </DialogContent>
+                        </Dialog>
+                    </div>
                 </div>
+                <hr className="my-4 border-t border-white/25" />
+
             </div>
+
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Card className="p-4 border rounded-lg">

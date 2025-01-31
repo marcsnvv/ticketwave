@@ -235,21 +235,21 @@ export default function Navbar() {
                                     </div>
                                     <button
                                         className='flex justify-start items-center gap-2 hover:bg-white/25 p-2 px-3 w-full rounded-md transition duration-200 ease-in-out'
-                                        onClick={() => router.push("/dashboard/revenue")}
+                                        onClick={() => router.push("/dashboard/admin/revenue")}
                                     >
                                         <RocketIcon className="w-6 h-6" />
                                         Revenue
                                     </button>
                                     <button
                                         className='flex justify-start items-center gap-2 hover:bg-white/25 p-2 px-3 w-full rounded-md transition duration-200 ease-in-out'
-                                        onClick={() => router.push("/dashboard/clients")}
+                                        onClick={() => router.push("/dashboard/admin/clients")}
                                     >
                                         <PersonIcon className="w-6 h-6" />
                                         Clients
                                     </button>
                                     <button
                                         className='flex justify-start items-center gap-2 hover:bg-white/25 p-2 px-3 w-full rounded-md transition duration-200 ease-in-out'
-                                        onClick={() => router.push("/dashboard/revenue")}
+                                        onClick={() => router.push("/dashboard/admin/logs")}
                                     >
                                         <ListBulletIcon className="w-6 h-6" />
                                         Logs

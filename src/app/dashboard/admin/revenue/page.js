@@ -21,10 +21,8 @@ export default function RevenueDashboard() {
     }, [])
 
     return (
-        <div className="flex flex-col h-screen">
-            <main className='flex-1 overflow-auto p-5 lg:mx-48'>
-                <RevenueSection />
-            </main>
-        </div>
+        <main className='flex flex-col items-start justify-start w-full p-10 mt-[80px] min-h-screen h-full'>
+            <RevenueSection />
+        </main>
     )
 }
