@@ -75,7 +75,7 @@ export default function Login() {
 
     return (
         <div className="flex justify-center items-center h-screen">
-            <Card className="w-full max-w-md shadow-lg">
+            <Card className="w-full max-w-md shadow-lg bg-background border border-white/25 rounded-[12px] text-white">
                 <CardHeader className="flex flex-col items-center justify-center gap-2">
                     <Image src={"/logo.png"} width={50} height={50} alt="tw logo" />
                     <CardTitle className="text-center text-xl">Login</CardTitle>

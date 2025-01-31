@@ -190,7 +190,7 @@ export default function AddEvent({
                             <div className="flex justify-between gap-2">
                                 <div className="grid gap-4 w-full">
                                     <Label htmlFor="event-name">
-                                        Name *
+                                        Event Name *
                                     </Label>
                                     {monitorsForAutocomplete.includes(monitorType) ? (
                                         <div className="relative">
@@ -202,6 +202,7 @@ export default function AddEvent({
                                                     setNewEventName(e.target.value) // Asegurarnos de que el valor se actualice siempre
                                                 }}
                                                 className="col-span-3"
+                                                placeholder="Bad Bunny"
                                             />
                                             {isSearching ? (
                                                 <div className="absolute w-full mt-1 bg-background rounded-md border shadow-lg p-4">
@@ -242,13 +243,14 @@ export default function AddEvent({
                                             value={newEventName}
                                             onChange={(e) => setNewEventName(e.target.value)}
                                             className="col-span-3"
+                                            placeholder="Bad Bunny"
                                         />
                                     )}
                                 </div>
 
                                 <div className="grid gap-4">
                                     <Label htmlFor="event-webhook-url">
-                                        Max price
+                                        Price Threshold
                                     </Label>
                                     <div className='flex items-center gap-2'>
                                         <Input
@@ -258,82 +260,68 @@ export default function AddEvent({
                                             value={newEventMaxPrice}
                                             onChange={(e) => setNewEventMaxPrice(e.target.value)}
                                             className="col-span-3"
+                                            placeholder="100€"
                                         />
-                                        <div className='flex items-center justify-center p-2 h-10 w-10 border border-gray rounded-lg'>
-                                            $
-                                        </div>
                                     </div>
                                 </div>
                             </div>
                             <div className="grid gap-4">
                                 <Label htmlFor="event-url">
-                                    URL *
+                                    Event URL *
                                 </Label>
                                 <Input
                                     id="event-url"
                                     value={newEventUrl}
                                     onChange={(e) => setNewEventUrl(e.target.value)}
                                     className="col-span-3"
+                                    placeholder="https://example.com/event"
                                 />
                             </div>
 
-                            <div className="grid gap-4">
-                                <Label htmlFor="event-webhook-url">
-                                    Webhook URL *
-                                </Label>
-                                <Popover open={openWebhookSelect} onOpenChange={setOpenWebhookSelect}>
-                                    <PopoverTrigger asChild>
-                                        <Button variant="outline" className="w-full justify-between">
-                                            {webhookTitle}
-                                            <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-full p-0">
-                                        <Command>
-                                            <CommandInput placeholder="Search webhook..." className="h-9" />
-                                            <CommandList className="max-h-[300px] overflow-auto">
-                                                <CommandEmpty>No webhook found.</CommandEmpty>
-                                                <CommandGroup className="overflow-auto">
-                                                    {channels.sort((a, b) => a.title.localeCompare(b.title)).map((channel) => (
-                                                        <CommandItem
-                                                            key={channel.id}
-                                                            value={channel.title}
-                                                            onSelect={() => {
-                                                                setNewEventChannelId(channel.id);
-                                                                setWebhookTitle(channel.title);
-                                                                setOpenWebhookSelect(false);
-                                                            }}
-                                                        >
-                                                            {channel.title}
-                                                            <CheckIcon
-                                                                className={`ml-auto h-4 w-4 ${newEventChannelId === channel.id ? "opacity-100" : "opacity-0"}`}
-                                                            />
-                                                        </CommandItem>
-                                                    ))}
-                                                </CommandGroup>
-                                            </CommandList>
-                                        </Command>
-                                    </PopoverContent>
-                                </Popover>
-                            </div>
                             <div className="flex justify-between gap-2 items-center">
                                 <div className="grid gap-4 w-1/2">
-                                    <Label htmlFor="product-webhook-url">
-                                        Resell
+                                    <Label htmlFor="event-webhook-url">
+                                        Webhook *
                                     </Label>
-                                    <Select onValueChange={(value) => setResell(value === "true")}>
-                                        <SelectTrigger className="">
-                                            <SelectValue placeholder="Resell" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="true">True</SelectItem>
-                                            <SelectItem value="false">False</SelectItem>
-                                        </SelectContent>
-                                    </Select>
+                                    <Popover open={openWebhookSelect} onOpenChange={setOpenWebhookSelect}>
+                                        <PopoverTrigger asChild>
+                                            <Button variant="outline" className="w-full justify-between">
+                                                {webhookTitle}
+                                                <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-full p-0">
+                                            <Command>
+                                                <CommandInput placeholder="Search webhook..." className="h-9" />
+                                                <CommandList className="max-h-[300px] overflow-auto">
+                                                    <CommandEmpty>No webhook found.</CommandEmpty>
+                                                    <CommandGroup className="overflow-auto">
+                                                        {channels.sort((a, b) => a.title.localeCompare(b.title)).map((channel) => (
+                                                            <CommandItem
+                                                                key={channel.id}
+                                                                value={channel.title}
+                                                                onSelect={() => {
+                                                                    setNewEventChannelId(channel.id);
+                                                                    setWebhookTitle(channel.title);
+                                                                    setOpenWebhookSelect(false);
+                                                                }}
+                                                            >
+                                                                {channel.title}
+                                                                <CheckIcon
+                                                                    className={`ml-auto h-4 w-4 ${newEventChannelId === channel.id ? "opacity-100" : "opacity-0"}`}
+                                                                />
+                                                            </CommandItem>
+                                                        ))}
+                                                    </CommandGroup>
+                                                </CommandList>
+                                            </Command>
+                                        </PopoverContent>
+                                    </Popover>
                                 </div>
+
                                 <div className="grid gap-4 w-1/2">
                                     <Label htmlFor="role-ping">
-                                        Role ping
+                                        Role
                                     </Label>
                                     <Popover open={openRole} onOpenChange={setOpenRole}>
                                         <PopoverTrigger asChild>
@@ -372,40 +360,60 @@ export default function AddEvent({
                                     </Popover>
                                 </div>
                             </div>
-                            <div className="grid gap-4">
-                                <Label htmlFor="auto-delete-date">
-                                    Date to autoremove
-                                </Label>
-                                <Popover open={openCalendar} onOpenChange={setOpenCalendar}>
-                                    <PopoverTrigger asChild>
-                                        <Button
-                                            variant={"outline"}
-                                            className="w-full justify-between"
-                                        >
-                                            {autoDeleteDate ? (
-                                                format(new Date(autoDeleteDate), "PPP")
-                                            ) : (
-                                                <span>Pick a date</span>
-                                            )}
-                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0" align="start">
-                                        <Calendar
-                                            mode="single"
-                                            selected={autoDeleteDate ? new Date(autoDeleteDate) : new Date()}
-                                            onSelect={(date) => {
-                                                setAutoDeleteDate(date.toISOString());
-                                                setOpenCalendar(false);
-                                            }}
-                                            initialFocus
-                                        />
-                                    </PopoverContent>
-                                </Popover>
+
+
+                            <div className="flex justify-between gap-2 items-center">
+                                <div className="grid gap-4 w-1/2">
+                                    <Label htmlFor="product-webhook-url">
+                                        Resell
+                                    </Label>
+                                    <Select onValueChange={(value) => setResell(value === "true")}>
+                                        <SelectTrigger className="">
+                                            <SelectValue placeholder="Resell" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="true">True</SelectItem>
+                                            <SelectItem value="false">False</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="grid gap-4 w-1/2">
+                                    <Label htmlFor="auto-delete-date">
+                                        Date to autoremove
+                                    </Label>
+                                    <Popover open={openCalendar} onOpenChange={setOpenCalendar}>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant={"outline"}
+                                                className="w-full justify-between"
+                                            >
+                                                {autoDeleteDate ? (
+                                                    format(new Date(autoDeleteDate), "PPP")
+                                                ) : (
+                                                    <span>Pick a date</span>
+                                                )}
+                                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start">
+                                            <Calendar
+                                                mode="single"
+                                                selected={autoDeleteDate ? new Date(autoDeleteDate) : new Date()}
+                                                onSelect={(date) => {
+                                                    setAutoDeleteDate(date.toISOString());
+                                                    setOpenCalendar(false);
+                                                }}
+                                                initialFocus
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                </div>
                             </div>
                         </div>
                         <DialogFooter>
                             {error && <span className="text-red-500 text-sm">{error}</span>}
+                            <Button variant="outline" onClick={() => setAddEvent(null)}>Cancel</Button>
                             <Button type="button" onClick={handleAddEvent}>Save</Button>
                         </DialogFooter>
                     </DialogContent>

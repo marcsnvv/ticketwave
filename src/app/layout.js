@@ -14,15 +14,17 @@ const geistMono = localFont({
 });
 
 export const metadata = {
-  title: "TicketWave Dashboard",
-  description: "Admin Monitors dashboard",
+  title: "TicketWave Monitors",
+  description: "whop.com/ticketwave",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {children}
+        <main className="bg-gradient-to-tl from-primary from-10% via-background via-50% to-background to-100%">
+          {children}
+        </main>
       </body>
     </html>
   );

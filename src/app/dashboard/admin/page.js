@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { supabase } from '../../../../supabase'
 import { useRouter } from 'next/navigation'
 import {
@@ -8,15 +8,11 @@ import {
     MenubarMenu,
     MenubarTrigger,
 } from "@/components/ui/menubar"
-import RevenueSection from './sections/revenue'
-import ClientsSection from './sections/clients'
-import LogsSection from './sections/logs'
 
 const admins_emails = [process.env.ADMIN_EMAIL1, process.env.ADMIN_EMAIL2, "vuntagecom@gmail.com", "busines1244@gmail.com"]
 
 export default function AdminPage() {
     const router = useRouter()
-    const [activeSection, setActiveSection] = useState('revenue')
 
     useEffect(() => {
         async function checkAuth() {
@@ -28,49 +24,35 @@ export default function AdminPage() {
         checkAuth()
     }, [])
 
-    const renderSection = () => {
-        switch (activeSection) {
-            case 'revenue':
-                return <RevenueSection />
-            case 'clients':
-                return <ClientsSection />
-            case 'logs':
-                return <LogsSection />
-            default:
-                return <RevenueSection />
-        }
-    }
-
     return (
         <div className="flex flex-col h-screen">
             <main className='flex-1 overflow-auto p-5 lg:mx-48'>
                 <Menubar className="flex w-56 mb-4">
                     <MenubarMenu>
                         <MenubarTrigger
-                            className={activeSection === 'revenue' ? 'bg-secondary' : ''}
-                            onClick={() => setActiveSection('revenue')}
+                            onClick={() => router.push('/dashboard/admin/revenuedashboard')}
                         >
                             Revenue
                         </MenubarTrigger>
                     </MenubarMenu>
                     <MenubarMenu>
                         <MenubarTrigger
-                            className={activeSection === 'clients' ? 'bg-secondary' : ''}
-                            onClick={() => setActiveSection('clients')}
+                            onClick={() => router.push('/dashboard/admin/clientsdashboard')}
                         >
                             Clients
                         </MenubarTrigger>
                     </MenubarMenu>
                     <MenubarMenu>
                         <MenubarTrigger
-                            className={activeSection === 'logs' ? 'bg-secondary' : ''}
-                            onClick={() => setActiveSection('logs')}
+                            onClick={() => router.push('/dashboard/admin/logsdashboard')}
                         >
                             Logs
                         </MenubarTrigger>
                     </MenubarMenu>
                 </Menubar>
-                {renderSection()}
+                <div className="text-center mt-10 text-gray-500">
+                    Select a section from the menu above
+                </div>
             </main>
         </div>
     )

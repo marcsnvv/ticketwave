@@ -7,14 +7,16 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '../../../supabase'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ListBulletIcon, MixerHorizontalIcon, ExitIcon, RocketIcon } from "@radix-ui/react-icons"
+import { ListBulletIcon, MixerHorizontalIcon, ExitIcon, RocketIcon, PersonIcon } from "@radix-ui/react-icons"
 import { Building2 } from "lucide-react"
+import { usePathname } from 'next/navigation'  // Add this import at the top
 
 const admins_emails = [process.env.ADMIN_EMAIL1, process.env.ADMIN_EMAIL2, "vuntagecom@gmail.com", "busines1244@gmail.com"]
 
 // Add these imports at the top
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import { Card } from './card'
 
 export default function Navbar() {
     const router = useRouter()
@@ -22,6 +24,14 @@ export default function Navbar() {
     const [isAdmin, setIsAdmin] = useState(false)
     const [companies, setCompanies] = useState([])
     const [isSwitchOpen, setIsSwitchOpen] = useState(false)
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+    const [currentPage, setCurrentPage] = useState('')
+    const pathname = usePathname()
+
+    useEffect(() => {
+        setCurrentPage(pathname)
+        console.log(pathname)
+    }, [pathname])
 
     function logout(event) {
         event.preventDefault()
@@ -118,7 +128,7 @@ export default function Navbar() {
                 // En el segundo useEffect, modifica la consulta para incluir el nombre de la compañía actual
                 const { data: userData, error } = await supabase
                     .from('users')
-                    .select('id,name,email,avatar_url,company_id,companies(name),companies_access(company_id,companies(name))')
+                    .select('id,name,email,avatar_url,company_id,companies(name),companies_access(company_id,companies(name,notification_settings(*)))')
                     .eq('email', authUser.email)
                     .single()
                     .single()
@@ -142,58 +152,139 @@ export default function Navbar() {
     }, [])
 
     return (
-        <div className="fixed top-0 left-0 right-0 z-50 backdrop-blur-sm bg-black/30">
-            <div className="flex items-center justify-between p-5 text-white lg:mx-48">
-                <div className="flex items-center">
+        <div className="fixed w-1/6 h-screen bg-primary">
+            <div className="flex flex-col items-start justify-between p-5 text-white h-screen border-r border-white/25">
+
+                <div className='flex flex-col gap-2 w-full'>
                     <Link href={"/"}>
-                        <Image src="/logo.png" alt="Logo" width={35} height={35} />
+                        <Image src="/logo.png" alt="Logo" width={200} height={200} />
                     </Link>
-                </div>
-                <div className="flex items-center gap-4">
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Avatar className="h-8 w-8 cursor-pointer">
-                                <AvatarImage src={user?.avatar_url} alt={user?.name} />
-                                <AvatarFallback>{user?.name?.substring(0, 2)?.toUpperCase() || 'TW'}</AvatarFallback>
-                            </Avatar>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuLabel className="flex flex-col gap-1">
-                                <div>{user?.name || 'TicketWave'}</div>
-                                <div className="text-sm text-gray-500">
-                                    {user?.companies?.name || 'No company selected'}
-                                </div>
-                            </DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onSelect={() => router.push("/dashboard")} >
-                                <ListBulletIcon className="w-4 h-4 mr-2" />
-                                Monitors
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onSelect={() => router.push("/dashboard/settings")}>
-                                <MixerHorizontalIcon className="w-4 h-4 mr-2" />
+                    <hr className='w-full border border-white/25' />
+                    <div className="flex flex-col items-start gap-2 w-full overflow-auto max-h-64">
+                        <button
+                            className='flex justify-start items-center gap-2 hover:bg-white/25 p-2 px-3 w-full rounded-md transition duration-200 ease-in-out'
+                            onClick={() => router.push("/dashboard")}
+                        >
+                            <ListBulletIcon className="w-6 h-6" />
+                            Monitors
+                        </button>
+                        <div className="relative w-full">
+                            <button
+                                className='flex justify-start items-center gap-2 hover:bg-white/25 p-2 px-3 w-full rounded-md transition duration-200 ease-in-out'
+                                onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+                            >
+                                <MixerHorizontalIcon className="w-6 h-6" />
                                 Settings
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onSelect={() => setIsSwitchOpen(true)}>
-                                <Building2 className="w-4 h-4 mr-2" />
-                                Company
-                            </DropdownMenuItem>
-                            {
-                                isAdmin
-                                    ? <DropdownMenuItem onSelect={() => router.push("/dashboard/admin")}>
-                                        <RocketIcon className="w-4 h-4 mr-2" />
-                                        Admin
-                                    </DropdownMenuItem>
-                                    : null
-                            }
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onSelect={(e) => logout(e)}>
-                                <ExitIcon className="w-4 h-4 mr-2" />
-                                Logout
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                            </button>
+                            {isSettingsOpen && (
+                                <div className="flex">
+                                    <div className='relative flex flex-col items-center jsutify-between h-full w-full mt-2 ml-6'>
+                                        <button
+                                            className={`
+                                                ${currentPage === "/dashboard/settings/channels" ? "border-seoncdaryAccent" : "border-white/25"}
+                                                border-l flex justify-start items-center gap-2 hover:text-white/75 p-2 px-3 w-full transition duration-200 ease-in-out    
+                                            `}
+                                            onClick={() => router.push("/dashboard/settings/channels")}
+                                        >
+                                            Channels
+                                        </button>
+                                        <button
+                                            className={`
+                                                ${currentPage === "/dashboard/settings/roles" ? "border-seoncdaryAccent" : "border-white/25"}
+                                                border-l flex justify-start items-center gap-2 hover:text-white/75 p-2 px-3 w-full transition duration-200 ease-in-out    
+                                            `}
+                                            onClick={() => router.push("/dashboard/settings/roles")}
+                                        >
+                                            Roles
+                                        </button>
+                                        <button
+                                            className={`
+                                                ${currentPage === "/dashboard/settings/customization" ? "border-seoncdaryAccent" : "border-white/25"}
+                                                border-l flex justify-start items-center gap-2 hover:text-white/75 p-2 px-3 w-full transition duration-200 ease-in-out    
+                                            `}
+                                            onClick={() => router.push("/dashboard/settings/customization")}
+                                        >
+                                            Customization
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                        <button
+                            className='flex justify-start items-center gap-2 hover:bg-white/25 p-2 px-3 w-full rounded-md transition duration-200 ease-in-out'
+                            onClick={() => setIsSwitchOpen(true)}
+                        >
+                            <Building2 className="w-6 h-6" />
+                            Company
+                        </button>
+
+
+                    </div>
+                    {
+                        isAdmin
+                            ? (
+                                <div className='flex flex-col items-start gap-2 w-full max-h-36'>
+                                    <div className='flex gap-2 items-center justify-between w-full'>
+                                        <hr className='w-full border border-white/25' />
+                                        <span className='text-sm font-bold text-white/25'>ADMIN</span>
+                                        <hr className='w-full border border-white/25' />
+                                    </div>
+                                    <button
+                                        className='flex justify-start items-center gap-2 hover:bg-white/25 p-2 px-3 w-full rounded-md transition duration-200 ease-in-out'
+                                        onClick={() => router.push("/dashboard/revenue")}
+                                    >
+                                        <RocketIcon className="w-6 h-6" />
+                                        Revenue
+                                    </button>
+                                    <button
+                                        className='flex justify-start items-center gap-2 hover:bg-white/25 p-2 px-3 w-full rounded-md transition duration-200 ease-in-out'
+                                        onClick={() => router.push("/dashboard/clients")}
+                                    >
+                                        <PersonIcon className="w-6 h-6" />
+                                        Clients
+                                    </button>
+                                    <button
+                                        className='flex justify-start items-center gap-2 hover:bg-white/25 p-2 px-3 w-full rounded-md transition duration-200 ease-in-out'
+                                        onClick={() => router.push("/dashboard/revenue")}
+                                    >
+                                        <ListBulletIcon className="w-6 h-6" />
+                                        Logs
+                                    </button>
+                                </div>
+                            )
+                            : null
+                    }
+
+
                 </div>
-            </div>
+
+
+                <div className='flex flex-col gap-4 w-full'>
+                    <div className='flex gap-4'>
+
+                        <Avatar className="h-12 w-12 cursor-pointer">
+                            <AvatarImage src={user?.avatar_url} alt={user?.name} />
+                            <AvatarFallback>{user?.name?.substring(0, 2)?.toUpperCase() || 'TW'}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                            <div>{user?.name || 'TicketWave'}</div>
+                            <div className="text-sm text-gray-400">
+                                {user?.companies?.name || 'No company selected'}
+                            </div>
+                        </div>
+                    </div>
+                    <hr className='w-full border border-white/25' />
+                    <Button
+                        className="bg-white w-full text-black hover:bg-white/25"
+                        onClick={(e) => logout(e)}>
+                        <ExitIcon className="w-4 h-4 mr-2" />
+                        Logout
+                    </Button>
+                </div>
+
+
+
+            </div >
 
             <Dialog open={isSwitchOpen} onOpenChange={setIsSwitchOpen}>
                 <DialogContent>
@@ -214,19 +305,24 @@ export default function Navbar() {
 
                     <div className="grid grid-cols-1 gap-2">
                         {companies.map((company) => (
-                            <Button
+                            <Card
                                 key={company.id}
-                                variant="outline"
-                                className="justify-start"
+                                className={`bg-[${company?.notification_settings?.[0]?.color}]`}
                                 onClick={() => handleSwitchCompany(company.id)}
                             >
-                                <Building2 className="w-4 h-4 mr-2" />
-                                {company.name}
-                            </Button>
+                                <Image
+                                    src={company?.notification_settings?.[0]?.image_url}
+                                    width={50}
+                                    height={50}
+                                />
+                                <span>
+                                    {company.name}
+                                </span>
+                            </Card>
                         ))}
                     </div>
                 </DialogContent>
             </Dialog>
-        </div>
+        </div >
     )
 }

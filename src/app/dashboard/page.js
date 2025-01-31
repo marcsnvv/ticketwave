@@ -319,31 +319,39 @@ export default function MonitorsTable() {
     )
 
     return (
-        <main className='flex items-center justify-center lg:mx-48 p-5'>
-            <div className="w-full">
+        <main className='flex items-center justify-center w-full p-10 mt-[80px]'>
+
+            <div className="w-full min-h-screen">
+
+                {/* Add dialog */}
+                <h2 className='text-5xl font-semibold text-white mb-4'>Website</h2>
+
                 <div className="flex justify-between mb-4">
-                    <MagnifyingGlassIcon className="absolute mt-2 ml-2 text-white h-5 w-5" />
+                    <MagnifyingGlassIcon className="absolute mt-2 ml-2 text-white/25 h-5 w-5" />
                     <Input
                         type="search"
                         placeholder="Search websites..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="lg:w-96 w-52 pl-9" // Added left padding to make room for icon
+                        className="lg:w-64 w-52 pl-9 border-white/25 focus:border-white hover:border-white/50 text-white rounded-[6px]" // Added left padding to make room for icon
                     />
                     <Button onClick={() => setAddDialogOpen(true)}>Add Website</Button>
                 </div>
 
-                {/* Add search input */}
+                <hr className='mb-4 border-white/25' />
 
-                <div className="rounded-md border">
-                    <Table>
+                <div className="bg-primary border-white/25 p-2 rounded-[12px] text-white">
+                    <Table className="">
                         <TableHeader>
                             <TableRow>
                                 <TableHead
                                     className="cursor-pointer"
                                     onClick={() => handleSort('website')}
                                 >
-                                    Website {sortColumn === 'website' && (sortDirection === 'asc' ? '↑' : '↓')}
+                                    <div className='flex items-center gap-2'>
+                                        <TargetIcon className="h-4 w-4" />
+                                        Website {sortColumn === 'website' && (sortDirection === 'asc' ? '↑' : '↓')}
+                                    </div>
                                 </TableHead>
                                 <TableHead
                                     className="cursor-pointer"
@@ -354,17 +362,17 @@ export default function MonitorsTable() {
                                 <TableHead>Actions</TableHead>
                             </TableRow>
                         </TableHeader>
-                        <TableBody>
+                        <TableBody className="">
                             {getSortedMonitors().length ? (
                                 getSortedMonitors().map((monitor) => (
-                                    <TableRow key={monitor.id}>
+                                    <TableRow key={monitor.id} className="">
                                         <TableCell>
                                             {/* Mostrar el nombre del monitor con un enlace a la página de monitoreo */}
                                             <a
                                                 href={`/dashboard/monitor/${monitor.name}`}
-                                                className="flex items-center space-x-2 uppercase"
+                                                className="flex items-center gap-2"
                                             >
-                                                <TargetIcon className="h-4 w-4 mr-2" />
+                                                <TargetIcon className="h-4 w-4" />
                                                 {monitor.name}
                                             </a>
                                         </TableCell>
@@ -373,7 +381,13 @@ export default function MonitorsTable() {
                                             <Badge>{monitor.totalProducts} events</Badge>
                                         </TableCell>
                                         <TableCell>
-                                            <DropdownMenu>
+                                            <button
+                                                className='p-2 text-white hover:text-error'
+                                                onClick={() => handleDeleteMonitor(monitor.id)}
+                                            >
+                                                <TrashIcon className="h-4 w-4" />
+                                            </button>
+                                            {/* <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
                                                     <Button variant="ghost" className="h-8 w-8 p-0">
                                                         <DotsHorizontalIcon className="h-4 w-4" />
@@ -389,7 +403,7 @@ export default function MonitorsTable() {
                                                         Delete Monitor
                                                     </DropdownMenuItem>
                                                 </DropdownMenuContent>
-                                            </DropdownMenu>
+                                            </DropdownMenu> */}
                                         </TableCell>
                                     </TableRow>
                                 ))

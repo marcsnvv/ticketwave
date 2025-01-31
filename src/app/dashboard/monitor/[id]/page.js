@@ -29,7 +29,22 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { DotsHorizontalIcon, ChevronDownIcon, ChevronRightIcon, MagnifyingGlassIcon, CheckIcon, LapTimerIcon, Link1Icon, DiscordLogoIcon, MixerHorizontalIcon, TrashIcon } from '@radix-ui/react-icons'
+import {
+    DotsHorizontalIcon,
+    ChevronDownIcon,
+    ChevronRightIcon,
+    MagnifyingGlassIcon,
+    CheckIcon,
+    LapTimerIcon,
+    Link1Icon,
+    DiscordLogoIcon,
+    MixerHorizontalIcon,
+    TrashIcon,
+    ChevronLeftIcon,
+    DownloadIcon,
+    UploadIcon,
+    Pencil1Icon
+} from '@radix-ui/react-icons'
 import Loader from '@/components/ui/loader' // Asegúrate de tener un componente de loader
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from '@/components/ui/command'
@@ -769,9 +784,9 @@ export default function ProductsTable({ params }) {
     }
 
     return (
-        <main className='flex items-center justify-center lg:mx-48 p-5'>
+        <main className='flex items-center justify-center w-full p-10 mt-[80px] h-full'>
 
-            <div className="w-full">
+            <div className="w-full min-h-screen h-full">
                 {/* {
                     monitorName.includes("ticketportal") && (
                         <Alert className="mb-4">
@@ -783,41 +798,63 @@ export default function ProductsTable({ params }) {
                         </Alert>
                     )
                 } */}
+                <div className='flex items-center justify-start gap-4'>
+                    <button
+                        className='mb-2'
+                        onClick={() => router.push("/dashboard")}
+                    >
+                        <svg width="14" height="30" viewBox="0 0 14 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M13 1L0.999998 15L13 29" stroke="#F0F0F0" stroke-linejoin="round" />
+                        </svg>
+
+                    </button>
+                    <h2 className='text-5xl font-semibold text-white mb-4'>Website</h2>
+                    <span className='text-white/25 text-2xl'>
+                        {monitorName}
+                    </span>
+                </div>
 
 
                 {/* Sección para añadir nuevos eventos */}
                 <div className="flex justify-between mb-4">
                     <div className="relative">
-                        <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5" />
+                        <MagnifyingGlassIcon className="absolute mt-2 ml-2 text-white/25 h-5 w-5" />
                         <Input
                             type="search"
                             placeholder={`Search events on ${monitorName}...`}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="lg:w-96 w-52 pl-9" // Added padding for the icon
+                            className="lg:w-72 w-52 pl-9 border-white/25 focus:border-white hover:border-white/50 text-white rounded-[6px]" // Added left padding to make room for icon
                         />
                     </div>
                     <div className="flex gap-2">
-                        <Button
-                            className="hidden lg:block"
-                            variant="outline"
-                            onClick={() => exportToCSV()}
-                        >
-                            Export CSV
-                        </Button>
-                        <Button
-                            className="hidden lg:block"
-                            variant="outline"
-                            onClick={() => setShowImportDialog(true)}
-                        >
-                            Import CSV
-                        </Button>
-                        <Button
-                            onClick={() => setNewEvent(true)}
-                            variant="outline"
-                        >
-                            Add New Event
-                        </Button>
+                        <div className="flex gap-2">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button
+                                        className="hidden lg:block"
+                                        variant="outline"
+                                    >
+                                        More actions
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent>
+                                    <DropdownMenuItem onClick={() => setShowImportDialog(true)}>
+                                        <UploadIcon className="h-4 w-4 mr-2" />
+                                        Import events
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={exportToCSV}>
+                                        <DownloadIcon className="h-4 w-4 mr-2" />
+                                        Export events
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                            <Button
+                                onClick={() => setNewEvent(true)}
+                            >
+                                Add New Event
+                            </Button>
+                        </div>
                     </div>
                 </div>
 
@@ -836,7 +873,7 @@ export default function ProductsTable({ params }) {
                     </div>
                 )}
 
-                <div className="rounded-md border">
+                <div className="bg-primary border-white/25 p-2 rounded-[12px] text-white">
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -871,6 +908,24 @@ export default function ProductsTable({ params }) {
                                                     <span title={group.name}>{truncateText(group.name, 30)}</span>
                                                 </div>
                                             </TableCell>
+                                            <TableCell>
+                                                {" "}
+                                            </TableCell>
+                                            <TableCell>
+                                                {" "}
+                                            </TableCell>
+                                            <TableCell>
+                                                {" "}
+                                            </TableCell>
+                                            <TableCell>
+                                                {" "}
+                                            </TableCell>
+                                            <TableCell>
+                                                {" "}
+                                            </TableCell>
+                                            <TableCell>
+                                                {" "}
+                                            </TableCell>
 
                                         </TableRow>
                                         {/* Filas desplegadas con los productos individuales */}
@@ -878,13 +933,16 @@ export default function ProductsTable({ params }) {
                                             group.items.map((product) => (
                                                 <TableRow key={product.id}>
                                                     <TableCell>
-                                                        <Checkbox
-                                                            className="cursor-pointer border-gray-400"
-                                                            checked={selectedProducts.includes(product.id)}
-                                                            onCheckedChange={(checked) =>
-                                                                handleSelectProduct(product.id, checked)
-                                                            }
-                                                        />
+                                                        <div className='flex items-center justify-start gap-2'>
+                                                            <Checkbox
+                                                                className="cursor-pointer border-gray-400"
+                                                                checked={selectedProducts.includes(product.id)}
+                                                                onCheckedChange={(checked) =>
+                                                                    handleSelectProduct(product.id, checked)
+                                                                }
+                                                            />
+                                                            {product.name}
+                                                        </div>
                                                     </TableCell>
 
                                                     <TableCell>
@@ -952,7 +1010,19 @@ export default function ProductsTable({ params }) {
                                                         </div>
                                                     </TableCell>
                                                     <TableCell>
-                                                        <DropdownMenu>
+                                                        <button
+                                                            className="text-white hover:text-secondaryAccent p-2"
+                                                            onClick={() => handleEdit(product)}
+                                                        >
+                                                            <Pencil1Icon className="w-4 h-4" />
+                                                        </button>
+                                                        <button
+                                                            className='text-white hover:text-error p-2'
+                                                            onClick={() => handleDelete(product.id)}
+                                                        >
+                                                            <TrashIcon className="w-4 h-4" />
+                                                        </button>
+                                                        {/* <DropdownMenu>
                                                             <DropdownMenuTrigger asChild>
                                                                 <Button variant="ghost">
                                                                     <DotsHorizontalIcon className="w-4 h-4" />
@@ -968,7 +1038,7 @@ export default function ProductsTable({ params }) {
                                                                     Delete
                                                                 </DropdownMenuItem>
                                                             </DropdownMenuContent>
-                                                        </DropdownMenu>
+                                                        </DropdownMenu> */}
                                                     </TableCell>
                                                 </TableRow>
                                             ))
@@ -1146,6 +1216,7 @@ export default function ProductsTable({ params }) {
 
                         <div className="grid gap-4 py-4">
                             <Input
+                                className="bg-white cursor-pointer hover:bg-white/75"
                                 type="file"
                                 accept=".csv"
                                 onChange={handleFileUpload}
