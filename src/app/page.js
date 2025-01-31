@@ -49,7 +49,7 @@ function Page() {
           const { data: user, error } = await supabase
             .from('users')
             .select('company_id')
-            .eq('email', session.user.email)
+            .eq('id', session.user.id)
 
           if (error) {
             console.error('Error fetching user:', error.message);

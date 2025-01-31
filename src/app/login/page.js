@@ -49,8 +49,6 @@ export default function Login() {
         }
     };
 
-
-
     const handleDiscordLogin = async () => {
         try {
             const { data, error } = await supabase.auth.signInWithOAuth({
@@ -70,8 +68,6 @@ export default function Login() {
             setError(error.message);
         }
     };
-
-
 
     return (
         <div className="flex justify-center items-center h-screen">

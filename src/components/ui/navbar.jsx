@@ -81,6 +81,7 @@ export default function Navbar() {
 
             setIsSwitchOpen(false)
             window.location.reload() // Reload to update the UI
+
         } catch (error) {
             console.error('Error switching company:', error)
         }
@@ -126,6 +127,7 @@ export default function Navbar() {
                     setIsAdmin(true)
                 }
                 // En el segundo useEffect, modifica la consulta para incluir el nombre de la compañía actual
+
                 const { data: userData, error } = await supabase
                     .from('users')
                     .select('id,name,email,avatar_url,company_id,companies(name),companies_access(company_id,companies(name,notification_settings(*)))')
@@ -137,12 +139,14 @@ export default function Navbar() {
                 }
                 if (userData) {
                     console.log(userData)
-                    setUser(userData)
                     // Format companies data
                     const accessibleCompanies = userData.companies_access?.map(access => ({
                         id: access.company_id,
-                        name: access.companies?.name
+                        name: access.companies?.name,
+                        image_url: access.companies?.notification_settings?.[0]?.image_url,
+                        color: access.companies?.notification_settings?.[0]?.color
                     })) || []
+                    console.log(accessibleCompanies)
                     setCompanies(accessibleCompanies)
                 }
             }
@@ -303,19 +307,28 @@ export default function Navbar() {
                         Switch company
                     </h3>
 
-                    <div className="grid grid-cols-1 gap-2">
+                    <div className="grid grid-cols-2 gap-2">
                         {companies.map((company) => (
                             <Card
                                 key={company.id}
-                                className={`bg-[${company?.notification_settings?.[0]?.color}]`}
+                                className={`min-w-48 w-auto min-h-48 h-auto relative rounded-lg cursor-pointer border-white/25 hover:border-white/50`}
+
                                 onClick={() => handleSwitchCompany(company.id)}
                             >
-                                <Image
-                                    src={company?.notification_settings?.[0]?.image_url}
-                                    width={50}
-                                    height={50}
+                                <div
+                                    className='w-full h-24 rounded-t-lg'
+                                    style={{
+                                        backgroundColor: company.color,
+                                    }}
+                                >
+
+                                </div>
+                                <img
+                                    src={company.image_url}
+                                    alt={company.name}
+                                    className="absolute top-14 w-24 h-24 rounded-full object-cover"
                                 />
-                                <span>
+                                <span className='ml-28 mt-4 text-lg'>
                                     {company.name}
                                 </span>
                             </Card>
@@ -326,3 +339,4 @@ export default function Navbar() {
         </div >
     )
 }
+
