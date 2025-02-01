@@ -90,7 +90,7 @@ export default function ClientsSection() {
             // Obtener clientes
             const { data: customersData, error } = await supabase
                 .from('users')
-                .select('*,companies(name),companies_access(company_id)')
+                .select('*,companies(name)')
 
             if (error) {
                 console.error('Error fetching customers:', error)
@@ -113,7 +113,6 @@ export default function ClientsSection() {
             }
 
             setCompaniesAccess(companiesAccessData)
-            console.log(companiesAccessData)
 
             // Obtener datos de los eventos monitoreados por cada usuario
             const { data: eventsData, error: eventsError } = await supabase
@@ -222,9 +221,9 @@ export default function ClientsSection() {
             // Create the access
             const { data: newAccess, error: insertError } = await supabase
                 .from('companies_access')
-                .insert([{ 
+                .insert([{
                     user_id: userId,
-                    company_id: companyId 
+                    company_id: companyId
                 }])
                 .select()
 
