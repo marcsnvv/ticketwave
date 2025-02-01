@@ -135,7 +135,7 @@ export default function RevenueSection() {
             .from('billing')
             .select('month,total_income,total_expenses,net_profit,created_at,updated_at')
 
-        if (error) {
+        if (error) {d
             console.error(error)
             return
         }
@@ -399,7 +399,7 @@ export default function RevenueSection() {
 
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card className="p-4 border rounded-lg">
+                <Card className="p-4 border rounded-[12px]">
                     <div className="flex items-center space-x-2">
                         <Users className="h-4 w-4 text-gray-500" />
                         <h3 className="text-sm font-medium">Total Customers</h3>
@@ -427,7 +427,7 @@ export default function RevenueSection() {
                     disabled={!selectedMonth}
                 />
 
-                <Card className="p-4 border rounded-lg">
+                <Card className="p-4 border rounded-[12px]">
                     <div className="flex items-center space-x-2">
                         <DollarSign className="h-4 w-4 text-blue-500" />
                         <h3 className="text-sm font-medium">Net Profit</h3>

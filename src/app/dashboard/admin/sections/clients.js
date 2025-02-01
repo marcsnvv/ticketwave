@@ -302,7 +302,7 @@ export default function ClientsSection() {
         <div>
             <Card className='p-4 border rounded-lg'>
                 <div className="flex items-center justify-between mb-4">
-                    <Title>Customers</Title>
+                    {/* <Title>Customers</Title> */}
                     <div className="flex gap-2">
                         <div className="relative">
                             <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />

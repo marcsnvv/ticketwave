@@ -112,22 +112,39 @@ export default function MonitorsTable() {
             return
         }
 
-        const { data, error } = await supabase
+        // Fetch all monitors for the company
+        const { data: monitors, error: monitorsError } = await supabase
             .from('monitors')
             .select('*')
             .eq('company_id', company_id)
 
-        if (error) {
-            console.error('Error fetching monitors:', error)
+        if (monitorsError) {
+            console.error('Error fetching monitors:', monitorsError)
             return
         }
 
-        const monitorsWithProducts = await Promise.all(
-            data.map(async (monitor) => {
-                const totalProducts = await fetchTotalProducts({ monitorId: monitor.id, companyId: company_id })
-                return { ...monitor, totalProducts }
-            })
-        )
+        // Fetch all products for the company in a single query
+        const { data: products, error: productsError } = await supabase
+            .from('products')
+            .select('monitor_id')
+            .eq('company_id', company_id)
+
+        if (productsError) {
+            console.error('Error fetching products:', productsError)
+            return
+        }
+
+        // Count products for each monitor
+        const productCounts = products.reduce((acc, product) => {
+            acc[product.monitor_id] = (acc[product.monitor_id] || 0) + 1
+            return acc
+        }, {})
+
+        // Combine monitors with their product counts
+        const monitorsWithProducts = monitors.map(monitor => ({
+            ...monitor,
+            totalProducts: productCounts[monitor.id] || 0
+        }))
 
         setMonitors(monitorsWithProducts)
     }
@@ -155,6 +172,7 @@ export default function MonitorsTable() {
                 } else {
                     localStorage.setItem('company_id', userData.company_id)
                     setNeedsCompany(false)
+                    console.log("Fetching monitors...")
                     await fetchMonitors()
                 }
             } catch (error) {

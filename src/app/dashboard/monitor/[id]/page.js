@@ -193,12 +193,11 @@ export default function ProductsTable({ params }) {
         setChannels(channelsData || [])
     }
 
-    // Efecto inicial
     useEffect(() => {
         if (label) {
             fetchData()
         }
-    }, [label])
+    }, [])
 
     // Nuevo efecto para actualizar datos cuando products cambie
     useEffect(() => {
@@ -242,7 +241,7 @@ export default function ProductsTable({ params }) {
 
             updateProductsData()
         }
-    }, [products.length]) // Se ejecuta cuando cambia la longitud de products
+    }, []) // Se ejecuta cuando cambia la longitud de products
 
     // Agrupar productos por nombre
     const groupedProducts = products.reduce((acc, product) => {
