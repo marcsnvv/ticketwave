@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
 @layer base {
   :root {
@@ -29,6 +30,9 @@
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
     --radius: 6px;
+
+    --font-mono: 'Space Mono', monospace;
+
   }
 
   .dark {

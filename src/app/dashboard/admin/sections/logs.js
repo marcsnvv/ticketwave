@@ -160,13 +160,11 @@ export default function LogsSection() {
     }
 
     return (
-        <Card className='p-4 border rounded-lg'>
+        <div className='w-full text-white'>
+
             <div className="flex flex-col gap-4 mb-4">
                 <div className="flex justify-between items-center">
-                    <Title>System Logs</Title>
-                    <Badge variant="outline">
-                        {logsData.filename} ({logsData.total_lines} lines)
-                    </Badge>
+                    
                     <Button
                         variant="outline"
                         onClick={forceRefresh}>
@@ -262,46 +260,50 @@ export default function LogsSection() {
                     <Button
                         variant="outline"
                         onClick={resetConfiguration}
-                        // className="ml-2"
+                    // className="ml-2"
                     >
                         Reset
                     </Button>
                 </div>
             </div>
 
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead className="w-48">Timestamp</TableHead>
-                        <TableHead>Message</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    <AnimatePresence>
-                        {filteredLogs.map((line, index) => {
-                            const { timestamp, message, isError } = parseLine(line);
-                            return (
-                                <motion.tr
-                                    key={index}
-                                    initial={{ opacity: 0, y: -20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: 20 }}
-                                    transition={{ duration: 0.3 }}
-                                >
-                                    <TableCell className="font-mono text-sm">
-                                        {timestamp}
-                                    </TableCell>
-                                    <TableCell>
-                                        <span className={`${isError ? 'text-red-600' : ''}`}>
-                                            {message}
-                                        </span>
-                                    </TableCell>
-                                </motion.tr>
-                            );
-                        })}
-                    </AnimatePresence>
-                </TableBody>
-            </Table>
-        </Card>
+            <div className='bg-black rounded-[12px] border border-white/25'>
+                <table className='font-mono'>
+                    <thead className='border-b border-white/25'>
+                        <tr className='h-10'>
+                            <th className="text-start px-5 py-3">Timestamp</th>
+                            <th className='text-start px-5 py-3'>Message</th>
+                            <th className='text-end text-nowrap px-5 py-3 text-sm text-white/50'>{maxLines} lines</th>
+                        </tr>
+                    </thead>
+
+                    <tbody className='p-5'>
+                        <AnimatePresence>
+                            {filteredLogs.map((line, index) => {
+                                const { timestamp, message, isError } = parseLine(line);
+                                return (
+                                    <motion.tr
+                                        key={index}
+                                        initial={{ opacity: 0, y: -20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: 20 }}
+                                        transition={{ duration: 0.3 }}
+                                    >
+                                        <td className="text-sm text-nowrap px-5 py-3">
+                                            {timestamp}
+                                        </td>
+                                        <td>
+                                            <span className={`px-5 py-3 text-sm ${isError ? 'text-error' : ''}`}>
+                                                {message}
+                                            </span>
+                                        </td>
+                                    </motion.tr>
+                                );
+                            })}
+                        </AnimatePresence>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     )
 }
