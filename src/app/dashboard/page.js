@@ -172,7 +172,6 @@ export default function MonitorsTable() {
                 } else {
                     localStorage.setItem('company_id', userData.company_id)
                     setNeedsCompany(false)
-                    console.log("Fetching monitors...")
                     await fetchMonitors()
                 }
             } catch (error) {

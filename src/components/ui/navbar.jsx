@@ -30,7 +30,6 @@ export default function Navbar() {
 
     useEffect(() => {
         setCurrentPage(pathname)
-        console.log(pathname)
     }, [pathname])
 
     function logout(event) {
@@ -96,47 +95,17 @@ export default function Navbar() {
                 if (admins_emails.includes(authUser.email)) {
                     setIsAdmin(true)
                 }
-
-                const { data, error } = await supabase
-                    .from('users')
-                    .select('name,email,avatar_url')
-                    .eq('email', authUser.email)
-
-                if (error) {
-                    console.log(error)
-                }
-
-                if (data) {
-                    console.log(data[0])
-                    setUser(data[0])
-                }
-            }
-
-        }
-
-        fetchData()
-    }, [])
-
-    useEffect(() => {
-        async function fetchData() {
-            const { data: { user: authUser } } = await supabase.auth.getUser()
-            if (!authUser) {
-                router.push("/login")
-            } else {
-                if (admins_emails.includes(authUser.email)) {
-                    setIsAdmin(true)
-                }
                 // En el segundo useEffect, modifica la consulta para incluir el nombre de la compañía actual
 
                 const { data: userData, error } = await supabase
                     .from('users')
                     .select('id,name,email,avatar_url,company_id,companies(name),companies_access(company_id,companies(name,notification_settings(*)))')
                     .eq('email', authUser.email)
-                    .single()
-                    .single()
+                    
                 if (error) {
                     console.log(error)
                 }
+
                 if (userData) {
                     console.log(userData)
                     // Format companies data
@@ -148,6 +117,7 @@ export default function Navbar() {
                     })) || []
                     console.log(accessibleCompanies)
                     setCompanies(accessibleCompanies)
+                    setUser(userData)
                 }
             }
         }

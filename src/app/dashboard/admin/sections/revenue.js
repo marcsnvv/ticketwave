@@ -135,7 +135,8 @@ export default function RevenueSection() {
             .from('billing')
             .select('month,total_income,total_expenses,net_profit,created_at,updated_at')
 
-        if (error) {d
+        if (error) {
+            d
             console.error(error)
             return
         }

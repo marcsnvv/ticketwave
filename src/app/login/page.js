@@ -89,7 +89,7 @@ export default function Login() {
                             />
                         </div>
 
-                        <Button onClick={handleLogin} className="w-full">
+                        <Button onClick={() => handleLogin()} className="w-full">
                             Send Login Link
                         </Button>
 
