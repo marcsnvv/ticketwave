@@ -5,7 +5,6 @@ import { supabase } from '../../../supabase';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
 import { Alert } from '@/components/ui/alert';
 import { DiscordLogoIcon } from "@radix-ui/react-icons";
 import Image from 'next/image';
@@ -13,32 +12,64 @@ import Image from 'next/image';
 export default function Login() {
     const [email, setEmail] = useState('');
     const [error, setError] = useState('');
-    const [users, setUsers] = useState([]);
+    const [failedAttempts, setFailedAttempts] = useState(0);
+    const [isCooldown, setIsCooldown] = useState(false);
 
     useEffect(() => {
-        const fetchData = async () => {
-            if (email) { // Fetch data only if email is set
-                const { data, error } = await supabase
-                    .from('users')
-                    .select('*')
-                    .eq('email', email);
-
-                if (error) {
-                    console.error('Error fetching users:', error);
-                } else {
-                    setUsers(data);
-                }
+        // Check if there's an active cooldown on component mount
+        const cooldownStart = localStorage.getItem('cooldownStart');
+        if (cooldownStart) {
+            const timeElapsed = Date.now() - parseInt(cooldownStart, 10);
+            if (timeElapsed < 300000) { // 5 minutes in milliseconds
+                setIsCooldown(true);
+                setError('Too many failed attempts. Please try again in 5 minutes.');
+                setTimeout(() => {
+                    setFailedAttempts(0);
+                    setIsCooldown(false);
+                    setError('');
+                    localStorage.removeItem('cooldownStart');
+                }, 300000 - timeElapsed);
+            } else {
+                localStorage.removeItem('cooldownStart');
             }
-        };
+        }
+    }, []);
 
-        fetchData();
-    }, []); // Fetch data when email changes
+    useEffect(() => {
+        if (failedAttempts >= 3) {
+            setIsCooldown(true);
+            setError('Too many failed attempts. Please try again in 5 minutes.');
+            const cooldownStart = Date.now();
+            localStorage.setItem('cooldownStart', cooldownStart.toString());
+
+            const cooldownTimer = setTimeout(() => {
+                setFailedAttempts(0);
+                setIsCooldown(false);
+                setError('');
+                localStorage.removeItem('cooldownStart');
+            }, 300000); // 5 minutes in milliseconds
+
+            return () => clearTimeout(cooldownTimer);
+        }
+    }, [failedAttempts]);
 
     const checkUserEmail = async (email) => {
-        return users.some(user => user.email === email);
+        const { data, error } = await supabase
+            .from('users')
+            .select('*')
+            .eq('email', email);
+
+        if (error) {
+            console.error('Error fetching users:', error);
+            return false;
+        }
+
+        return data.length > 0;
     };
 
     const handleLogin = async () => {
+        if (isCooldown) return;
+
         const userExists = await checkUserEmail(email);
 
         if (userExists) {
@@ -46,9 +77,10 @@ export default function Login() {
             if (error) {
                 setError(error.message);
             } else {
-                alert('Check your email for the login link!');
+                setError('Success - Check your email for the login link!');
             }
         } else {
+            setFailedAttempts(prev => prev + 1);
             setError('Access denied - Email not authorized');
         }
     };

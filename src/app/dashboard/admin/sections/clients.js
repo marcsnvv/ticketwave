@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { AreaChart, Card, Title } from "@tremor/react"
+import { Card } from "@tremor/react"
 import {
     Table,
     TableBody,
@@ -12,12 +12,8 @@ import {
 } from '@/components/ui/table'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { PageAnalytics } from '@/components/page-analytics'
 import {
     Users,
-    DollarSign,
-    ArrowUpCircle,
-    ArrowDownCircle,
     Search,
     Mail,
     Trash2,
@@ -298,204 +294,202 @@ export default function ClientsSection() {
     }
 
     return (
-        <div>
-            <Card className='p-4 border rounded-lg'>
-                <div className="flex items-center justify-between mb-4">
-                    {/* <Title>Customers</Title> */}
-                    <div className="flex gap-2">
-                        <div className="relative">
-                            <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
-                            <Input
-                                placeholder="Search customers..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="pl-8"
-                            />
-                        </div>
-                        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                            <DialogTrigger asChild>
-                                <Button>Add Customer</Button>
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-[500px]">
-                                <DialogHeader>
-                                    <DialogTitle>Add New Customer</DialogTitle>
-                                </DialogHeader>
-                                <div className="flex flex-col gap-4 py-4 items-start justify-start w-full">
-                                    <div className='flex items-center justify-between gap-4 w-full'>
-                                        <div className='flex flex-col item-start gap-2'>
-                                            <Label htmlFor="name">Name</Label>
-                                            <Input
-                                                placeholder='Jhon Doe'
-                                                id="name"
-                                                className="w-full"
-                                                value={newCustomer.name}
-                                                onChange={(e) => setNewCustomer({ ...newCustomer, name: e.target.value })}
-                                            />
-                                        </div>
-
-                                        <div className='flex flex-col item-start gap-2'>
-                                            <Label htmlFor="email">Email</Label>
-                                            <Input
-                                                placeholder='jhon@doe.com'
-                                                id="email"
-                                                className="w-full"
-                                                value={newCustomer.email}
-                                                onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className='flex flex-col item-start gap-2 w-full'>
-                                        <Label htmlFor="avatar">Avatar URL</Label>
-                                        <Input
-                                            placeholder="https://example.com/avatar.jpg"
-                                            id="avatar"
-                                            className="col-span-3"
-                                            value={newCustomer.avatar_url}
-                                            onChange={(e) => setNewCustomer({ ...newCustomer, avatar_url: e.target.value })}
-                                        />
-                                    </div>
-
-                                    <div className='flex flex-col item-start gap-2 w-full'>
-                                        <Label htmlFor="company">Company Name</Label>
-                                        <Input
-                                            placeholder="TicketWave"
-                                            id="company"
-                                            className="col-span-3"
-                                            value={newCustomer.company_name}
-                                            onChange={(e) => setNewCustomer({ ...newCustomer, company_name: e.target.value })}
-                                        />
-                                    </div>
-                                </div>
-                                <Button className="w-auto" onClick={handleCreateCustomer}>Create Customer</Button>
-                            </DialogContent>
-                        </Dialog>
+        <div className='w-full'>
+            <div className="flex items-center justify-between mb-4 w-full">
+                {/* <Title>Customers</Title> */}
+                <div className="flex gap-2">
+                    <div className="relative">
+                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
+                        <Input
+                            placeholder="Search customers..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="pl-8"
+                        />
                     </div>
                 </div>
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Company</TableHead>
-                            <TableHead>Email</TableHead>
-                            <TableHead>Company</TableHead>
-                            <TableHead>Events</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {filteredCustomers.map((customer) => (
-                            <TableRow key={customer.id}>
-                                <TableCell>{customer.name}</TableCell>
-                                <TableCell>{customer.email}</TableCell>
-                                <TableCell>
-                                    <Badge color="blue">{customer.companies?.name}</Badge>
-                                </TableCell>
-                                <TableCell>
-                                    <Badge>{
-                                        // Filtrar los eventos, por el company id del usuario
-                                        products.filter(product => product.company_id === customer.company_id).length
+                <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                    <DialogTrigger asChild>
+                        <Button>Add Customer</Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[500px]">
+                        <DialogHeader>
+                            <DialogTitle>Add New Customer</DialogTitle>
+                        </DialogHeader>
+                        <div className="flex flex-col gap-4 py-4 items-start justify-start w-full">
+                            <div className='flex items-center justify-between gap-4 w-full'>
+                                <div className='flex flex-col item-start gap-2'>
+                                    <Label htmlFor="name">Name</Label>
+                                    <Input
+                                        placeholder='Jhon Doe'
+                                        id="name"
+                                        className="w-full"
+                                        value={newCustomer.name}
+                                        onChange={(e) => setNewCustomer({ ...newCustomer, name: e.target.value })}
+                                    />
+                                </div>
 
-                                    }</Badge>
-                                </TableCell>
-                                <TableCell className="text-right">
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button variant="ghost" size="icon">
-                                                <MoreHorizontal className="h-4 w-4" />
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end">
-                                            <DropdownMenuItem onClick={() => {
-                                                setSelectedUser(customer)
-                                                setIsManageCompaniesOpen(true)
-                                            }}>
-                                                <Users className="h-4 w-4 mr-2" />
-                                                Manage Companies
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => handleSendEmail(customer.email)}>
-                                                <Mail className="h-4 w-4 mr-2" />
-                                                Send Email
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem
-                                                onClick={() => setCustomerToDelete(customer)}
-                                                className="text-red-500 focus:text-red-500"
-                                            >
-                                                <Trash2 className="h-4 w-4 mr-2" />
-                                                Delete
-                                            </DropdownMenuItem>
+                                <div className='flex flex-col item-start gap-2'>
+                                    <Label htmlFor="email">Email</Label>
+                                    <Input
+                                        placeholder='jhon@doe.com'
+                                        id="email"
+                                        className="w-full"
+                                        value={newCustomer.email}
+                                        onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
+                                    />
+                                </div>
+                            </div>
 
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                    <Dialog open={isManageCompaniesOpen} onOpenChange={setIsManageCompaniesOpen}>
-                                        <DialogContent className="sm:max-w-[500px]">
-                                            <DialogHeader>
-                                                <DialogTitle>Manage Company Access</DialogTitle>
-                                            </DialogHeader>
-                                            <div className="flex flex-col gap-4">
-                                                <div>
-                                                    <h3 className="mb-2 font-medium">Current Access</h3>
-                                                    <div className="flex flex-wrap gap-2">
-                                                        {selectedUser?.companies_access?.map((access) => (
-                                                            <Badge
-                                                                key={access.company_id}
-                                                                variant="secondary"
-                                                                className="flex items-center gap-2"
+                            <div className='flex flex-col item-start gap-2 w-full'>
+                                <Label htmlFor="avatar">Avatar URL</Label>
+                                <Input
+                                    placeholder="https://example.com/avatar.jpg"
+                                    id="avatar"
+                                    className="col-span-3"
+                                    value={newCustomer.avatar_url}
+                                    onChange={(e) => setNewCustomer({ ...newCustomer, avatar_url: e.target.value })}
+                                />
+                            </div>
+
+                            <div className='flex flex-col item-start gap-2 w-full'>
+                                <Label htmlFor="company">Company Name</Label>
+                                <Input
+                                    placeholder="TicketWave"
+                                    id="company"
+                                    className="col-span-3"
+                                    value={newCustomer.company_name}
+                                    onChange={(e) => setNewCustomer({ ...newCustomer, company_name: e.target.value })}
+                                />
+                            </div>
+                        </div>
+                        <Button className="w-auto" onClick={handleCreateCustomer}>Create Customer</Button>
+                    </DialogContent>
+                </Dialog>
+            </div>
+            <Table className="p-2 rounded-[12px] bg-primary text-white">
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>Company</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Company</TableHead>
+                        <TableHead>Events</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {filteredCustomers.map((customer) => (
+                        <TableRow key={customer.id}>
+                            <TableCell>{customer.name}</TableCell>
+                            <TableCell>{customer.email}</TableCell>
+                            <TableCell>
+                                <Badge color="blue">{customer.companies?.name}</Badge>
+                            </TableCell>
+                            <TableCell>
+                                <Badge>{
+                                    // Filtrar los eventos, por el company id del usuario
+                                    products.filter(product => product.company_id === customer.company_id).length
+
+                                }</Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="icon">
+                                            <MoreHorizontal className="h-4 w-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuItem onClick={() => {
+                                            setSelectedUser(customer)
+                                            setIsManageCompaniesOpen(true)
+                                        }}>
+                                            <Users className="h-4 w-4 mr-2" />
+                                            Manage Companies
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleSendEmail(customer.email)}>
+                                            <Mail className="h-4 w-4 mr-2" />
+                                            Send Email
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            onClick={() => setCustomerToDelete(customer)}
+                                            className="text-red-500 focus:text-red-500"
+                                        >
+                                            <Trash2 className="h-4 w-4 mr-2" />
+                                            Delete
+                                        </DropdownMenuItem>
+
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                                <Dialog open={isManageCompaniesOpen} onOpenChange={setIsManageCompaniesOpen}>
+                                    <DialogContent className="sm:max-w-[500px]">
+                                        <DialogHeader>
+                                            <DialogTitle>Manage Company Access</DialogTitle>
+                                        </DialogHeader>
+                                        <div className="flex flex-col gap-4">
+                                            <div>
+                                                <h3 className="mb-2 font-medium">Current Access</h3>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {selectedUser?.companies_access?.map((access) => (
+                                                        <Badge
+                                                            key={access.company_id}
+                                                            variant="secondary"
+                                                            className="flex items-center gap-2"
+                                                        >
+                                                            {companies.find(c => c.company_id === access.company_id)?.name}
+                                                            <button
+                                                                onClick={() => handleRemoveCompanyAccess(selectedUser.id, access.company_id)}
+                                                                className="ml-2 hover:text-red-500"
                                                             >
-                                                                {companies.find(c => c.company_id === access.company_id)?.name}
-                                                                <button
-                                                                    onClick={() => handleRemoveCompanyAccess(selectedUser.id, access.company_id)}
-                                                                    className="ml-2 hover:text-red-500"
-                                                                >
-                                                                    <Trash2 className="h-3 w-3" />
-                                                                </button>
-                                                            </Badge>
-                                                        ))}
-                                                    </div>
+                                                                <Trash2 className="h-3 w-3" />
+                                                            </button>
+                                                        </Badge>
+                                                    ))}
                                                 </div>
-
-                                                <h3 className="mb-2 font-medium">Add Access</h3>
-                                                <div className="grid grid-cols-2 gap-2">
-                                                    {companies
-                                                        // Remove duplicates by filtering unique company_ids
-                                                        .filter((company, index, self) =>
-                                                            index === self.findIndex((c) => c.company_id === company.company_id)
-                                                        )
-                                                        .filter(company =>
-                                                            !companiesAccess?.some(
-                                                                access =>
-                                                                    access.company_id === company.company_id &&
-                                                                    access.user_id === selectedUser?.id
-                                                            ) &&
-                                                            company.company_id !== selectedUser?.company_id
-                                                        )
-                                                        .map(company => (
-                                                            <Button
-                                                                key={`company-${company.company_id}`}
-                                                                variant={selectedCompany?.company_id === company.company_id ? "default" : "outline"}
-                                                                className={`justify-start ${company.company_id === selectedUser?.company_id ? 'border-2 border-blue-500' : ''}`}
-                                                                onClick={() => setSelectedCompany(company)}
-                                                            >
-                                                                {company.name}
-                                                            </Button>
-                                                        ))
-                                                    }
-                                                </div>
-                                                <Button
-                                                    className="mt-4"
-                                                    onClick={() => handleAddCompanyAccess(selectedUser.id, selectedCompany.company_id)}
-                                                    disabled={!selectedCompany}
-                                                >
-                                                    Grant Access
-                                                </Button>
                                             </div>
-                                        </DialogContent>
-                                    </Dialog>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </Card>
+
+                                            <h3 className="mb-2 font-medium">Add Access</h3>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                {companies
+                                                    // Remove duplicates by filtering unique company_ids
+                                                    .filter((company, index, self) =>
+                                                        index === self.findIndex((c) => c.company_id === company.company_id)
+                                                    )
+                                                    .filter(company =>
+                                                        !companiesAccess?.some(
+                                                            access =>
+                                                                access.company_id === company.company_id &&
+                                                                access.user_id === selectedUser?.id
+                                                        ) &&
+                                                        company.company_id !== selectedUser?.company_id
+                                                    )
+                                                    .map(company => (
+                                                        <Button
+                                                            key={`company-${company.company_id}`}
+                                                            variant={selectedCompany?.company_id === company.company_id ? "default" : "outline"}
+                                                            className={`justify-start ${company.company_id === selectedUser?.company_id ? 'border-2 border-blue-500' : ''}`}
+                                                            onClick={() => setSelectedCompany(company)}
+                                                        >
+                                                            {company.name}
+                                                        </Button>
+                                                    ))
+                                                }
+                                            </div>
+                                            <Button
+                                                className="mt-4"
+                                                onClick={() => handleAddCompanyAccess(selectedUser.id, selectedCompany.company_id)}
+                                                disabled={!selectedCompany}
+                                            >
+                                                Grant Access
+                                            </Button>
+                                        </div>
+                                    </DialogContent>
+                                </Dialog>
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
             <AlertDialog open={customerToDelete !== null} onOpenChange={() => setCustomerToDelete(null)}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
