@@ -103,7 +103,7 @@ export default function Login() {
                         </div>
 
                         <Button
-                            onClick={handleDiscordLogin}
+                            onClick={() => handleDiscordLogin()}
                             className="w-full bg-[#5865F2] hover:bg-[#4752C4] text-white"
                         >
                             <DiscordLogoIcon className="mr-2 h-5 w-5" />
