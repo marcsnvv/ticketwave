@@ -1,7 +1,8 @@
 "use client"
 
+import React from 'react'
 import { useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, use } from 'react'
 import {
     Table,
     TableBody,
@@ -25,29 +26,21 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
-    DotsHorizontalIcon,
     ChevronDownIcon,
     ChevronRightIcon,
     MagnifyingGlassIcon,
-    CheckIcon,
     LapTimerIcon,
-    Link1Icon,
     DiscordLogoIcon,
-    MixerHorizontalIcon,
     TrashIcon,
-    ChevronLeftIcon,
     DownloadIcon,
     UploadIcon,
     Pencil1Icon
 } from '@radix-ui/react-icons'
 import Loader from '@/components/ui/loader' // Asegúrate de tener un componente de loader
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
-import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from '@/components/ui/command'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge'
 import {
@@ -56,13 +49,13 @@ import {
     AlertTitle,
 } from "@/components/ui/alert"
 
-import { CircleAlert } from 'lucide-react'
 import AddEvent from './add-event'
 import EditEventDialog from './edit-event'
 import { format } from "date-fns"; // Asegúrate de que este import esté presente
 import { useToast } from "@/hooks/use-toast"
 import { Checkbox } from "@/components/ui/checkbox" // Añadir este import
 import { AlertCircle } from 'lucide-react' // Añadir este import
+import Link from 'next/link'
 
 
 // Función auxiliar para truncar texto
@@ -88,7 +81,7 @@ function extractID(url) {
 export default function ProductsTable({ params }) {
     const router = useRouter()
 
-    const label = params.id // Ahora params.id contiene el label
+    const label = use(params).id // Ahora params.id contiene el label
     const [products, setProducts] = useState([])
     const [editProduct, setEditProduct] = useState(null)
     const [newName, setNewName] = useState("")
@@ -803,7 +796,7 @@ export default function ProductsTable({ params }) {
                         onClick={() => router.push("/dashboard")}
                     >
                         <svg width="14" height="30" viewBox="0 0 14 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M13 1L0.999998 15L13 29" stroke="#F0F0F0" stroke-linejoin="round" />
+                            <path d="M13 1L0.999998 15L13 29" stroke="#F0F0F0" strokeLinejoin="round" />
                         </svg>
 
                     </button>
@@ -875,183 +868,111 @@ export default function ProductsTable({ params }) {
                 <div className="bg-primary border-white/25 p-2 rounded-[12px] text-white">
                     <Table>
                         <TableHeader>
-                            <TableRow>
-                                <TableHead className="min-w-1/5">
-                                    <Checkbox
-                                        className="cursor-pointer border-gray-400"
-                                        checked={selectedProducts.length === products.length}
-                                        onCheckedChange={handleSelectAll}
-                                    />
-                                </TableHead>
-                                {/* <TableHead>Event</TableHead> */}
-                                <TableHead>ID</TableHead>
-                                <TableHead>Webhook URL</TableHead>
-                                <TableHead>Role</TableHead>  {/* Nueva columna */}
-                                <TableHead>Max Price</TableHead>
-                                <TableHead>Auto Delete</TableHead>
-                                <TableHead>Actions</TableHead>
-                            </TableRow>
+                            <TableRow><TableHead className="min-w-1/5"><Checkbox
+                                className="cursor-pointer border-gray-400"
+                                checked={selectedProducts.length === products.length}
+                                onCheckedChange={handleSelectAll}
+                            /></TableHead><TableHead>ID</TableHead><TableHead>Webhook URL</TableHead><TableHead>Role</TableHead><TableHead>Max Price</TableHead><TableHead>Auto Delete</TableHead><TableHead>Actions</TableHead></TableRow>
                         </TableHeader>
-                        <TableBody>
-                            {filteredProducts.length ? (
-                                filteredProducts?.map((group) => (
-                                    <>
-                                        <TableRow key={group.name} className="cursor-pointer" onClick={() => handleToggleExpand(group.name)}>
-                                            <TableCell>
-                                                <div className="flex items-center">
-                                                    {expanded === group.name ? (
-                                                        <ChevronDownIcon className="mr-2" />
+                        <TableBody>{filteredProducts.length ? (
+                            filteredProducts?.map((group) => (
+                                <React.Fragment key={group.name}>
+                                    <TableRow className="cursor-pointer" onClick={() => handleToggleExpand(group.name)}><TableCell>
+                                        <div className="flex items-center">
+                                            {expanded === group.name ? (
+                                                <ChevronDownIcon className="mr-2" />
+                                            ) : (
+                                                <ChevronRightIcon className="mr-2" />
+                                            )}
+                                            <span title={group.name}>{truncateText(group.name, 30)}</span>
+                                        </div>
+                                    </TableCell><TableCell>{""}</TableCell><TableCell>{""}</TableCell><TableCell>{""}</TableCell><TableCell>{""}</TableCell><TableCell>{""}</TableCell><TableCell>{""}</TableCell></TableRow>
+                                    {expanded === group.name && group.items.map((product) => (
+                                        <TableRow key={product.id}><TableCell>
+                                            <div className='flex items-center justify-start gap-2'>
+                                                <Checkbox
+                                                    className="cursor-pointer border-gray-400"
+                                                    checked={selectedProducts.includes(product.id)}
+                                                    onCheckedChange={(checked) => handleSelectProduct(product.id, checked)}
+                                                />
+                                                {product.name}
+                                            </div>
+                                        </TableCell><TableCell>
+                                                <Link
+                                                    href={product.url}
+                                                    className="text-blue-500 hover:underline flex items-center gap-1"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                >
+                                                    {extractID(product.url)}
+                                                </Link>
+                                            </TableCell><TableCell>
+                                                {product.channels ? (
+                                                    <Link
+                                                        href={product.channels?.webhook_url}
+                                                        className="text-blue-500 hover:underline flex items-center gap-1"
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                    >
+                                                        <DiscordLogoIcon className="w-4 h-4" />
+                                                        {product.channels?.title}
+                                                    </Link>
+                                                ) : (
+                                                    "--"
+                                                )}
+                                            </TableCell><TableCell>
+                                                {product.roles ? (
+                                                    <Badge
+                                                        style={{
+                                                            backgroundColor: product.roles?.color || '#fff',
+                                                        }}
+                                                    >
+                                                        {product.roles?.title || "--"}
+                                                    </Badge>
+                                                ) : (
+                                                    "--"
+                                                )}
+                                            </TableCell><TableCell>
+                                                <Badge
+                                                    variant={product.max_price ? "primary" : "gray"}
+                                                >
+                                                    {product.max_price ? product.max_price.toLocaleString() + " $" : "-- $"}
+                                                </Badge>
+                                            </TableCell><TableCell>
+                                                <div className='flex items-center gap-2'>
+                                                    <LapTimerIcon className='w-4 h-4' />
+                                                    {product.autodelete_event ? (
+                                                        <time
+                                                            suppressHydrationWarning
+                                                            className='text-sm text-gray-300'
+                                                            dateTime={product.autodelete_event}
+                                                        >
+                                                            {format(new Date(product.autodelete_event), 'dd/MM/yyyy')}
+                                                        </time>
                                                     ) : (
-                                                        <ChevronRightIcon className="mr-2" />
+                                                        "Not set"
                                                     )}
-                                                    <span title={group.name}>{truncateText(group.name, 30)}</span>
                                                 </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                {" "}
-                                            </TableCell>
-                                            <TableCell>
-                                                {" "}
-                                            </TableCell>
-                                            <TableCell>
-                                                {" "}
-                                            </TableCell>
-                                            <TableCell>
-                                                {" "}
-                                            </TableCell>
-                                            <TableCell>
-                                                {" "}
-                                            </TableCell>
-                                            <TableCell>
-                                                {" "}
-                                            </TableCell>
-
-                                        </TableRow>
-                                        {/* Filas desplegadas con los productos individuales */}
-                                        {expanded === group.name && (
-                                            group.items.map((product) => (
-                                                <TableRow key={product.id}>
-                                                    <TableCell>
-                                                        <div className='flex items-center justify-start gap-2'>
-                                                            <Checkbox
-                                                                className="cursor-pointer border-gray-400"
-                                                                checked={selectedProducts.includes(product.id)}
-                                                                onCheckedChange={(checked) =>
-                                                                    handleSelectProduct(product.id, checked)
-                                                                }
-                                                            />
-                                                            {product.name}
-                                                        </div>
-                                                    </TableCell>
-
-                                                    <TableCell>
-                                                        <a
-                                                            href={product.url}
-                                                            className="text-blue-500 hover:underline flex items-center gap-1"
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                        >
-                                                            {/* Show the event ID */}
-                                                            {extractID(product.url)}
-                                                        </a>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        {
-                                                            product.channels ? (
-                                                                <a
-                                                                    href={product.channels?.webhook_url}
-                                                                    className="text-blue-500 hover:underline flex items-center gap-1"
-                                                                    target="_blank"
-                                                                    rel="noopener noreferrer"
-                                                                >
-                                                                    <DiscordLogoIcon className="w-4 h-4" />
-                                                                    {product.channels?.title}
-                                                                </a>
-                                                            ) : (
-                                                                "--"
-                                                            )
-                                                        }
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        {product.roles ? (
-                                                            <Badge
-                                                                style={{
-                                                                    backgroundColor: product.roles?.color || '#fff',
-                                                                }}
-                                                            >
-                                                                {product.roles?.title || "--"}
-                                                            </Badge>
-                                                        ) : (
-                                                            "--"
-                                                        )}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <Badge
-                                                            variant={product.max_price ? "primary" : "gray"}
-                                                        >
-                                                            {product.max_price ? product.max_price.toLocaleString() + " $" : "-- $"}
-                                                        </Badge>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <div className='flex items-center gap-2'>
-                                                            <LapTimerIcon className='w-4 h-4' />
-
-                                                            {product.autodelete_event ? (
-                                                                <time
-                                                                    className='text-sm text-gray-300'
-                                                                    dateTime={product.autodelete_event}
-                                                                >
-                                                                    {format(new Date(product.autodelete_event), 'dd/MM/yyyy')}
-                                                                </time>
-                                                            ) : (
-                                                                "Not set"
-                                                            )}
-                                                        </div>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <button
-                                                            className="text-white hover:text-secondaryAccent p-2"
-                                                            onClick={() => handleEdit(product)}
-                                                        >
-                                                            <Pencil1Icon className="w-4 h-4" />
-                                                        </button>
-                                                        <button
-                                                            className='text-white hover:text-error p-2'
-                                                            onClick={() => handleDelete(product.id)}
-                                                        >
-                                                            <TrashIcon className="w-4 h-4" />
-                                                        </button>
-                                                        {/* <DropdownMenu>
-                                                            <DropdownMenuTrigger asChild>
-                                                                <Button variant="ghost">
-                                                                    <DotsHorizontalIcon className="w-4 h-4" />
-                                                                </Button>
-                                                            </DropdownMenuTrigger>
-                                                            <DropdownMenuContent align="end">
-                                                                <DropdownMenuItem onClick={() => handleEdit(product)}>
-                                                                    <MixerHorizontalIcon className="w-4 h-4 mr-2" />
-                                                                    Edit
-                                                                </DropdownMenuItem>
-                                                                <DropdownMenuItem onClick={() => handleDelete(product.id)}>
-                                                                    <TrashIcon className="w-4 h-4 mr-2" />
-                                                                    Delete
-                                                                </DropdownMenuItem>
-                                                            </DropdownMenuContent>
-                                                        </DropdownMenu> */}
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))
-                                        )}
-                                    </>
-                                ))
-                            ) : (
-                                <TableRow>
-                                    <TableCell colSpan="8" className="text-center">
-                                        No products found.
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
+                                            </TableCell><TableCell>
+                                                <button
+                                                    className="text-white hover:text-secondaryAccent p-2"
+                                                    onClick={() => handleEdit(product)}
+                                                >
+                                                    <Pencil1Icon className="w-4 h-4" />
+                                                </button>
+                                                <button
+                                                    className='text-white hover:text-error p-2'
+                                                    onClick={() => handleDelete(product.id)}
+                                                >
+                                                    <TrashIcon className="w-4 h-4" />
+                                                </button>
+                                            </TableCell></TableRow>
+                                    ))}
+                                </React.Fragment>
+                            ))
+                        ) : (
+                            <TableRow><TableCell colSpan="8" className="text-center">No products found.</TableCell></TableRow>
+                        )}</TableBody>
                     </Table>
                 </div>
 

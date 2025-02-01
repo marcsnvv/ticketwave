@@ -1,10 +1,10 @@
 "use client"
 
-import { useState, useEffect } from 'react'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { supabase } from '../../../supabase';
+import { fetchUserData } from '../../utils/fetchUserData'; // Import the utility function
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { useRouter } from 'next/navigation'
-import { supabase } from '../../../supabase'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ListBulletIcon, MixerHorizontalIcon, ExitIcon, RocketIcon, PersonIcon } from "@radix-ui/react-icons"
@@ -19,18 +19,47 @@ import { Button } from "@/components/ui/button"
 import { Card } from './card'
 
 export default function Navbar() {
-    const router = useRouter()
-    const [user, setUser] = useState(null)
-    const [isAdmin, setIsAdmin] = useState(false)
-    const [companies, setCompanies] = useState([])
-    const [isSwitchOpen, setIsSwitchOpen] = useState(false)
-    const [isSettingsOpen, setIsSettingsOpen] = useState(false)
-    const [currentPage, setCurrentPage] = useState('')
-    const pathname = usePathname()
+    const router = useRouter();
+    const [user, setUser] = useState(null);
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [companies, setCompanies] = useState([]);
+    const [isSwitchOpen, setIsSwitchOpen] = useState(false);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [currentPage, setCurrentPage] = useState('');
+    const pathname = usePathname();
 
     useEffect(() => {
-        setCurrentPage(pathname)
-    }, [pathname])
+        setCurrentPage(pathname);
+    }, [pathname]);
+
+    useEffect(() => {
+        async function fetchData() {
+            const { data: { user: authUser } } = await supabase.auth.getUser();
+            if (!authUser) {
+                router.push("/login");
+            } else {
+                if (admins_emails.includes(authUser.email)) {
+                    setIsAdmin(true);
+                }
+
+                const userData = await fetchUserData(authUser.email); // Use the utility function
+
+                if (userData) {
+                    // Format companies data
+                    const accessibleCompanies = userData.companies_access?.map(access => ({
+                        id: access.company_id,
+                        name: access.companies?.name,
+                        image_url: access.companies?.notification_settings?.[0]?.image_url,
+                        color: access.companies?.notification_settings?.[0]?.color
+                    })) || [];
+                    setCompanies(accessibleCompanies);
+                    setUser(userData);
+                }
+            }
+        }
+
+        fetchData();
+    }, []);
 
     function logout(event) {
         event.preventDefault()
@@ -86,50 +115,11 @@ export default function Navbar() {
         }
     }
 
-    useEffect(() => {
-        async function fetchData() {
-            const { data: { user: authUser } } = await supabase.auth.getUser()
-            if (!authUser) {
-                router.push("/login")
-            } else {
-                if (admins_emails.includes(authUser.email)) {
-                    setIsAdmin(true)
-                }
-                // En el segundo useEffect, modifica la consulta para incluir el nombre de la compañía actual
-
-                const { data: userData, error } = await supabase
-                    .from('users')
-                    .select('id,name,email,avatar_url,company_id,companies(name),companies_access(company_id,companies(name,notification_settings(*)))')
-                    .eq('email', authUser.email)
-                    
-                if (error) {
-                    console.log(error)
-                }
-
-                if (userData) {
-                    console.log(userData)
-                    // Format companies data
-                    const accessibleCompanies = userData.companies_access?.map(access => ({
-                        id: access.company_id,
-                        name: access.companies?.name,
-                        image_url: access.companies?.notification_settings?.[0]?.image_url,
-                        color: access.companies?.notification_settings?.[0]?.color
-                    })) || []
-                    console.log(accessibleCompanies)
-                    setCompanies(accessibleCompanies)
-                    setUser(userData)
-                }
-            }
-        }
-
-        fetchData()
-    }, [])
-
     return (
         <div className="fixed w-1/6 h-screen bg-primary">
             <div className="flex flex-col items-start justify-between p-5 text-white h-screen border-r border-white/25">
 
-                <div className='flex flex-col gap-2 w-full'>
+                <div className='flex flex-col items-center gap-2 w-full'>
                     <Link href={"/"}>
                         <Image src="/logo.png" alt="Logo" width={200} height={200} />
                     </Link>

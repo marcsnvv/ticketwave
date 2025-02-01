@@ -11,28 +11,32 @@ import { DiscordLogoIcon } from "@radix-ui/react-icons";
 import Image from 'next/image';
 
 export default function Login() {
-    const [email, setEmail] = useState('')
-    const [error, setError] = useState('')
+    const [email, setEmail] = useState('');
+    const [error, setError] = useState('');
+    const [users, setUsers] = useState([]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            if (email) { // Fetch data only if email is set
+                const { data, error } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('email', email);
+
+                if (error) {
+                    console.error('Error fetching users:', error);
+                } else {
+                    setUsers(data);
+                }
+            }
+        };
+
+        fetchData();
+    }, []); // Fetch data when email changes
 
     const checkUserEmail = async (email) => {
-        const { data, error } = await supabase
-            .from('users')
-            .select('email,company_id')
-            .eq('email', email)
-
-        if (error) {
-            setError('An error occurred while checking email');
-            console.error('Error checking email:', error.message);
-            return false
-        }
-
-        if (data.length === 0) {
-            return false
-        } else {
-            localStorage.setItem('company_id', data[0].company_id);
-            return true
-        }
-    }
+        return users.some(user => user.email === email);
+    };
 
     const handleLogin = async () => {
         const userExists = await checkUserEmail(email);
@@ -70,7 +74,7 @@ export default function Login() {
     };
 
     return (
-        <div className="flex justify-center items-center h-screen">
+        <main className="flex justify-center items-center h-screen">
             <Card className="w-full max-w-md shadow-lg bg-background border border-white/25 rounded-[12px] text-white">
                 <CardHeader className="flex flex-col items-center justify-center gap-2">
                     <Image src={"/logo.png"} width={50} height={50} alt="tw logo" />
@@ -79,7 +83,6 @@ export default function Login() {
                 <CardContent>
                     <div className="space-y-4">
                         <div>
-                            {/* <Label htmlFor="email" className="mb-2">Email Address</Label> */}
                             <Input
                                 id="email"
                                 type="email"
@@ -118,6 +121,6 @@ export default function Login() {
                     </div>
                 </CardContent>
             </Card>
-        </div>
+        </main>
     );
 }

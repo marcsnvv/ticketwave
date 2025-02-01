@@ -59,7 +59,7 @@ export default function AddEvent({
     useEffect(() => {
         const timeoutId = setTimeout(() => {
             if (monitorType.includes('ticketmaster')) {
-                searchTicketmaster(searchTerm)
+                // searchTicketmaster(searchTerm)
             } else if (monitorsForAutocomplete.pop('ticketmaster').includes(monitorType)) {
                 searchEventim(searchTerm)
             }
