@@ -11,7 +11,7 @@ import { ListBulletIcon, MixerHorizontalIcon, ExitIcon, RocketIcon, PersonIcon }
 import { Building2 } from "lucide-react"
 import { usePathname } from 'next/navigation'  // Add this import at the top
 
-const admins_emails = [process.env.ADMIN_EMAIL1, process.env.ADMIN_EMAIL2, "vuntagecom@gmail.com", "busines1244@gmail.com"]
+const admins_emails = [process.env.ADMIN_EMAIL1, process.env.ADMIN_EMAIL2, "vuntagecom@gmail.com", "busines1244@gmail.com", "michalkulik.k12@gmail.com"]
 
 // Add these imports at the top
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"

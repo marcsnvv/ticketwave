@@ -9,7 +9,7 @@ import {
     MenubarTrigger,
 } from "@/components/ui/menubar"
 
-const admins_emails = [process.env.ADMIN_EMAIL1, process.env.ADMIN_EMAIL2, "vuntagecom@gmail.com", "busines1244@gmail.com"]
+const admins_emails = [process.env.ADMIN_EMAIL1, process.env.ADMIN_EMAIL2, "vuntagecom@gmail.com", "busines1244@gmail.com", "michalkulik.k12@gmail.com"]
 
 export default function AdminPage() {
     const router = useRouter()
