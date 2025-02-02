@@ -336,7 +336,7 @@ export default function MonitorsTable() {
     )
 
     return (
-        <main className='flex items-center justify-center w-full p-10 mt-[80px]'>
+        <main className='flex items-center justify-center w-full p-[24px]'>
 
             <div className="w-full min-h-screen">
 

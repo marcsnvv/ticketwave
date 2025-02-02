@@ -19,7 +19,7 @@ export default function CustomizationPage() {
     }, [])
 
     return (
-        <main className='flex flex-col items-start justify-start w-full p-10 mt-[80px] min-h-screen h-full'>
+        <main className='flex flex-col items-start justify-start w-full p-[24px] min-h-screen h-full'>
             <h2 className='text-5xl font-semibold text-white mb-4'>Customization</h2>
             <CustomizationSection />
         </main>
