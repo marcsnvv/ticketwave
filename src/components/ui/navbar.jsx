@@ -116,7 +116,7 @@ export default function Navbar() {
     }
 
     return (
-        <div className="fixed w-1/6 h-screen bg-primary">
+        <div className="fixed w-[250px] h-screen bg-primary">
             <div className="flex flex-col items-start justify-between p-5 text-white h-screen border-r border-white/25">
 
                 <div className='flex flex-col items-center gap-2 w-full'>
