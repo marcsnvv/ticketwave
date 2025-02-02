@@ -30,6 +30,7 @@ export default function Navbar() {
 
     useEffect(() => {
         setCurrentPage(pathname);
+        console.log(pathname)
     }, [pathname]);
 
     useEffect(() => {
@@ -117,7 +118,7 @@ export default function Navbar() {
 
     return (
         <div className="fixed w-[250px] h-screen bg-primary">
-            <div className="flex flex-col items-start justify-between p-5 text-white h-screen border-r border-white/25">
+            <div className="flex flex-col items-start justify-between p-[24px] text-white h-screen border-r border-white/25">
 
                 <div className='flex flex-col items-center gap-2 w-full'>
                     <Link href={"/"}>
@@ -126,7 +127,10 @@ export default function Navbar() {
                     <hr className='w-full border border-white/25' />
                     <div className="flex flex-col items-start gap-2 w-full overflow-auto max-h-64">
                         <button
-                            className='flex justify-start items-center gap-2 hover:bg-white/25 p-2 px-3 w-full rounded-md transition duration-200 ease-in-out'
+                            className={`
+                                flex justify-start items-center gap-2 hover:bg-white/25 p-2 px-3 w-full rounded-md transition duration-200 ease-in-out
+                                ${currentPage === "/dashboard" ? "bg-white/25" : ""}
+                            `}
                             onClick={() => router.push("/dashboard")}
                         >
                             <ListBulletIcon className="w-6 h-6" />
@@ -134,7 +138,10 @@ export default function Navbar() {
                         </button>
                         <div className="relative w-full">
                             <button
-                                className='flex justify-start items-center gap-2 hover:bg-white/25 p-2 px-3 w-full rounded-md transition duration-200 ease-in-out'
+                                className={`
+                                    flex justify-start items-center gap-2 hover:bg-white/25 p-2 px-3 w-full rounded-md transition duration-200 ease-in-out
+                                    ${currentPage === "/settings" ? "bg-white/25" : ""}
+                                `}
                                 onClick={() => setIsSettingsOpen(!isSettingsOpen)}
                             >
                                 <MixerHorizontalIcon className="w-6 h-6" />
@@ -175,7 +182,10 @@ export default function Navbar() {
                             )}
                         </div>
                         <button
-                            className='flex justify-start items-center gap-2 hover:bg-white/25 p-2 px-3 w-full rounded-md transition duration-200 ease-in-out'
+                            className={`
+                                flex justify-start items-center gap-2 hover:bg-white/25 p-2 px-3 w-full rounded-md transition duration-200 ease-in-out
+                                ${currentPage === "/company" ? "bg-white/25" : ""}
+                            `}
                             onClick={() => setIsSwitchOpen(true)}
                         >
                             <Building2 className="w-6 h-6" />
@@ -194,21 +204,30 @@ export default function Navbar() {
                                         <hr className='w-full border border-white/25' />
                                     </div>
                                     <button
-                                        className='flex justify-start items-center gap-2 hover:bg-white/25 p-2 px-3 w-full rounded-md transition duration-200 ease-in-out'
+                                        className={`
+                                            flex justify-start items-center gap-2 hover:bg-white/25 p-2 px-3 w-full rounded-md transition duration-200 ease-in-out
+                                            ${currentPage === "/dashboard/admin/revenue" ? "bg-white/25" : ""}
+                                        `}
                                         onClick={() => router.push("/dashboard/admin/revenue")}
                                     >
                                         <RocketIcon className="w-6 h-6" />
                                         Revenue
                                     </button>
                                     <button
-                                        className='flex justify-start items-center gap-2 hover:bg-white/25 p-2 px-3 w-full rounded-md transition duration-200 ease-in-out'
+                                        className={`
+                                            flex justify-start items-center gap-2 hover:bg-white/25 p-2 px-3 w-full rounded-md transition duration-200 ease-in-out
+                                            ${currentPage === "/dashboard/admin/clients" ? "bg-white/25" : ""}
+                                        `}
                                         onClick={() => router.push("/dashboard/admin/clients")}
                                     >
                                         <PersonIcon className="w-6 h-6" />
                                         Clients
                                     </button>
                                     <button
-                                        className='flex justify-start items-center gap-2 hover:bg-white/25 p-2 px-3 w-full rounded-md transition duration-200 ease-in-out'
+                                        className={`
+                                            flex justify-start items-center gap-2 hover:bg-white/25 p-2 px-3 w-full rounded-md transition duration-200 ease-in-out
+                                            ${currentPage === "/dashboard/admin/logs" ? "bg-white/25" : ""}
+                                        `}
                                         onClick={() => router.push("/dashboard/admin/logs")}
                                     >
                                         <ListBulletIcon className="w-6 h-6" />
