@@ -72,7 +72,6 @@ export default function LogsSection() {
     const [logsData, setLogsData] = useState({ filename: '', total_lines: 0, lines: [] })
     const [loading, setLoading] = useState(true)
     const [selectedMonitor, setSelectedMonitor] = useState('viagogo.com')
-    const [newLogs, setNewLogs] = useState([])
     const [searchTerm, setSearchTerm] = useState('')
     const [maxLines, setMaxLines] = useState(50)
     const [startDate, setStartDate] = useState(null)
@@ -161,48 +160,21 @@ export default function LogsSection() {
 
     return (
         <div className='w-full text-white'>
-
-            <div className="flex flex-col gap-4 mb-4">
-                <div className="flex justify-between items-center">
-                    
-                    <Button
-                        variant="outline"
-                        onClick={forceRefresh}>
-                        <div className={loading ? 'animate-spin' : ''}>
-                            <RefreshCw />
-                        </div>
-                    </Button>
-
-                </div>
-                <Select
-                    value={selectedMonitor}
-                    onValueChange={setSelectedMonitor}
-                >
-                    <SelectTrigger className="w-[280px]">
-                        <SelectValue placeholder="Select a monitor" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {websites.map((site) => (
-                            <SelectItem key={site.value} value={site.value}>
-                                {site.label}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+            <div className='flex justify-between mb-2'>
                 <Input
                     type="text"
                     placeholder="Search logs..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="mt-4"
+                    className="max-w-[250px] w-full"
                 />
+                <div className='flex gap-2'>
 
-                <div className='flex justify-between gap-4'>
                     <Select
                         value={maxLines}
                         onValueChange={setMaxLines}
                     >
-                        <SelectTrigger className="w-[300px]">
+                        <SelectTrigger className="w-[150px]">
                             <SelectValue placeholder="Select number of lines" />
                         </SelectTrigger>
                         <SelectContent>
@@ -213,7 +185,9 @@ export default function LogsSection() {
                             ))}
                         </SelectContent>
                     </Select>
-                    <Popover>
+                    <Popover
+                        className="w-[150px]"
+                    >
                         <PopoverTrigger asChild>
                             <Button
                                 variant={"outline"}
@@ -222,8 +196,8 @@ export default function LogsSection() {
                                     !startDate && "text-muted-foreground"
                                 )}
                             >
+                                {startDate ? format(startDate, "PPP") : <span>Select from</span>}
                                 <CalendarIcon className="mr-2 h-4 w-4" />
-                                {startDate ? format(startDate, "PPP") : <span>Select start date</span>}
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0">
@@ -235,7 +209,7 @@ export default function LogsSection() {
                             />
                         </PopoverContent>
                     </Popover>
-                    <Popover>
+                    <Popover className="w-[150px]">
                         <PopoverTrigger asChild>
                             <Button
                                 variant={"outline"}
@@ -244,8 +218,8 @@ export default function LogsSection() {
                                     !endDate && "text-muted-foreground"
                                 )}
                             >
+                                {endDate ? format(endDate, "PPP") : <span>Select to</span>}
                                 <CalendarIcon className="mr-2 h-4 w-4" />
-                                {endDate ? format(endDate, "PPP") : <span>Select end date</span>}
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0">
@@ -257,6 +231,21 @@ export default function LogsSection() {
                             />
                         </PopoverContent>
                     </Popover>
+                    <Select
+                        value={selectedMonitor}
+                        onValueChange={setSelectedMonitor}
+                    >
+                        <SelectTrigger className="w-[150px]">
+                            <SelectValue placeholder="Select a monitor" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {websites.map((site) => (
+                                <SelectItem key={site.value} value={site.value}>
+                                    {site.label}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                     <Button
                         variant="outline"
                         onClick={resetConfiguration}
@@ -267,13 +256,26 @@ export default function LogsSection() {
                 </div>
             </div>
 
+            <hr className='border-white/25 mb-2'></hr>
+
             <div className='bg-black rounded-[12px] border border-white/25'>
                 <table className='font-mono'>
                     <thead className='border-b border-white/25'>
                         <tr className='h-10'>
                             <th className="text-start px-5 py-3">Timestamp</th>
                             <th className='text-start px-5 py-3'>Message</th>
-                            <th className='text-end text-nowrap px-5 py-3 text-sm text-white/50'>{maxLines} lines</th>
+                            <th className='text-end text-nowrap px-5 py-3 text-sm text-white/50 flex items-center gap-2'>
+                                {maxLines} lines
+                                <button
+                                    onClick={() => forceRefresh()}
+                                    className={`
+                                        p-2 text-white
+                                    ${loading ? 'animate-spin' : ''}    
+                                    `}
+                                >
+                                    <RefreshCw />
+                                </button>
+                            </th>
                         </tr>
                     </thead>
 
