@@ -21,8 +21,8 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <main className="bg-gradient-to-tl from-primary from-10% via-background via-50% to-background to-100%">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background`}>
+        <main>
           {children}
         </main>
       </body>

@@ -21,7 +21,7 @@ export default function RevenueDashboard() {
     }, [])
 
     return (
-        <main className='flex flex-col items-start justify-start w-full p-[24px] min-h-screen h-full'>
+        <main className='flex flex-col items-start justify-start w-full p-[24px] pt-[80px] min-h-screen h-full'>
             <RevenueSection />
         </main>
     )

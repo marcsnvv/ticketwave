@@ -118,14 +118,14 @@ export default function Navbar() {
 
     return (
         <div className="fixed w-[250px] h-screen bg-primary">
-            <div className="flex flex-col items-start justify-between p-[24px] text-white h-screen border-r border-white/25">
+            <div className="flex flex-col items-start justify-between p-[24px] text-white h-screen">
 
                 <div className='flex flex-col items-center gap-2 w-full'>
                     <Link href={"/"}>
-                        <Image src="/logo.png" alt="Logo" width={200} height={200} />
+                        <Image src="/logo.png" alt="Logo" width={150} height={150} />
                     </Link>
                     <hr className='w-full border border-white/25' />
-                    <div className="flex flex-col items-start gap-2 w-full overflow-auto max-h-64">
+                    <div className="flex flex-col items-start gap-2 w-full overflow-auto max-h-72">
                         <button
                             className={`
                                 flex justify-start items-center gap-2 hover:bg-white/25 p-2 px-3 w-full rounded-md transition duration-200 ease-in-out

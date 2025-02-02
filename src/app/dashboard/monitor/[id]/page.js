@@ -776,7 +776,7 @@ export default function ProductsTable({ params }) {
     }
 
     return (
-        <main className='flex items-center justify-center w-full p-[24px] h-full'>
+        <main className='flex items-center justify-center w-full p-[24px] pt-[80px] h-full'>
 
             <div className="w-full min-h-screen h-full">
                 {/* {
