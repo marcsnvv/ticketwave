@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react';
-import { supabase } from '../../../supabase';
-import { fetchUserData } from '../../utils/fetchUserData';
+import { supabase } from './../../supabase';
+import { fetchUserData } from '../utils/fetchUserData';
 
 export const UserContext = createContext();
 
