@@ -259,7 +259,7 @@ export default function LogsSection() {
             <hr className='border-white/25 mb-2'></hr>
 
             <div className='bg-black rounded-[12px] border border-white/25'>
-                <table className='font-mono'>
+                <table className='font-mono w-full'>
                     <thead className='border-b border-white/25'>
                         <tr className='h-10'>
                             <th className="text-start px-5 py-3">Timestamp</th>
@@ -279,7 +279,7 @@ export default function LogsSection() {
                         </tr>
                     </thead>
 
-                    <tbody className='p-5'>
+                    <tbody className='' style={{ maxHeight: '60vh', overflow: 'auto', display: 'block' }}>
                         <AnimatePresence>
                             {filteredLogs.map((line, index) => {
                                 const { timestamp, message, isError } = parseLine(line);
@@ -290,6 +290,7 @@ export default function LogsSection() {
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: 20 }}
                                         transition={{ duration: 0.3 }}
+                                        // style={{ display: 'table', width: '100%' }}
                                     >
                                         <td className="text-sm text-nowrap px-5 py-3">
                                             {timestamp}

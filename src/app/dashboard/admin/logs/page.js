@@ -21,7 +21,7 @@ export default function LogsDashboard() {
     }, [])
 
     return (
-        <main className='flex flex-col items-start justify-start w-full p-[24px] pt-[80px] min-h-screen h-full'>
+        <main className='flex flex-col items-start justify-start w-full p-[24px] pt-[80px]'>
             <h2 className='text-5xl font-semibold text-white mb-4'>Logs</h2>
             <LogsSection />
         </main>
