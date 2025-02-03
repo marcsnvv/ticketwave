@@ -17,7 +17,7 @@ function Page() {
       });
 
       if (!guildResponse.ok) {
-        console.error('User is not a member of the required server');
+        console.log('User is not a member of the required server');
         return false;
       }
 
@@ -26,13 +26,13 @@ function Page() {
 
       // Verificar si tiene el rol específico
       if (!guildData.roles.includes("1316157670272532582")) {
-        console.error('User does not have the required role');
+        console.log('User does not have the required role');
         return false;
       }
 
       return true;
     } catch (error) {
-      console.error('Error checking Discord membership:', error);
+      console.log('Error checking Discord membership:', error);
       return false;
     }
   }
@@ -42,22 +42,25 @@ function Page() {
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session?.provider_token) {
         const hasAccess = await checkDiscordMembership(session.provider_token);
+        console.log("Has access: ", hasAccess)
         if (!hasAccess) {
           await supabase.auth.signOut();
         } else {
+          console.log("Recupering")
           // Recuperar el usuario de Supabase y insertar el company id en localStorage
           const { data: user, error } = await supabase
             .from('users')
             .select('company_id')
             .eq('id', session.user.id)
 
+
           if (error) {
-            console.error('Error fetching user:', error.message);
+            console.log('Error fetching user:', error.message);
             return;
           }
 
           if (user.length === 0) {
-            console.error('User not found');
+            console.log('User not found');
             return;
           }
 
@@ -82,11 +85,10 @@ function Page() {
     };
 
     checkSession();
-  }, [router]);
+  }, []);
 
   return (
     <div>
-      {/* Contenido de la página */}
     </div>
   );
 }

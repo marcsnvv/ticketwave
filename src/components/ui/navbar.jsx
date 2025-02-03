@@ -10,8 +10,6 @@ import Link from 'next/link'
 import { ListBulletIcon, MixerHorizontalIcon, ExitIcon, RocketIcon, PersonIcon } from "@radix-ui/react-icons"
 import { Building2 } from "lucide-react"
 import { usePathname } from 'next/navigation'  // Add this import at the top
-import { useContext } from 'react';
-import { UserContext } from '../../context/UserContext'; // Importa el contexto
 
 const admins_emails = [process.env.ADMIN_EMAIL1, process.env.ADMIN_EMAIL2, "vuntagecom@gmail.com", "busines1244@gmail.com", "michalkulik.k12@gmail.com"]
 
@@ -22,7 +20,9 @@ import { Card } from './card'
 
 export default function Navbar() {
     const router = useRouter();
-    const { user, isAdmin, companies } = useContext(UserContext); // Usa el contexto
+    const [user, setUser] = useState(null);
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [companies, setCompanies] = useState([]);
     const [isSwitchOpen, setIsSwitchOpen] = useState(false);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState('');
@@ -32,12 +32,43 @@ export default function Navbar() {
         setCurrentPage(pathname);
     }, [pathname]);
 
-    // Elimina el useEffect que llama a fetchUserData
+    useEffect(() => {
+        async function fetchData() {
+            const { data: { user: authUser } } = await supabase.auth.getUser();
+            if (!authUser) {
+                router.push("/login");
+            } else {
+                if (admins_emails.includes(authUser.email)) {
+                    setIsAdmin(true);
+                }
+
+                if (authUser.email) {
+                    console.log("Fetching data for... ", authUser.email)
+                    const userData = await fetchUserData(authUser.email); // Use the utility function
+
+                    if (userData) {
+                        // Format companies data
+                        const accessibleCompanies = userData.companies_access?.map(access => ({
+                            id: access.company_id,
+                            name: access.companies?.name,
+                            image_url: access.companies?.notification_settings?.[0]?.image_url,
+                            color: access.companies?.notification_settings?.[0]?.color
+                        })) || [];
+                        setCompanies(accessibleCompanies);
+                        setUser(userData);
+                    }
+                }
+
+            }
+        }
+
+        fetchData();
+    }, []);
 
     function logout(event) {
-        event.preventDefault();
-        supabase.auth.signOut();
-        router.push("/login");
+        event.preventDefault()
+        supabase.auth.signOut()
+        router.push("/login")
     }
 
     const handleSwitchCompany = async (newCompanyId) => {

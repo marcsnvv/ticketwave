@@ -9,13 +9,13 @@ export async function fetchUserData(email) {
             .single();
 
         if (error) {
-            console.error('Error fetching user data:', error);
+            console.log('Error fetching user data:', error);
             return null;
         }
 
         return data;
     } catch (error) {
-        console.error('Unexpected error fetching user data:', error);
+        console.log('Unexpected error fetching user data:', error);
         return null;
     }
 }

@@ -1,0 +1,175 @@
+{
+    "event_message": "GET | 503 | 114.223.218.232 | 90c367129b3ed015 | https://vtliewlajtjeqsuqmfdn.supabase.co/rest/v1/users?select=id%2Cname%2Cemail%2Cavatar_url%2Ccompany_id%2Ccompanies%28name%29%2Ccompanies_access%28company_id%2Ccompanies%28name%29%29 | Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0",
+    "id": "2a94f3cb-9e8b-45b9-a833-69d4db3f3bd5",
+    "metadata": [
+        {
+            "load_balancer_redirect_identifier": null,
+            "logflare_worker": [
+                {
+                    "worker_id": "QW16QB"
+                }
+            ],
+            "request": [
+                {
+                    "cf": [
+                        {
+                            "asOrganization": "China Telecom",
+                            "asn": 4134,
+                            "botManagement": [
+                                {
+                                    "corporateProxy": false,
+                                    "detectionIds": [],
+                                    "ja3Hash": null,
+                                    "jsDetection": [
+                                        {
+                                            "passed": false
+                                        }
+                                    ],
+                                    "score": 99,
+                                    "staticResource": false,
+                                    "verifiedBot": false
+                                }
+                            ],
+                            "city": "Wuxi",
+                            "clientAcceptEncoding": "gzip, deflate, br, zstd",
+                            "clientTcpRtt": 398,
+                            "clientTrustScore": null,
+                            "colo": "SJC",
+                            "continent": "AS",
+                            "country": "CN",
+                            "edgeRequestKeepAliveStatus": 1,
+                            "httpProtocol": "HTTP/1.1",
+                            "isEUCountry": null,
+                            "latitude": "31.56180",
+                            "longitude": "120.28640",
+                            "metroCode": null,
+                            "postalCode": null,
+                            "region": "Jiangsu",
+                            "regionCode": "JS",
+                            "requestPriority": null,
+                            "timezone": "Asia/Shanghai",
+                            "tlsCipher": "AEAD-AES256-GCM-SHA384",
+                            "tlsClientAuth": [
+                                {
+                                    "certPresented": "0",
+                                    "certRevoked": "0",
+                                    "certVerified": "NONE"
+                                }
+                            ],
+                            "tlsClientExtensionsSha1": "ZNW3zaUPWmk8b99l7rhfy7tSGTE=",
+                            "tlsClientHelloLength": "633",
+                            "tlsClientRandom": "RhwkvRllaOurE6RmfiMRbIBJRk71ORpXDQk1usQAMw0=",
+                            "tlsExportedAuthenticator": [
+                                {
+                                    "clientFinished": "f1eb7d7eb1025f6a42d87e49c54f79a4e472bb88871601c31e7f68ae15cf8ea5e655b477abd6a426d009a0da03013aa4",
+                                    "clientHandshake": "cf2e5ca6121d913876217930bf28f39de2629fa0390f11746f17847290de3e01fcd83cc93aee82fc02804d911d673048",
+                                    "serverFinished": "86ab09b8c935686c29500895ff4dc7fa111e422b48fb0e355298417413f42d5cba8ea965515b9fa1441b45b25efe7456",
+                                    "serverHandshake": "8b5d44a095b2eed8e6ad9dc3ae3bf88e7c088bb0db67eff675f783b8e116db07c131468288bf1adb0e886a699c32c727"
+                                }
+                            ],
+                            "tlsVersion": "TLSv1.3",
+                            "verifiedBotCategory": null
+                        }
+                    ],
+                    "headers": [
+                        {
+                            "accept": "*/*",
+                            "cf_cache_status": null,
+                            "cf_connecting_ip": "114.223.218.232",
+                            "cf_ipcountry": "CN",
+                            "cf_ray": "90c367129b3ed015",
+                            "content_length": null,
+                            "content_location": null,
+                            "content_range": null,
+                            "content_type": "application/json;charset=UTF-8",
+                            "date": null,
+                            "host": "vtliewlajtjeqsuqmfdn.supabase.co",
+                            "prefer": null,
+                            "range": null,
+                            "referer": "https://ticketwave-lime.vercel.app/",
+                            "sb_gateway_mode": null,
+                            "sb_gateway_version": null,
+                            "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0",
+                            "x_client_info": "supabase-js-web/2.45.4",
+                            "x_forwarded_host": null,
+                            "x_forwarded_proto": "https",
+                            "x_forwarded_user_agent": null,
+                            "x_kong_proxy_latency": null,
+                            "x_kong_upstream_latency": null,
+                            "x_real_ip": "114.223.218.232"
+                        }
+                    ],
+                    "host": "vtliewlajtjeqsuqmfdn.supabase.co",
+                    "method": "GET",
+                    "path": "/rest/v1/users",
+                    "port": null,
+                    "protocol": "https:",
+                    "sb": [
+                        {
+                            "auth_user": null,
+                            "jwt": [
+                                {
+                                    "apikey": [
+                                        {
+                                            "invalid": null,
+                                            "payload": [
+                                                {
+                                                    "algorithm": "HS256",
+                                                    "issuer": "supabase",
+                                                    "role": "anon",
+                                                    "signature_prefix": "fdyjkZ",
+                                                    "subject": null
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "authorization": [
+                                        {
+                                            "invalid": null,
+                                            "payload": [
+                                                {
+                                                    "algorithm": "HS256",
+                                                    "issuer": "supabase",
+                                                    "key_id": null,
+                                                    "role": "anon",
+                                                    "signature_prefix": "fdyjkZ",
+                                                    "subject": null
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "search": "?select=id%2Cname%2Cemail%2Cavatar_url%2Ccompany_id%2Ccompanies%28name%29%2Ccompanies_access%28company_id%2Ccompanies%28name%29%29",
+                    "url": "https://vtliewlajtjeqsuqmfdn.supabase.co/rest/v1/users?select=id%2Cname%2Cemail%2Cavatar_url%2Ccompany_id%2Ccompanies%28name%29%2Ccompanies_access%28company_id%2Ccompanies%28name%29%29"
+                }
+            ],
+            "response": [
+                {
+                    "headers": [
+                        {
+                            "cf_cache_status": "DYNAMIC",
+                            "cf_ray": "90c36712d026d015-SJC",
+                            "content_length": null,
+                            "content_location": null,
+                            "content_range": null,
+                            "content_type": "text/plain",
+                            "date": "Mon, 03 Feb 2025 15:22:03 GMT",
+                            "sb_gateway_mode": null,
+                            "sb_gateway_version": "1",
+                            "transfer_encoding": "chunked",
+                            "x_kong_proxy_latency": null,
+                            "x_kong_upstream_latency": null,
+                            "x_sb_error_code": null
+                        }
+                    ],
+                    "origin_time": 121306,
+                    "status_code": 503
+                }
+            ]
+        }
+    ],
+    "timestamp": 1738596123013000
+}
