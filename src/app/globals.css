@@ -3,7 +3,19 @@
 @tailwind utilities;
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
+html {
+  scroll-behavior: smooth;
+}
+
 @layer base {
+  @font-face {
+    font-family: 'Swiss';
+    src: url(/swiss.ttf) format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
+
+
   :root {
     --background: #05161A;
     --foreground: 0 0% 98%;
@@ -62,4 +74,3 @@
     --chart-5: 340 75% 55%
   }
 }
-
