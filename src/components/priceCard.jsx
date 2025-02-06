@@ -30,6 +30,7 @@ export default function PriceCard({ title, price, features, featured }) {
 
                 <button className={`
             bg-button-gradient w-full text-white rounded-[6px] p-[16px] font-semibold
+            transition-all duration-300 hover:bg-button-hover-gradient
             ${featured ? 'border-2 border-secondary' : ''}    
             `}>
                     Get {title}
