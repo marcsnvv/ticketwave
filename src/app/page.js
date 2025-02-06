@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../../supabase'; // Asegúrate de que la ruta sea correcta
 import Link from 'next/link';
@@ -8,8 +8,9 @@ import Image from 'next/image';
 import PriceCard from '@/components/priceCard';
 import FaqCard from '@/components/faqCard';
 
-function Page() {
+export default function Home() {
   const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const checkDiscordMembership = async (access_token) => {
     try {
@@ -46,17 +47,14 @@ function Page() {
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session?.provider_token) {
         const hasAccess = await checkDiscordMembership(session.provider_token);
-        console.log("Has access: ", hasAccess)
         if (!hasAccess) {
           await supabase.auth.signOut();
         } else {
-          console.log("Recupering")
           // Recuperar el usuario de Supabase y insertar el company id en localStorage
           const { data: user, error } = await supabase
             .from('users')
             .select('company_id')
             .eq('id', session.user.id)
-
 
           if (error) {
             console.log('Error fetching user:', error.message);
@@ -78,18 +76,16 @@ function Page() {
     };
   }, []);
 
-  // useEffect(() => {
-  //   const checkSession = async () => {
-  //     const { data: { session } } = await supabase.auth.getSession()
-  //     if (!session) {
-  //       router.push('/login'); // Redirige a la página de login si no hay sesión
-  //     } else {
-  //       router.push("/dashboard")
-  //     }
-  //   };
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        setIsLoggedIn(true);
+      }
+    };
 
-  //   checkSession();
-  // }, []);
+    checkSession();
+  }, []);
 
   return (
     <>
@@ -159,22 +155,31 @@ function Page() {
 
             {/* Navigation */}
             <Link href={"/#home"}>
-              <span className='font-semibold text-white font-[16px]'>Home</span>
+              <span className='font-semibold text-white font-[16px] hover:text-secondaryAccent duration-150'>Home</span>
             </Link>
             <Link href={"/#features"}>
-              <span className='font-semibold text-white font-[16px]'>Features</span>
+              <span className='font-semibold text-white font-[16px] hover:text-secondaryAccent duration-150'>Features</span>
             </Link>
             <Link href={"/#pricing"}>
-              <span className='font-semibold text-white font-[16px]'>Pricing</span>
+              <span className='font-semibold text-white font-[16px] hover:text-secondaryAccent duration-150'>Pricing</span>
             </Link>
             <Link href={"/#faq"}>
-              <span className='font-semibold text-white font-[16px]'>FAQ</span>
+              <span className='font-semibold text-white font-[16px] hover:text-secondaryAccent duration-150'>FAQ</span>
             </Link>
           </div>
 
           {/* Section 2 */}
-          <button className='text-white font-semibold font-[16px] bg-button-gradient px-[16px] py-[8px] rounded-[36px]'>
-            Dashboard
+          <button
+            onClick={() => {
+              if (isLoggedIn) {
+                router.push('/dashboard');
+              } else {
+                router.push('/login');
+              }
+            }}
+            className="text-white font-semibold text-[16px] bg-button-gradient px-[16px] py-[8px] rounded-[36px] transition-all duration-300 hover:bg-button-hover-gradient"
+          >
+            {isLoggedIn ? "Dashboard" : "Sign in"}
           </button>
         </nav>
 
@@ -192,7 +197,7 @@ function Page() {
               Get easy-to-use, super-fast and absolutely accurate<br />
               custom monitors tuned to perfection
             </span>
-            <button className='text-white font-semibold font-[16px] bg-button-gradient px-[40px] py-[8px] rounded-[36px] z-10'>
+            <button className="text-white font-semibold text-[16px] bg-button-gradient px-[16px] py-[8px] rounded-[36px] transition-all duration-300 hover:bg-button-hover-gradient">
               Apply now
             </button>
             <Image
@@ -290,9 +295,16 @@ function Page() {
                       Anyone con do it, group or individual, just a few clicks. We also supply the product with a video tutorial and are available to answer you requests.
                     </span>
                   </div>
-                  <button className='flex gap-2 items-center justify-between text-white font-semibold'>
+                  <button className="flex gap-2 items-center justify-between text-white font-semibold group">
                     View Guide
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="transform transition-transform duration-300 group-hover:translate-x-2"
+                    >
                       <path d="M5 12H19" stroke="#F0F0F0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                       <path d="M12 5L19 12L12 19" stroke="#F0F0F0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
@@ -312,13 +324,21 @@ function Page() {
             </h2>
             <div className='bg-button-gradient p-[48px] rounded-[24px] flex flex-col items-center justify-center gap-6'>
               <span className='text-white text-[32px] font-semibold'>...everything you need</span>
-              <button className='flex gap-2 items-center justify-between text-white font-semibold'>
+              <button className="flex gap-2 items-center justify-between text-white font-semibold group">
                 View Guide
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="transform transition-transform duration-300 group-hover:translate-x-2"
+                >
                   <path d="M5 12H19" stroke="#F0F0F0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   <path d="M12 5L19 12L12 19" stroke="#F0F0F0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
+
               <Image
                 src={"/monitors-preview.svg"}
                 width={1222}
@@ -445,17 +465,17 @@ function Page() {
                   Quick Links
                 </span>
                 <Link href="/#">
-                  <span className='text-white/50 text-[16px]'>
+                  <span className='text-white/50 text-[16px] hover:text-secondaryAccent duration-150'>
                     Home
                   </span>
                 </Link>
                 <Link href="/#features">
-                  <span className='text-white/50 text-[16px]'>
+                  <span className='text-white/50 text-[16px] hover:text-secondaryAccent duration-150'>
                     Features
                   </span>
                 </Link>
                 <Link href="/#pricing">
-                  <span className='text-white/50 text-[16px]'>
+                  <span className='text-white/50 text-[16px] hover:text-secondaryAccent duration-150'>
                     Pricing
                   </span>
                 </Link>
@@ -466,12 +486,12 @@ function Page() {
                   Legal
                 </span>
                 <Link href="/terms">
-                  <span className='text-white/50 text-[16px]'>
+                  <span className='text-white/50 text-[16px] hover:text-secondaryAccent duration-150'>
                     Terms of Service
                   </span>
                 </Link>
                 <Link href="/privacy">
-                  <span className='text-white/50 text-[16px]'>
+                  <span className='text-white/50 text-[16px] hover:text-secondaryAccent duration-150'>
                     Privacy Policy
                   </span>
                 </Link>
@@ -482,12 +502,12 @@ function Page() {
                   Support
                 </span>
                 <Link href="/terms">
-                  <span className='text-white/50 text-[16px]'>
+                  <span className='text-white/50 text-[16px] hover:text-secondaryAccent duration-150'>
                     Email Us
                   </span>
                 </Link>
                 <Link href="/privacy">
-                  <span className='text-white/50 text-[16px]'>
+                  <span className='text-white/50 text-[16px] hover:text-secondaryAccent duration-150'>
                     Discord
                   </span>
                 </Link>
@@ -498,25 +518,20 @@ function Page() {
                   Social
                 </span>
                 <Link href="/terms">
-                  <span className='text-white/50 text-[16px]'>
+                  <span className='text-white/50 text-[16px] hover:text-secondaryAccent duration-150'>
                     Instagram
                   </span>
                 </Link>
                 <Link href="/privacy">
-                  <span className='text-white/50 text-[16px]'>
+                  <span className='text-white/50 text-[16px] hover:text-secondaryAccent duration-150'>
                     X
                   </span>
                 </Link>
               </div>
             </div>
-
-
           </footer>
-
         </main>
       </div>
     </>
   );
 }
-
-export default Page;
