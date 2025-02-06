@@ -159,7 +159,7 @@ export default function Home() {
         className="absolute right-0 top-[50%] lg:top-[40%] z-0 mask-gradient opacity-100 hidden lg:block"
       />
 
-      <div className='max-w-screen w-full flex justify-center h-full scroll-smooth overflow-x-hidden'>
+      <div className='max-w-screen w-full flex justify-center h-full scroll-smooth overflow-y-auto overflow-x-hidden'>
         <Topbar 
           isLoggedIn={isLoggedIn}
           isMenuOpen={isMenuOpen}
@@ -168,9 +168,9 @@ export default function Home() {
         />
 
         {/* Hero - ajustado para evitar overflow */}
-        <main id="home" className='w-full flex flex-col justify-center items-center mt-12 lg:mt-36 px-4 lg:max-w-[1440px]'>
-          <section className='w-full lg:max-w-[1440px] flex flex-col justify-center items-center gap-8 h-screen'>
-            <h1 className='font-swiss text-[24px] lg:text-[96px] text-white lg:mt-24 text-center z-10 text-wrap'>
+        <main id="home" className='w-full flex flex-col justify-center items-center mt-12 lg:mt-36 px-4 lg:max-w-[1440px] overflow-x-hidden z-10'>
+          <section className='w-full lg:max-w-[1440px] flex flex-col justify-center items-center gap-8'>
+            <h1 className='font-swiss text-[24px] lg:text-[96px] text-white text-center'>
               <span className='text-transparent bg-clip-text bg-h1-gradient'>BEAT</span> THE MARKET,<br />
               MAXIMIZE <span className='text-transparent bg-clip-text bg-h1-gradient'>PROFITS</span>
             </h1>
@@ -179,7 +179,7 @@ export default function Home() {
               custom monitors tuned to perfection
             </span>
             <button
-              onClick={() => open("https://discord.gg/ticketwavemonitors")}
+              onClick={() => window.open("https://discord.gg/ticketwavemonitors")}
               className="text-white font-semibold text-[16px] bg-button-gradient px-[16px] py-[8px] rounded-[36px] transition-all duration-300 hover:bg-button-hover-gradient">
               Apply now
             </button>
@@ -188,7 +188,7 @@ export default function Home() {
               width={1392}
               height={697}
               alt="TicketWave 3d Logo"
-              className='z-10 w-[692px] h-[347px] lg:w-[1392px] lg:h-[697px]'
+              className='z-10 w-full max-w-[692px] lg:max-w-[1392px] h-auto'
             />
           </section>
 
