@@ -168,7 +168,7 @@ export default function Home() {
         />
 
         {/* Hero - ajustado para evitar overflow */}
-        <main id="home" className='w-full flex flex-col justify-center items-center lg:mt-36 px-4 lg:max-w-[1440px]'>
+        <main id="home" className='w-full flex flex-col justify-center items-center mt-12 lg:mt-36 px-4 lg:max-w-[1440px]'>
           <section className='w-full lg:max-w-[1440px] flex flex-col justify-center items-center gap-8 h-screen'>
             <h1 className='font-swiss text-[24px] lg:text-[96px] text-white lg:mt-24 text-center z-10 text-wrap'>
               <span className='text-transparent bg-clip-text bg-h1-gradient'>BEAT</span> THE MARKET,<br />
