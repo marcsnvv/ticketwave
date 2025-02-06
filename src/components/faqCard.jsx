@@ -8,7 +8,7 @@ export default function FaqCard({ title, description }) {
 
     // Haz una card que al hacer click encima, se despligue la respuesta (description)
     return (
-        <div className="w-[800px] border border-white/25 hover:border-white/50 transition-all duration-150 rounded-[12px] p-[16px] flex flex-col gap-4">
+        <div className="w-full lg:w-[800px] border border-white/25 hover:border-white/50 transition-all duration-150 rounded-[12px] p-[16px] flex flex-col gap-4">
             <button
                 onClick={() => setShowDescription(!showDescription)}
                 className='text-[16px] text-white flex items-center justify-between w-full'

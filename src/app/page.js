@@ -1,16 +1,27 @@
 "use client"
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../../supabase'; // Asegúrate de que la ruta sea correcta
 import Link from 'next/link';
 import Image from 'next/image';
 import PriceCard from '@/components/priceCard';
 import FaqCard from '@/components/faqCard';
+import Topbar from '@/components/topbar';
 
 export default function Home() {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [currentStat, setCurrentStat] = useState(0);
+
+  const stats = [
+    { number: "100+", text: "PROFITABLE EVENTS MONITORED" },
+    { number: "1000+", text: "TICKETS CATCHED WEEKLY" },
+    { number: "10,000€", text: "EUR PROFIT MADE WEEKLY" },
+    { number: "99.9%", text: "ACCURACY" },
+    { number: "0.5s", text: "PING AFTER STOCK LOADED" }
+  ];
 
   const checkDiscordMembership = async (access_token) => {
     try {
@@ -41,6 +52,13 @@ export default function Home() {
       return false;
     }
   }
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentStat((prev) => (prev + 1) % stats.length);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Añadir este efecto para manejar el callback de Discord
   useEffect(() => {
@@ -89,47 +107,48 @@ export default function Home() {
 
   return (
     <>
+      {/* Background illustrations - Ajustadas para móvil */}
       <Image
         src="/ilustration.png"
         width={800}
         height={800}
         alt="Background illustration"
-        className="absolute -left-96 top-0 opacity-40 z-0"
+        className="absolute max-w-full max-h-full left-0 top-0 opacity-40 z-0 hidden lg:block"
       />
       <Image
         src="/ilustration.png"
         width={600}
         height={600}
         alt="Background illustration"
-        className="absolute -right-64 top-96 opacity-30 z-0"
+        className="absolute max-w-full max-h-full right-0 top-96 opacity-30 z-0 hidden lg:block"
       />
       <Image
         src="/ilustration.png"
         width={900}
         height={900}
         alt="Background illustration"
-        className="absolute -left-80 top-[120%] opacity-25 z-0"
+        className="absolute max-w-full max-h-full left-0 top-[120%] opacity-25 z-0 hidden lg:block"
       />
       <Image
         src="/ilustration.png"
         width={700}
         height={700}
         alt="Background illustration"
-        className="absolute -right-72 top-[180%] opacity-35 z-0"
+        className="absolute max-w-full max-h-full right-0 top-[180%] opacity-35 z-0 hidden lg:block"
       />
       <Image
         src="/ilustration.png"
         width={800}
         height={800}
         alt="Background illustration"
-        className="absolute -left-96 top-[250%] opacity-30 z-0"
+        className="absolute max-w-full max-h-full left-0 top-[250%] opacity-30 z-0 hidden lg:block"
       />
       <Image
         src="/ilustration.png"
         width={600}
         height={600}
         alt="Background illustration"
-        className="absolute -right-64 top-[300%] opacity-25 z-0"
+        className="absolute max-w-full max-h-full right-0 top-[300%] opacity-25 z-0 hidden lg:block"
       />
 
       <Image
@@ -137,67 +156,31 @@ export default function Home() {
         width={1222}
         height={678}
         alt="Monitors preview"
-        className="absolute right-0 top-[40%] z-0 mask-gradient opacity-100"
+        className="absolute right-0 top-[50%] lg:top-[40%] z-0 mask-gradient opacity-100 hidden lg:block"
       />
-      <div className='w-screen flex justify-center h-full scroll-smooth'>
-        <nav className='fixed w-[1440px] flex justify-between px-[24px] py-[24px] bg-background z-50'>
-          {/* Section 1 */}
-          <div className='flex gap-4'>
-            {/* Logo */}
-            <Link href={"/"} className='mr-4'>
-              <Image
-                src={"/logo.svg"}
-                width={45}
-                height={45}
-                alt="TicketWave Logo"
-              />
-            </Link>
 
-            {/* Navigation */}
-            <Link href={"/#home"}>
-              <span className='font-semibold text-white font-[16px] hover:text-secondaryAccent duration-150'>Home</span>
-            </Link>
-            <Link href={"/#features"}>
-              <span className='font-semibold text-white font-[16px] hover:text-secondaryAccent duration-150'>Features</span>
-            </Link>
-            <Link href={"/#pricing"}>
-              <span className='font-semibold text-white font-[16px] hover:text-secondaryAccent duration-150'>Pricing</span>
-            </Link>
-            <Link href={"/#faq"}>
-              <span className='font-semibold text-white font-[16px] hover:text-secondaryAccent duration-150'>FAQ</span>
-            </Link>
-          </div>
+      <div className='max-w-screen w-full flex justify-center h-full scroll-smooth overflow-x-hidden'>
+        <Topbar 
+          isLoggedIn={isLoggedIn}
+          isMenuOpen={isMenuOpen}
+          setIsMenuOpen={setIsMenuOpen}
+          router={router}
+        />
 
-          {/* Section 2 */}
-          <button
-            onClick={() => {
-              if (isLoggedIn) {
-                router.push('/dashboard');
-              } else {
-                router.push('/login');
-              }
-            }}
-            className="text-white font-semibold text-[16px] bg-button-gradient px-[16px] py-[8px] rounded-[36px] transition-all duration-300 hover:bg-button-hover-gradient"
-          >
-            {isLoggedIn ? "Dashboard" : "Sign in"}
-          </button>
-        </nav>
-
-        {/* Hero */}
-        <main id="home" className='flex flex-col justify-center items-center mt-36 max-w-[1440px] relative'>
-          {/* Background illustrations */}
-
-
-          <section className='flex flex-col justify-center items-center gap-8 h-screen'>
-            <h1 className='font-swiss text-[96px] text-white mt-24 text-center z-10'>
-              <span className='text-transparent bg-clip-text bg-h1-gradient'>BEAT</span> THE MARKET,
+        {/* Hero - ajustado para evitar overflow */}
+        <main id="home" className='w-full flex flex-col justify-center items-center lg:mt-36 px-4 lg:max-w-[1440px]'>
+          <section className='w-full lg:max-w-[1440px] flex flex-col justify-center items-center gap-8 h-screen'>
+            <h1 className='font-swiss text-[24px] lg:text-[96px] text-white lg:mt-24 text-center z-10 text-wrap'>
+              <span className='text-transparent bg-clip-text bg-h1-gradient'>BEAT</span> THE MARKET,<br />
               MAXIMIZE <span className='text-transparent bg-clip-text bg-h1-gradient'>PROFITS</span>
             </h1>
             <span className='font-[24px] text-center text-white/50'>
               Get easy-to-use, super-fast and absolutely accurate<br />
               custom monitors tuned to perfection
             </span>
-            <button className="text-white font-semibold text-[16px] bg-button-gradient px-[16px] py-[8px] rounded-[36px] transition-all duration-300 hover:bg-button-hover-gradient">
+            <button
+              onClick={() => open("https://discord.gg/ticketwavemonitors")}
+              className="text-white font-semibold text-[16px] bg-button-gradient px-[16px] py-[8px] rounded-[36px] transition-all duration-300 hover:bg-button-hover-gradient">
               Apply now
             </button>
             <Image
@@ -205,54 +188,70 @@ export default function Home() {
               width={1392}
               height={697}
               alt="TicketWave 3d Logo"
-              className='z-10'
+              className='z-10 w-[692px] h-[347px] lg:w-[1392px] lg:h-[697px]'
             />
-
-
           </section>
 
-          {/* Numbers section */}
-          <section className='h-[169px] bg-background my-48'>
-            <div className='flex items-center gap-8 px-[24px]'>
-              <div className='flex flex-col items-center'>
-                <span className='text-white text-[64px] font-semibold'>100+</span>
-                <span className='text-white/25 text-sm font-semibold'>PROFITABLE EVENTS MONITORED</span>
+          {/* Numbers section - ajustado el ancho */}
+          <section className='w-full h-[169px] bg-background lg:my-48'>
+            {/* Desktop version */}
+            <div className='hidden lg:flex items-center justify-center gap-8 px-[24px]'>
+              {stats.map((stat, index) => (
+                <div key={index} className='flex items-center justify-center gap-8'>
+                  <div className='flex flex-col items-center justify-center'>
+                    <span className='text-white text-[64px] font-semibold'>{stat.number}</span>
+                    <span className='text-white/25 text-sm font-semibold'>{stat.text}</span>
+                  </div>
+                  {index < stats.length - 1 && (
+                    <div className='w-0.5 bg-white/25 h-[80px]'></div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Mobile carousel */}
+            <div className='lg:hidden relative h-full flex items-center justify-center px-[24px]'>
+              <div className='relative w-full h-full'>
+                {stats.map((stat, index) => (
+                  <div
+                    key={index}
+                    className={`absolute w-full min-w-[250px] flex flex-col items-center transition-all duration-500 transform ${index === currentStat
+                      ? 'translate-x-0 opacity-100'
+                      : index < currentStat
+                        ? '-translate-x-full opacity-0'
+                        : 'translate-x-full opacity-0'
+                      }`}
+                  >
+                    <span className='text-white text-[48px] font-semibold'>{stat.number}</span>
+                    <span className='text-white/25 text-sm font-semibold text-center text-wrap'>{stat.text}</span>
+                  </div>
+                ))}
               </div>
-              {/* Divider */}
-              <div className='w-0.5 bg-white/25 h-[80px]'></div>
-              <div className='flex flex-col items-center'>
-                <span className='text-white text-[64px] font-semibold'>1000+</span>
-                <span className='text-white/25 text-sm font-semibold'>TICKETS CATCHED WEEKLY</span>
-              </div>
-              {/* Divider */}
-              <div className='w-0.5 bg-white/25 h-[80px]'></div>
-              <div className='flex flex-col items-center'>
-                <span className='text-white text-[64px] font-semibold'>10,000€</span>
-                <span className='text-white/25 text-sm font-semibold'>EUR PROFIT MADE WEEKLY</span>
-              </div>
-              {/* Divider */}
-              <div className='w-0.5 bg-white/25 h-[80px]'></div>
-              <div className='flex flex-col items-center'>
-                <span className='text-white text-[64px] font-semibold'>99.9%</span>
-                <span className='text-white/25 text-sm font-semibold'>ACCURACY</span>
-              </div>
-              {/* Divider */}
-              <div className='w-0.5 bg-white/25 h-[80px]'></div>
-              <div className='flex flex-col items-center'>
-                <span className='text-white text-[64px] font-semibold'>0.5s</span>
-                <span className='text-white/25 text-sm font-semibold'>PING AFTER STOCK LOADED</span>
+
+              {/* Indicators */}
+              <div className='absolute bottom-2 left-0 right-0 flex justify-center gap-2'>
+                {stats.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentStat(index)}
+                    className={`w-2 h-2 rounded-full transition-all ${index === currentStat ? 'bg-white' : 'bg-white/25'
+                      }`}
+                  />
+                ))}
               </div>
             </div>
           </section>
 
           {/* 2n SECTION */}
-          <section id="features" className='flex flex-col justify-start items-start w-full gap-8 py-[24px]'>
-            <h2 className='font-swiss text-[96px] text-white text-center w-full'>
-              <span className='text-transparent bg-clip-text bg-h1-gradient'>ENOJIY</span> THE<br />
+          <section id="features" className='flex flex-col justify-start lg:justify-center lg:items-start gap-8 py-[24px] w-full z-50'>
+
+            <h2 className='font-swiss text-[24px] lg:text-[96px] text-white lg:mt-24 text-center z-10 w-full'>
+              <span className='text-transparent bg-clip-text bg-h1-gradient'>ENJOY</span> THE<br />
               <span className='text-transparent bg-clip-text bg-h1-gradient'>BENEFITS</span>
             </h2>
-            <div className='flex justify-between w-full'>
-              <div className='flex items-center justify-start gap-4'>
+
+            <div className='flex flex-col lg:flex-row lg:justify-between w-full'>
+              <div className='flex items-center justify-start gap-4 p-4'>
                 <svg width="8" height="142" viewBox="0 0 8 142" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <circle cx="4" cy="21" r="4" fill="#6DA5C0" />
                   <rect x="3.5" y="27" width="1" height="8" fill="#F0F0F0" fillOpacity="0.25" />
@@ -267,7 +266,7 @@ export default function Home() {
                   <circle cx="4" cy="121" r="4" fill="#F0F0F0" fillOpacity="0.25" />
                 </svg>
 
-                <div className='w-1/2 flex flex-col gap-4 items-start justify-start'>
+                <div className='w-full lg:w-1/2 flex flex-col gap-4 items-start justify-start text-white'>
                   <div className='flex gap-2'>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <g clipPath="url(#clip0_269_27)">
@@ -283,7 +282,7 @@ export default function Home() {
                       </defs>
                     </svg>
 
-                    <span className='text-[#6DA5C0] font-semibold font-[16px]'>
+                    <span className='text-white lg:text-[#6DA5C0] font-semibold font-[16px]'>
                       #easy-setup
                     </span>
                   </div>
@@ -311,18 +310,19 @@ export default function Home() {
                   </button>
                 </div>
               </div>
-              <div className='h-[600px] w-[900px] bg-white/10'>
+
+              <div className='lg:h-[600px] lg:w-[900px] bg-white/10'>
               </div>
             </div>
           </section>
 
-          {/* Dashboard Preview Section */}
-          <section className='flex flex-col justify-center items-center w-full gap-8 py-[24px]'>
-            <h2 className='font-swiss text-[96px] text-white text-center w-full'>
+          {/* Dashboard Preview Section - ajustado el padding */}
+          <section className='w-full max-w-[1440px] flex flex-col justify-center items-center gap-8 py-[24px] z-10'>
+            <h2 className='font-swiss text-[24px] lg:text-[96px] text-white lg:mt-24 text-center z-10 text-wrap'>
               CLEAR, SIMPLE,<br />
               <span className='text-transparent bg-clip-text bg-h1-gradient'>POWERFUL</span>
             </h2>
-            <div className='bg-button-gradient p-[48px] rounded-[24px] flex flex-col items-center justify-center gap-6'>
+            <div className='bg-button-gradient p-[12px] lg:p-[48px] rounded-[24px] flex flex-col items-center justify-center gap-6 w-full'>
               <span className='text-white text-[32px] font-semibold'>...everything you need</span>
               <button className="flex gap-2 items-center justify-between text-white font-semibold group">
                 View Guide
@@ -350,12 +350,12 @@ export default function Home() {
           </section>
 
           {/* Pricing section */}
-          <section id="pricing" className='flex flex-col justify-center items-center w-full gap-8 py-[24px]'>
-            <h2 className='font-swiss text-[96px] text-white text-center w-full'>
+          <section id="pricing" className='flex flex-col justify-center items-center w-full gap-2 lg:gap-8 py-[10px] py-[24px] z-10'>
+            <h2 className='font-swiss text-[24px] lg:text-[96px] text-white lg:mt-24 text-center z-10 text-wrap'>
               <span className='text-transparent bg-clip-text bg-h1-gradient'>CHOOSE</span> THE MOST<br />
               SUITABLE <span className='text-transparent bg-clip-text bg-h1-gradient'>PLAN</span>
             </h2>
-            <div className='flex items-center justify-end gap-8'>
+            <div className='flex flex-col lg:flex-row items-center justify-end gap-4 lg:gap-8'>
               <PriceCard
                 title="BASIC"
                 price="180"
@@ -411,9 +411,9 @@ export default function Home() {
             </div>
           </section>
 
-          {/* FAQ section */}
-          <section id="faq" className='flex flex-col justify-center items-center w-full gap-8 py-[24px]'>
-            <h2 className='font-swiss text-[96px] text-white text-center w-full'>
+          {/* FAQ section - ajustado el padding */}
+          <section id="faq" className='flex flex-col justify-center items-center w-full gap-8 py-[24px] z-10'>
+            <h2 className='font-swiss text-[24px] lg:text-[96px] text-white lg:mt-24 text-center z-10 text-wrap'>
               ANY <span className='text-transparent bg-clip-text bg-h1-gradient'>QUESTIONS?</span>
             </h2>
             <div className='flex flex-col gap-4'>
@@ -438,8 +438,8 @@ export default function Home() {
           </section>
 
           {/* Footer section */}
-          <footer className='w-full h-[510px] flex justify-start gap-24 items-center p-[24px]'>
-            <div className='flex gap-4 items-start justify-start'>
+          <footer className='w-full h-[510px] flex flex-col lg:flex-row justify-start gap-10 lg:gap-24 items-start lg:items-center p-[24px] z-10'>
+            <div className='flex gap-4 flex-col lg:flex-row items-start justify-start'>
               <Link href="/">
                 <Image
                   src={"/logo.svg"}
@@ -459,7 +459,7 @@ export default function Home() {
             {/* Divider */}
             <div className='w-0.5 h-24 bg-white/10' />
 
-            <div className='flex justify-between gap-28'>
+            <div className='flex justify-center items-start gap-10 lg:items-center lg:gap-28 flex-col lg:flex-row'>
               <div className='flex flex-col gap-2'>
                 <span className='text-white text-[20px] font-semibold'>
                   Quick Links
