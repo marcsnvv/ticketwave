@@ -434,7 +434,6 @@ export default function Home() {
                 description={"Our group is currently closed, but you can sign up for the waiting list and if you have high ambitions or reselling experience, we'd love to welcome you. Check out our Whop and Discord."}
               />
             </div>
-
           </section>
 
           {/* Footer section */}
