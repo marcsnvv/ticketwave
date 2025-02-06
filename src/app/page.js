@@ -418,20 +418,20 @@ export default function Home() {
             </h2>
             <div className='flex flex-col gap-4'>
               <FaqCard
-                title="What should be the starting capital for the ticket reselling business?"
-                description={"What should be the starting capital for the ticket reselling business? What should be the starting capital for the ticket reselling business? What should be the starting capital for the ticket reselling business? What should be the starting capital for the ticket reselling business?"}
+                title="Who are these monitors suitable for?"
+                description={"You can use them as a complete beginner, but also as a super-experienced reseller. First of all, they give you a big head start on the rest of the market, as you'll be instantly notified when tickets are available for the events you're monitoring. They're easy to set up and use, we're happy to help you with everything. "}
               />
               <FaqCard
                 title="Who created these monitors?"
-                description={"What should be the starting capital for the ticket reselling business? What should be the starting capital for the ticket reselling business? What should be the starting capital for the ticket reselling business? What should be the starting capital for the ticket reselling business?"}
+                description={"TicketWave is one of the largest and most successful reselling groups in Europe. In the past year we have made over 10 million euros, in total we have bought over 30k tickets on 100+ drops. We have over 5 years of experience in selling tickets for various events from sports and gaming to music around the world. We have our own experienced development team who create these customized tools."}
               />
               <FaqCard
                 title="How is it possible that you have all the monitors together?"
-                description={"What should be the starting capital for the ticket reselling business? What should be the starting capital for the ticket reselling business? What should be the starting capital for the ticket reselling business? What should be the starting capital for the ticket reselling business?"}
+                description={"We have our own experienced development team who create these bespoke tools. We work with many platforms, even Viagogo and Stubhub. We regularly monitor the changes that some platforms are trying to protect and secure."}
               />
               <FaqCard
                 title="Can I join your reselling group?"
-                description={"What should be the starting capital for the ticket reselling business? What should be the starting capital for the ticket reselling business? What should be the starting capital for the ticket reselling business? What should be the starting capital for the ticket reselling business?"}
+                description={"Our group is currently closed, but you can sign up for the waiting list and if you have high ambitions or reselling experience, we'd love to welcome you. Check out our Whop and Discord."}
               />
             </div>
 
