@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useLayoutEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../../supabase'; // Asegúrate de que la ruta sea correcta
 import Link from 'next/link';
@@ -8,12 +8,28 @@ import Image from 'next/image';
 import PriceCard from '@/components/priceCard';
 import FaqCard from '@/components/faqCard';
 import Topbar from '@/components/topbar';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 export default function Home() {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentStat, setCurrentStat] = useState(0);
+  // Add currentFeature state
+  const [currentFeature, setCurrentFeature] = useState(0);
+  const imageContainer = useRef(null);
+
+  // Modificar el efecto de scroll
+  useLayoutEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+    ScrollTrigger.create({
+      trigger: imageContainer.current,
+      pin: true,
+      start: "top-=100px",
+      end: document.body.offsetHeight - window.innerHeight - 50,
+    })
+  }, [])
 
   const stats = [
     { number: "100+", text: "PROFITABLE EVENTS MONITORED" },
@@ -22,6 +38,45 @@ export default function Home() {
     { number: "99.9%", text: "ACCURACY" },
     { number: "0.5s", text: "PING AFTER STOCK LOADED" }
   ];
+
+  const features = [
+    {
+      "title": "Easy set-up for everyone",
+      "hashtag": "#easy-setup",
+      "description": "Anyone con do it, group or individual, just a few clicks. We also supply the product with a video tutorial and are available to answer you requests.",
+      "image": "out-of-box.svg"
+    },
+    {
+      "title": "Fastest on the market",
+      "hashtag": "#speed",
+      "description": "Compared to the competition, our pings are much earlier and more accurate. We minimize the human factor and automate most of the process.",
+      "image": "stopwatch.svg"
+    },
+    {
+      "title": "Works with every platform",
+      "hashtag": "#platform",
+      "description": "With us, you don’t need another tool because we have a reach across all platforms in the world.",
+      "image": "network.svg"
+    },
+    {
+      "title": "One-click carting",
+      "hashtag": "#carting",
+      "description": "Ping also comes with a link directly with the full cart, you just need to complete the order. This gives you plenty of time to analyze whether the purchase is really worth it.",
+      "image": "cart.svg"
+    },
+    {
+      "title": "Customized notifications",
+      "hashtag": "#notifications",
+      "description": "The tool works perfectly with Discord, you can set up notifications for specific events you want to be the first to know about.",
+      "image": "bell.svg"
+    },
+    {
+      "title": "We keep delivering...",
+      "hashtag": "#delivering",
+      "description": "TicketWave is a market leader in reselling, we are responsive to change and know what is essential for success in this business.",
+      "image": "truck.svg"
+    },
+  ]
 
   const checkDiscordMembership = async (access_token) => {
     try {
@@ -160,7 +215,7 @@ export default function Home() {
       />
 
       <div className='max-w-screen w-full flex justify-center h-full scroll-smooth overflow-y-auto overflow-x-hidden'>
-        <Topbar 
+        <Topbar
           isLoggedIn={isLoggedIn}
           isMenuOpen={isMenuOpen}
           setIsMenuOpen={setIsMenuOpen}
@@ -190,6 +245,52 @@ export default function Home() {
               alt="TicketWave 3d Logo"
               className='z-10 w-full max-w-[692px] lg:max-w-[1392px] h-auto'
             />
+          </section>
+
+          {/* Supported platforms section */}
+          <section className='w-full lg:max-w-[1440px] flex flex-col justify-center items-center gap-8 mt-12 lg:mt-36'>
+            <div className='flex flex-wrap justify-center items-center gap-[48px]'>
+              <h2 className='text-[24px] lg:text-[32px] text-white text-center font-semibold'>
+                Supporting over 9 platforms
+              </h2>
+              <Image
+                src={"/platforms/ticketmaster-logo.svg"}
+                width={50}
+                height={50}
+                alt="Ticketmaster Logo"
+              />
+              <Image
+                src={"/platforms/viagogo-logo.svg"}
+                width={50}
+                height={50}
+                alt="Viagogo Logo"
+              />
+              <Image
+                src={"/platforms/axs-logo.svg"}
+                width={50}
+                height={50}
+                alt="AXS Logo"
+              />
+              <Image
+                src={"/platforms/seatgeek-logo.svg"}
+                width={50}
+                height={50}
+                alt="SeatGeek Logo"
+              />
+              <Image
+                src={"/platforms/eventim-logo.svg"}
+                width={50}
+                height={50}
+                alt="AXS Logo"
+              />
+              <Image
+                src={"/platforms/ebilet-logo.svg"}
+                width={50}
+                height={50}
+                alt="Ebilet Logo"
+              />
+
+            </div>
           </section>
 
           {/* Numbers section - ajustado el ancho */}
@@ -243,76 +344,102 @@ export default function Home() {
           </section>
 
           {/* 2n SECTION */}
-          <section id="features" className='flex flex-col justify-start lg:justify-center lg:items-start gap-8 py-[24px] w-full z-50'>
-
-            <h2 className='font-swiss text-[24px] lg:text-[96px] text-white lg:mt-24 text-center z-10 w-full'>
+          <section id="features"
+            className='relative w-full min-h-[300vh]'
+          >
+            <h2 className='font-swiss text-[24px] lg:text-[96px] text-white text-center mb-12'>
               <span className='text-transparent bg-clip-text bg-h1-gradient'>ENJOY</span> THE<br />
               <span className='text-transparent bg-clip-text bg-h1-gradient'>BENEFITS</span>
             </h2>
+            <div ref={imageContainer} className='sticky top-0 h-screen w-full flex items-center justify-center bg-background'>
+              <div className='max-w-[1440px] w-full px-4 lg:px-24 pb-24'>
 
-            <div className='flex flex-col lg:flex-row lg:justify-between w-full'>
-              <div className='flex items-center justify-start gap-4 p-4'>
-                <svg width="8" height="142" viewBox="0 0 8 142" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="4" cy="21" r="4" fill="#6DA5C0" />
-                  <rect x="3.5" y="27" width="1" height="8" fill="#F0F0F0" fillOpacity="0.25" />
-                  <circle cx="4" cy="41" r="4" fill="#F0F0F0" fillOpacity="0.25" />
-                  <rect x="3.5" y="47" width="1" height="8" fill="#F0F0F0" fillOpacity="0.25" />
-                  <circle cx="4" cy="61" r="4" fill="#F0F0F0" fillOpacity="0.25" />
-                  <rect x="3.5" y="67" width="1" height="8" fill="#F0F0F0" fillOpacity="0.25" />
-                  <circle cx="4" cy="81" r="4" fill="#F0F0F0" fillOpacity="0.25" />
-                  <rect x="3.5" y="87" width="1" height="8" fill="#F0F0F0" fillOpacity="0.25" />
-                  <circle cx="4" cy="101" r="4" fill="#F0F0F0" fillOpacity="0.25" />
-                  <rect x="3.5" y="107" width="1" height="8" fill="#F0F0F0" fillOpacity="0.25" />
-                  <circle cx="4" cy="121" r="4" fill="#F0F0F0" fillOpacity="0.25" />
-                </svg>
+                <div className='flex flex-col lg:flex-row justify-between items-center gap-8'>
+                  <div className='w-full lg:w-1/2 flex flex-col gap-8'>
+                    <div className='flex items-start gap-4 h-48'>
+                      <svg width="8" height="142" viewBox="0 0 8 142" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        {features.map((_, index) => (
+                          <React.Fragment key={index}>
+                            <circle
+                              cx="4"
+                              cy={21 + (index * 20)}
+                              r="4"
+                              fill={currentFeature === index ? "#6DA5C0" : "#F0F0F0"}
+                              fillOpacity={currentFeature === index ? "1" : "0.25"}
+                            />
+                            {index < features.length - 1 && (
+                              <rect
+                                x="3.5"
+                                y={27 + (index * 20)}
+                                width="1"
+                                height="8"
+                                fill="#F0F0F0"
+                                fillOpacity="0.25"
+                              />
+                            )}
+                          </React.Fragment>
+                        ))}
+                      </svg>
 
-                <div className='w-full lg:w-1/2 flex flex-col gap-4 items-start justify-start text-white'>
-                  <div className='flex gap-2'>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <g clipPath="url(#clip0_269_27)">
-                        <path d="M9 12H9.01" stroke="#6DA5C0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        <path d="M15 12H15.01" stroke="#6DA5C0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        <path d="M10 16C10.5 16.3 11.2 16.5 12 16.5C12.8 16.5 13.5 16.3 14 16" stroke="#6DA5C0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        <path d="M19 6.3C19.906 7.43567 20.5236 8.77378 20.8 10.2C21.1381 10.3638 21.4233 10.6195 21.6229 10.9378C21.8224 11.2562 21.9282 11.6243 21.9282 12C21.9282 12.3757 21.8224 12.7438 21.6229 13.0622C21.4233 13.3805 21.1381 13.6362 20.8 13.8C20.3683 15.8135 19.2592 17.618 17.6577 18.9125C16.0562 20.207 14.0592 20.9132 12 20.9132C9.94076 20.9132 7.94379 20.207 6.34231 18.9125C4.74083 17.618 3.63171 15.8135 3.2 13.8C2.86186 13.6362 2.57668 13.3805 2.37714 13.0622C2.17761 12.7438 2.07178 12.3757 2.07178 12C2.07178 11.6243 2.17761 11.2562 2.37714 10.9378C2.57668 10.6195 2.86186 10.3638 3.2 10.2C3.61426 8.1705 4.71589 6.34602 6.31902 5.03437C7.92216 3.72271 9.92866 3.00418 12 3C14 3 15.5 4.1 15.5 5.5C15.5 6.9 14.6 8 13.5 8C12.7 8 12 7.6 12 7" stroke="#6DA5C0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      </g>
-                      <defs>
-                        <clipPath id="clip0_269_27">
-                          <rect width="24" height="24" fill="white" />
-                        </clipPath>
-                      </defs>
-                    </svg>
+                      <div className='feature-content flex flex-col gap-4 transition-all duration-300'>
+                        <div className='flex gap-2 items-center'>
+                          <Image
+                            src={`/${features[currentFeature].image}`}
+                            width={24}
+                            height={24}
+                            alt={features[currentFeature].title}
+                            className='transition-all duration-300'
+                          />
+                          <span className='text-[#6DA5C0] font-semibold'>
+                            {features[currentFeature].hashtag}
+                          </span>
+                        </div>
+                        <h3 className='text-[32px] text-white font-semibold'>
+                          {features[currentFeature].title}
+                        </h3>
+                        <p className='text-[20px] text-white/50'>
+                          {features[currentFeature].description}
+                        </p>
+                      </div>
 
-                    <span className='text-white lg:text-[#6DA5C0] font-semibold font-[16px]'>
-                      #easy-setup
-                    </span>
+
+                    </div>
+                    <button className="flex gap-2 items-center justify-start text-white font-semibold group z-30">
+                      View Guide
+                      <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="transform transition-transform duration-300 group-hover:translate-x-2"
+                      >
+                        <path d="M5 12H19" stroke="#F0F0F0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M12 5L19 12L12 19" stroke="#F0F0F0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </button>
                   </div>
-                  <div className='flex flex-col gap-2'>
-                    <span className='text-[32px] text-white font-semibold'>
-                      Easy set-up for everyone
-                    </span>
-                    <span className='text-[20px] text-white/50 text-wrap'>
-                      Anyone con do it, group or individual, just a few clicks. We also supply the product with a video tutorial and are available to answer you requests.
-                    </span>
+
+                  <div className='w-full lg:w-1/2 h-[600px] w-[600px] relative'>
+                    <Image
+                      src={`/${features[currentFeature].image}`}
+                      fill
+                      className='object-contain transition-all duration-300'
+                      alt={features[currentFeature].title}
+                    />
                   </div>
-                  <button className="flex gap-2 items-center justify-between text-white font-semibold group">
-                    View Guide
-                    <svg
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="transform transition-transform duration-300 group-hover:translate-x-2"
-                    >
-                      <path d="M5 12H19" stroke="#F0F0F0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      <path d="M12 5L19 12L12 19" stroke="#F0F0F0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </button>
                 </div>
               </div>
+            </div>
 
-              <div className='lg:h-[600px] lg:w-[900px] bg-white/10'>
-              </div>
+            <div className='absolute bottom-0 left-0 w-full'>
+              {features.map((feature, index) => (
+                <div
+                  key={index}
+                  className='h-screen w-full'
+                  onMouseEnter={() => setCurrentFeature(index)}
+                />
+              ))}
             </div>
           </section>
 
