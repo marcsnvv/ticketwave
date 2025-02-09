@@ -196,7 +196,7 @@ export default function Home() {
               custom monitors tuned to perfection
             </span>
             <button
-              onClick={() => router.push("/apply")}
+              onClick={() => router.push("/#pricing")}
               className="text-white font-semibold text-[16px] bg-button-gradient px-[16px] py-[8px] rounded-[36px] transition-all duration-300 hover:bg-button-hover-gradient">
               Apply now
             </button>
