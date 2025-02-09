@@ -14,13 +14,21 @@ export default function FaqCard({ title, description }) {
                 className='text-[16px] text-white flex items-center justify-between w-full'
             >
                 {title}
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M5 12H19" stroke="#F0F0F0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M12 5V19" stroke="#F0F0F0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+                {
+                    showDescription ? (
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5 12H19" stroke="#F0F0F0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                    ) : (
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5 12H19" stroke="#F0F0F0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            <path d="M12 5V19" stroke="#F0F0F0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                    )
+                }
             </button>
             {showDescription && (
-                <span className='text-[16px] text-white font-semibold'>
+                <span className='text-[16px] text-white/50 border-t border-white/25 pt-4'>
                     {description}
                 </span>
             )}
