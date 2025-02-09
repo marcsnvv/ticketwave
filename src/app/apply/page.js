@@ -1,15 +1,14 @@
 "use client"
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import Link from 'next/link'
-
 import { useSearchParams } from 'next/navigation'
 import { Building2, AtSign, Send } from "lucide-react"
 import { DiscordLogoIcon } from "@radix-ui/react-icons"
 
 import pricing from '@/data/pricing.json'
 
-export default function ApplyPage() {
+function ApplicationForm() {
     const searchParams = useSearchParams("plan")
     const planParam = searchParams.get("plan")
 
@@ -282,5 +281,19 @@ export default function ApplyPage() {
                 </div>
             )}
         </div>
+    )
+}
+
+export default function ApplyPage() {
+    return (
+        <Suspense fallback={
+            <div className="w-full h-screen flex items-center justify-center">
+                <div className="flex flex-col gap-2 items-center justify-center">
+                    <span>Loading...</span>
+                </div>
+            </div>
+        }>
+            <ApplicationForm />
+        </Suspense>
     )
 }
