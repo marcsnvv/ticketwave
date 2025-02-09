@@ -1,4 +1,9 @@
+import { useRouter } from "next/navigation"
+
+
 export default function PriceCard({ title, price, features, featured }) {
+    const router = useRouter()
+
     return (
         <div className={`
             relative flex flex-col justify-end h-[585px]
@@ -28,7 +33,9 @@ export default function PriceCard({ title, price, features, featured }) {
                     </span>
                 </div>
 
-                <button className={`
+                <button
+                    onClick={() => router.push("/apply?plan=" + title)}
+                    className={`
             bg-button-gradient w-full text-white rounded-[6px] p-[16px] font-semibold
             transition-all duration-300 hover:bg-button-hover-gradient
             ${featured ? 'border-2 border-secondary' : ''}    

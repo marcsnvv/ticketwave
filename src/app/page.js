@@ -10,13 +10,14 @@ import FaqCard from '@/components/faqCard';
 import Topbar from '@/components/topbar';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import features from '@/data/features.json';
+import pricing from '@/data/pricing.json';
 
 export default function Home() {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentStat, setCurrentStat] = useState(0);
-  // Add currentFeature state
   const [currentFeature, setCurrentFeature] = useState(0);
   const imageContainer = useRef(null);
 
@@ -38,45 +39,6 @@ export default function Home() {
     { number: "99.9%", text: "ACCURACY" },
     { number: "0.5s", text: "PING AFTER STOCK LOADED" }
   ];
-
-  const features = [
-    {
-      "title": "Easy set-up for everyone",
-      "hashtag": "#easy-setup",
-      "description": "Anyone con do it, group or individual, just a few clicks. We also supply the product with a video tutorial and are available to answer you requests.",
-      "image": "out-of-box.svg"
-    },
-    {
-      "title": "Fastest on the market",
-      "hashtag": "#speed",
-      "description": "Compared to the competition, our pings are much earlier and more accurate. We minimize the human factor and automate most of the process.",
-      "image": "stopwatch.svg"
-    },
-    {
-      "title": "Works with every platform",
-      "hashtag": "#platform",
-      "description": "With us, you don’t need another tool because we have a reach across all platforms in the world.",
-      "image": "network.svg"
-    },
-    {
-      "title": "One-click carting",
-      "hashtag": "#carting",
-      "description": "Ping also comes with a link directly with the full cart, you just need to complete the order. This gives you plenty of time to analyze whether the purchase is really worth it.",
-      "image": "cart.svg"
-    },
-    {
-      "title": "Customized notifications",
-      "hashtag": "#notifications",
-      "description": "The tool works perfectly with Discord, you can set up notifications for specific events you want to be the first to know about.",
-      "image": "bell.svg"
-    },
-    {
-      "title": "We keep delivering...",
-      "hashtag": "#delivering",
-      "description": "TicketWave is a market leader in reselling, we are responsive to change and know what is essential for success in this business.",
-      "image": "truck.svg"
-    },
-  ]
 
   const checkDiscordMembership = async (access_token) => {
     try {
@@ -234,7 +196,7 @@ export default function Home() {
               custom monitors tuned to perfection
             </span>
             <button
-              onClick={() => window.open("https://discord.gg/ticketwavemonitors")}
+              onClick={() => router.push("/apply")}
               className="text-white font-semibold text-[16px] bg-button-gradient px-[16px] py-[8px] rounded-[36px] transition-all duration-300 hover:bg-button-hover-gradient">
               Apply now
             </button>
@@ -483,58 +445,16 @@ export default function Home() {
               SUITABLE <span className='text-transparent bg-clip-text bg-h1-gradient'>PLAN</span>
             </h2>
             <div className='flex flex-col lg:flex-row items-center justify-end gap-4 lg:gap-8'>
-              <PriceCard
-                title="BASIC"
-                price="180"
-                features={[
-                  "Maximum 100 Events",
-                  "Discord integration",
-                  "Customizable notifications",
-                  "Up to 5 people in the team",
-                  "Our support will reply in 48h",
-                ]}
-              />
-              <PriceCard
-                title="STANDARD"
-                price="340"
-                features={[
-                  "Maximum 200 Events",
-                  "Discord integration",
-                  "Customizable notifications",
-                  "Up to 10 people in the team",
-                  "24/7 support",
-                  "Viagogo price errors",
-                ]}
-              />
-              <PriceCard
-                title="PRO"
-                price="420"
-                features={[
-                  "Maximum 200 Events",
-                  "Discord integration",
-                  "Customizable notifications",
-                  "Up to 10 people in the team",
-                  "24/7 support",
-                  "Viagogo price errors",
-                  "2x TicketWave InnerCircle subscription",
-                ]}
-                featured
-              />
-              <PriceCard
-                title="ENTERPRISE"
-                price="495"
-                features={[
-                  "Maximum 200 Events",
-                  "Discord integration",
-                  "Customizable notifications",
-                  "Up to 10 people in the team",
-                  "24/7 support",
-                  "Viagogo price errors",
-                  "2x TicketWave InnerCircle subscription",
-                  "API access",
+              {pricing.map((plan, index) =>
+                <PriceCard
+                  key={index}
+                  title={plan.title}
+                  price={plan.price}
+                  features={plan.features}
+                  featured={index === 2}
+                />
+              )}
 
-                ]}
-              />
             </div>
           </section>
 

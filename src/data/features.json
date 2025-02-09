@@ -1,0 +1,38 @@
+[
+    {
+        "title": "Easy set-up for everyone",
+        "hashtag": "#easy-setup",
+        "description": "Anyone con do it, group or individual, just a few clicks. We also supply the product with a video tutorial and are available to answer you requests.",
+        "image": "out-of-box.svg"
+    },
+    {
+        "title": "Fastest on the market",
+        "hashtag": "#speed",
+        "description": "Compared to the competition, our pings are much earlier and more accurate. We minimize the human factor and automate most of the process.",
+        "image": "stopwatch.svg"
+    },
+    {
+        "title": "Works with every platform",
+        "hashtag": "#platform",
+        "description": "With us, you don’t need another tool because we have a reach across all platforms in the world.",
+        "image": "network.svg"
+    },
+    {
+        "title": "One-click carting",
+        "hashtag": "#carting",
+        "description": "Ping also comes with a link directly with the full cart, you just need to complete the order. This gives you plenty of time to analyze whether the purchase is really worth it.",
+        "image": "cart.svg"
+    },
+    {
+        "title": "Customized notifications",
+        "hashtag": "#notifications",
+        "description": "The tool works perfectly with Discord, you can set up notifications for specific events you want to be the first to know about.",
+        "image": "bell.svg"
+    },
+    {
+        "title": "We keep delivering...",
+        "hashtag": "#delivering",
+        "description": "TicketWave is a market leader in reselling, we are responsive to change and know what is essential for success in this business.",
+        "image": "truck.svg"
+    }
+]

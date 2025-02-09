@@ -1,0 +1,52 @@
+[
+    {
+        "title": "BASIC",
+        "price": "180",
+        "features": [
+            "Maximum 100 Events",
+            "Discord integration",
+            "Customizable notifications",
+            "Up to 5 people in the team",
+            "Our support will reply in 48h"
+        ]
+    },
+    {
+        "title": "STANDARD",
+        "price": "340",
+        "features": [
+            "Maximum 200 Events",
+            "Discord integration",
+            "Customizable notifications",
+            "Up to 10 people in the team",
+            "24/7 support",
+            "Viagogo price errors"
+        ]
+    },
+    {
+        "title": "PRO",
+        "price": "420",
+        "features": [
+            "Maximum 200 Events",
+            "Discord integration",
+            "Customizable notifications",
+            "Up to 10 people in the team",
+            "24/7 support",
+            "Viagogo price errors",
+            "2x TicketWave InnerCircle subscription"
+        ]
+    },
+    {
+        "title": "ENTERPRISE",
+        "price": "495",
+        "features": [
+            "Maximum 200 Events",
+            "Discord integration",
+            "Customizable notifications",
+            "Up to 10 people in the team",
+            "24/7 support",
+            "Viagogo price errors",
+            "2x TicketWave InnerCircle subscription",
+            "API access"
+        ]
+    }
+]
