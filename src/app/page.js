@@ -12,6 +12,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import features from '@/data/features.json';
 import pricing from '@/data/pricing.json';
+import { DiscordLogoIcon } from '@radix-ui/react-icons';
 
 export default function Home() {
   const router = useRouter();
@@ -167,6 +168,76 @@ export default function Home() {
         alt="Background illustration"
         className="absolute max-w-full max-h-full right-0 top-[300%] opacity-25 z-0 hidden lg:block"
       />
+      <Image
+        src="/ilustration.png"
+        width={600}
+        height={600}
+        alt="Background illustration"
+        className="absolute max-w-full max-h-full left-0 top-[350%] opacity-25 z-0 hidden lg:block"
+      />
+      <Image
+        src="/ilustration.png"
+        width={600}
+        height={600}
+        alt="Background illustration"
+        className="absolute max-w-full max-h-full right-0 top-[400%] opacity-25 z-0 hidden lg:block"
+      />
+      <Image
+        src="/ilustration.png"
+        width={600}
+        height={600}
+        alt="Background illustration"
+        className="absolute max-w-full max-h-full left-0 top-[450%] opacity-25 z-0 hidden lg:block"
+      />
+      <Image
+        src="/ilustration.png"
+        width={600}
+        height={600}
+        alt="Background illustration"
+        className="absolute max-w-full max-h-full right-0 top-[500%] opacity-25 z-0 hidden lg:block"
+      />
+      <Image
+        src="/ilustration.png"
+        width={600}
+        height={600}
+        alt="Background illustration"
+        className="absolute max-w-full max-h-full left-0 top-[450%] opacity-25 z-0 hidden lg:block"
+      />
+      <Image
+        src="/ilustration.png"
+        width={600}
+        height={600}
+        alt="Background illustration"
+        className="absolute max-w-full max-h-full right-0 top-[700%] opacity-25 z-0 hidden lg:block"
+      />
+      <Image
+        src="/ilustration.png"
+        width={600}
+        height={600}
+        alt="Background illustration"
+        className="absolute max-w-full max-h-full left-0 top-[750%] opacity-25 z-0 hidden lg:block"
+      />
+      <Image
+        src="/ilustration.png"
+        width={600}
+        height={600}
+        alt="Background illustration"
+        className="absolute max-w-full max-h-full right-0 top-[820%] opacity-25 z-0 hidden lg:block"
+      />
+      <Image
+        src="/ilustration.png"
+        width={600}
+        height={600}
+        alt="Background illustration"
+        className="absolute max-w-full max-h-full left-0 top-[950%] opacity-25 z-0 hidden lg:block"
+      />
+      <Image
+        src="/ilustration.png"
+        width={600}
+        height={600}
+        alt="Background illustration"
+        className="absolute max-w-full max-h-full right-0 top-[1100%] opacity-25 z-0 hidden lg:block"
+      />
 
       <Image
         src={"/monitors-preview.svg"}
@@ -185,7 +256,7 @@ export default function Home() {
         />
 
         {/* Hero - ajustado para evitar overflow */}
-        <main id="home" className='w-full flex flex-col justify-center items-center mt-12 lg:mt-36 px-4 lg:max-w-[1440px] overflow-x-hidden z-10'>
+        <main id="home" className='w-full flex flex-col justify-center items-center mt-24 lg:mt-36 px-4 lg:max-w-[1440px] overflow-x-hidden z-10'>
           <section className='w-full lg:max-w-[1440px] flex flex-col justify-center items-center gap-8'>
             <h1 className='font-swiss text-[24px] lg:text-[96px] text-white text-center'>
               <span className='text-transparent bg-clip-text bg-h1-gradient'>BEAT</span> THE MARKET,<br />
@@ -211,52 +282,61 @@ export default function Home() {
 
           {/* Supported platforms section */}
           <section className='w-full lg:max-w-[1440px] flex flex-col justify-center items-center gap-8 mt-12 lg:mt-36'>
-            <div className='flex flex-wrap justify-center items-center gap-[48px]'>
-              <h2 className='text-[24px] lg:text-[32px] text-white text-center font-semibold'>
+            <div className='flex flex-col lg:flex-row flex-wrap justify-center items-center gap-[24px] lg:gap-[48px]'>
+              <h2 className='text-[20px] lg:text-[32px] text-white text-center font-semibold'>
                 Supporting over 9 platforms
               </h2>
-              <Image
-                src={"/platforms/ticketmaster-logo.svg"}
-                width={50}
-                height={50}
-                alt="Ticketmaster Logo"
-              />
-              <Image
-                src={"/platforms/viagogo-logo.svg"}
-                width={50}
-                height={50}
-                alt="Viagogo Logo"
-              />
-              <Image
-                src={"/platforms/axs-logo.svg"}
-                width={50}
-                height={50}
-                alt="AXS Logo"
-              />
-              <Image
-                src={"/platforms/seatgeek-logo.svg"}
-                width={50}
-                height={50}
-                alt="SeatGeek Logo"
-              />
-              <Image
-                src={"/platforms/eventim-logo.svg"}
-                width={50}
-                height={50}
-                alt="AXS Logo"
-              />
-              <Image
-                src={"/platforms/ebilet-logo.svg"}
-                width={50}
-                height={50}
-                alt="Ebilet Logo"
-              />
+              <div className='flex flex-wrap justify-center items-center gap-4'>
 
+                <Image
+                  src={"/platforms/ticketmaster-logo.svg"}
+                  width={50}
+                  height={50}
+                  alt="Ticketmaster Logo"
+                  className='w-[32px] h-[32px] lg:w-[50px] lg:h-[50px]'
+                />
+                <Image
+                  src={"/platforms/viagogo-logo.svg"}
+                  width={50}
+                  height={50}
+                  alt="Viagogo Logo"
+                  className='w-[32px] h-[32px] lg:w-[50px] lg:h-[50px]'
+                />
+                <Image
+                  src={"/platforms/axs-logo.svg"}
+                  width={50}
+                  height={50}
+                  alt="AXS Logo"
+                  className='w-[32px] h-[32px] lg:w-[50px] lg:h-[50px]'
+                />
+                <Image
+                  src={"/platforms/seatgeek-logo.svg"}
+                  width={50}
+                  height={50}
+                  alt="SeatGeek Logo"
+                  className='w-[32px] h-[32px] lg:w-[50px] lg:h-[50px]'
+                />
+                <Image
+                  src={"/platforms/eventim-logo.svg"}
+                  width={50}
+                  height={50}
+                  alt="AXS Logo"
+                  className='w-[32px] h-[32px] lg:w-[50px] lg:h-[50px]'
+                />
+                <Image
+                  src={"/platforms/ebilet-logo.svg"}
+                  width={50}
+                  height={50}
+                  alt="Ebilet Logo"
+                  className='w-[32px] h-[32px] lg:w-[50px] lg:h-[50px]'
+                />
+
+              </div>
             </div>
           </section>
 
           {/* Numbers section - ajustado el ancho */}
-          <section className='w-full h-[169px] bg-background lg:my-48'>
+          <section className='w-full h-[169px] bg-background py-[24px] my-[48px] lg:my-48'>
             {/* Desktop version */}
             <div className='hidden lg:flex items-center justify-center gap-8 px-[24px]'>
               {stats.map((stat, index) => (
@@ -484,45 +564,76 @@ export default function Home() {
           </section>
 
           {/* Footer section */}
-          <footer className='w-full h-[510px] flex flex-col lg:flex-row justify-start gap-10 lg:gap-24 items-start lg:items-center p-[24px] z-10'>
-            <div className='flex gap-4 flex-col lg:flex-row items-start justify-start'>
-              <Link href="/">
-                <Image
-                  src={"/logo.svg"}
-                  width={110}
-                  height={110}
-                  alt="TicketWave Logo"
-                />
-              </Link>
-              <div className='flex flex-col gap-4'>
-                <span className='text-[24px] text-white font-semibold'>
-                  TicketWave<br />
-                  Monitors
-                </span>
+          <footer className='relative w-full h-[510px] flex flex-col lg:flex-row justify-start gap-10 lg:gap-24 items-start lg:items-center p-[24px] z-10'>
+            <div className='flex flex-col gap-8 items-start justify-start'>
+              <div className='flex gap-4 items-start justify-start'>
+                <Link href="/">
+                  <Image
+                    src={"/logo.svg"}
+                    width={110}
+                    height={110}
+                    alt="TicketWave Logo"
+                  />
+                </Link>
+                <div className='flex flex-col gap-4'>
+                  <span className='text-[24px] text-white font-semibold'>
+                    TicketWave<br />
+                    Monitors
+                  </span>
+                </div>
+              </div>
+              <div className='flex items-center gap-[24px] lg:px-[24px]'>
+                <Link href={"https://instagram.com/ticketwave"} className='hover:opacity-50'>
+                  <Image
+                    src={"/social/instagram.svg"}
+                    width={24}
+                    height={24}
+                    alt="Instagram Logo"
+                  />
+                </Link>
+                <Link href={"https://x.com/ticketwave"} className='hover:opacity-50'>
+                  <Image
+                    src={"/social/x.svg"}
+                    width={24}
+                    height={24}
+                    alt="X Logo"
+                  />
+                </Link>
+                <Link href={"https://discord.gg/ticketwavemonitors"} className='hover:opacity-50'>
+                  <DiscordLogoIcon className='w-8 h-8 text-white/50' />
+                </Link>
+                <Link href={"https://tiktok.com/ticketwave"} className='hover:opacity-50'>
+                  <Image
+                    src={"/social/tiktok.svg"}
+                    width={24}
+                    height={24}
+                    alt="TikTok Logo"
+                  />
+                </Link>
               </div>
             </div>
 
             {/* Divider */}
             <div className='w-0.5 h-24 bg-white/10' />
 
-            <div className='flex justify-center items-start gap-10 lg:items-center lg:gap-28 flex-col lg:flex-row'>
+            <div className='flex justify-center items-start gap-10 lg:gap-28 flex-col lg:flex-row'>
               <div className='flex flex-col gap-2'>
                 <span className='text-white text-[20px] font-semibold'>
                   Quick Links
                 </span>
-                <Link href="/#">
+                <Link href="https://waveoftickets.com">
                   <span className='text-white/50 text-[16px] hover:text-secondaryAccent duration-150'>
-                    Home
+                    Ticket Wave
                   </span>
                 </Link>
-                <Link href="/#features">
+                <Link href="https://inventory.waveoftickets.com">
                   <span className='text-white/50 text-[16px] hover:text-secondaryAccent duration-150'>
-                    Features
+                    Inventory Manager
                   </span>
                 </Link>
-                <Link href="/#pricing">
+                <Link href="https://whop.com/ticketwave">
                   <span className='text-white/50 text-[16px] hover:text-secondaryAccent duration-150'>
-                    Pricing
+                    Whop
                   </span>
                 </Link>
               </div>
@@ -531,14 +642,14 @@ export default function Home() {
                 <span className='text-white text-[20px] font-semibold'>
                   Legal
                 </span>
-                <Link href="/terms">
-                  <span className='text-white/50 text-[16px] hover:text-secondaryAccent duration-150'>
-                    Terms of Service
-                  </span>
-                </Link>
-                <Link href="/privacy">
+                <Link href="https://waveoftickets.com/privacy-policy/">
                   <span className='text-white/50 text-[16px] hover:text-secondaryAccent duration-150'>
                     Privacy Policy
+                  </span>
+                </Link>
+                <Link href="https://waveoftickets.com/cookie-policy/">
+                  <span className='text-white/50 text-[16px] hover:text-secondaryAccent duration-150'>
+                    Cookie Policy
                   </span>
                 </Link>
               </div>
@@ -552,28 +663,23 @@ export default function Home() {
                     Email Us
                   </span>
                 </Link>
-                <Link href="/privacy">
-                  <span className='text-white/50 text-[16px] hover:text-secondaryAccent duration-150'>
-                    Discord
-                  </span>
-                </Link>
               </div>
 
-              <div className='flex flex-col gap-2'>
-                <span className='text-white text-[20px] font-semibold'>
-                  Social
-                </span>
-                <Link href="/terms">
-                  <span className='text-white/50 text-[16px] hover:text-secondaryAccent duration-150'>
-                    Instagram
-                  </span>
+            </div>
+
+            {/* Mentions and copyright */}
+            <div className='lg:absolute bottom-0 left-0 w-full flex justify-center items-center gap-4 p-[24px]'>
+              <span className='text-white/50 text-[14px]'>
+                © {
+                  new Date().getFullYear()
+                }
+                {" "}·{" "}
+                <Link href={"https://waveofticket.com"} className='underline'>
+                  Ticket Wave
                 </Link>
-                <Link href="/privacy">
-                  <span className='text-white/50 text-[16px] hover:text-secondaryAccent duration-150'>
-                    X
-                  </span>
-                </Link>
-              </div>
+                {" "}·{" "}
+                developed by Busto · designed by Wenyxz
+              </span>
             </div>
           </footer>
         </main>

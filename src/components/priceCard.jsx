@@ -6,7 +6,7 @@ export default function PriceCard({ title, price, features, featured }) {
 
     return (
         <div className={`
-            relative flex flex-col justify-end h-[585px]
+            relative flex flex-col justify-end h-[585px] w-full
             ${featured ? 'bg-secondary rounded-[12px]' : 'bg-transparent'}
         `}>
             {
@@ -17,7 +17,7 @@ export default function PriceCard({ title, price, features, featured }) {
                 )
             }
             <div className={`
-            flex flex-col items-center justify-start gap-4 bg-primary rounded-[12px] border p-[24px] w-[300px] h-[550px]
+            flex flex-col items-center justify-start gap-4 bg-primary rounded-[12px] border p-[24px] w-full lg:w-[300px] h-[550px]
             ${featured ? 'border-secondary' : 'border-white/25'}
         `}>
                 <span className='text-[24px] text-white font-semibold'>
