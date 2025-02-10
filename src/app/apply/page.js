@@ -101,7 +101,7 @@ function ApplicationForm() {
     }
 
     return (
-        <div className="w-full text-white">
+        <div className="w-full text-white flex items-center justify-center">
             <button
                 onClick={() => {
                     window.location.href = "/"

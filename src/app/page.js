@@ -305,7 +305,7 @@ export default function Home() {
             </div>
           </section>
 
-          {/* 2n SECTION */}
+          {/* Features */}
           <section id="features"
             className='relative w-full min-h-[300vh]'
           >
@@ -313,7 +313,7 @@ export default function Home() {
               <span className='text-transparent bg-clip-text bg-h1-gradient'>ENJOY</span> THE<br />
               <span className='text-transparent bg-clip-text bg-h1-gradient'>BENEFITS</span>
             </h2>
-            <div ref={imageContainer} className='sticky top-0 h-screen w-full flex items-center justify-center bg-background'>
+            <div ref={imageContainer} className='sticky top-0 h-screen w-full flex items-center justify-center'>
               <div className='max-w-[1440px] w-full px-4 lg:px-24 pb-24'>
 
                 <div className='flex flex-col lg:flex-row justify-between items-center gap-8'>
