@@ -591,7 +591,7 @@ export default function Home() {
                     alt="Instagram Logo"
                   />
                 </Link>
-                <Link href={"https://x.com/ticketwave"} className='hover:opacity-50'>
+                <Link href={"https://x.com/ticketswave"} className='hover:opacity-50'>
                   <Image
                     src={"/social/x.svg"}
                     width={24}
