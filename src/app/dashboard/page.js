@@ -60,6 +60,7 @@ const websites = [
     { "value": "oeticket.com", "label": "Oeticket.com" },
     { "value": "eticketing.co.uk", "label": "Eticketing.co.uk" },
     { "value": "seetickets.com", "label": "Seetickets.com" },
+    { "value": "seetickets.co.uk", "label": "Seetickets.co.uk" },
 ]
 
 export default function MonitorsTable() {
